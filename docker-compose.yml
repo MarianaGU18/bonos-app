@@ -41,12 +41,13 @@ services:
       - bonos-net
 
 
+
   frontend:
     build:
-      context: ./frontend
-    container_name: react_frontend
+      context: ./bono-ui
+    container_name: next_bono-ui
     ports:
-      - "3000:80"
+      - "3000:3000"
     restart: always
 
 

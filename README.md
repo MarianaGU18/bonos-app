@@ -1,70 +1,73 @@
-# Getting Started with Create React App
+# 📊 Bono App
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Aplicación web tipo SaaS para la gestión de activos financieros (bonos).
 
-## Available Scripts
 
-In the project directory, you can run:
+### Tech Stack
+* Fronted en Next.js
+* Backend con Spring Boot
+* Base de datos relacional
+* Orquestación con Docker
 
-### `npm start`
+###  ¿Qué es este proyecto?
+Bono App es una plataforma donde los usuarios pueden:
+* Solicitar su registro
+* Autenticarse
+* Visualizar un dashboard financiero
+* Gestionar sus activos (bonos)
+* Analizar rendimiento
+* Obtener reportes
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+###  Arquitectura
+     bono-app/
+    │ 
+    ├── bono-ui/ # Frontend (Next.js + MUI) 
+    ├── backend/ # API (Spring Boot)
+    ├── db/ # Scripts de base de datos 
+    ├── docker-compose.yml
 
-### `npm test`
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## Stack Tecnología
+###  Frontend
+* Next.js 16 (App Router)
+* Material UI (MUI)
 
-### `npm run build`
+### Backend
+* Spring Boot
+* REST API
+* Maven
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### Base de Datos
+* MySQL
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### DevOps
+* Docker
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+# Instalación
+1. Clonar repositorio
+2. Levantar todo con Docker
+docker-compose up --build
 
-### `npm run eject`
+3. Acceder a la aplicacion
+- Frontend: http://localhost:3000
+- Backend API: http://localhost:8080
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+# Estado del proyecto
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+Este proyecto se encuentra actualmente en desarrollo:
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+- Frontend en construcción
+- Backend en desarrollo
+- Integración completa en progreso
 
-## Learn More
+## Próximas mejoras
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+* Completar el desarrollo del frontend (UI y flujo de usuario)
+* Finalizar la implementación del backend (lógica y endpoints)
+* Implementar autenticación segura con JWT
+* Conectar completamente el frontend con el backend
+* Construir un dashboard dinámico con datos reales
+* Integrar gráficas para visualización de rendimiento
+* Desplegar la aplicación en la nube (entorno de producción)
