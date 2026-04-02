@@ -1,0 +1,61 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: bonos_mysql
+    restart: always
+
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: bonos_db
+
+    ports:
+      - "3306:3306"
+
+    volumes:
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 10s
+      retries: 10
+    
+    networks:
+      - bonos-net
+
+  backend:
+    build: ./backend
+    container_name: bonos_api
+    restart: always
+
+    ports:
+      - "8000:8000"
+
+    depends_on:
+      mysql:
+        condition: service_healthy
+    
+    environment:
+      DATABASE_URL: mysql://root:root@mysql:3306/bonos_db
+
+    networks:
+      - bonos-net
+
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: react_frontend
+    ports:
+      - "3000:80"
+    restart: always
+
+
+    depends_on:
+      - backend
+
+    networks:
+      - bonos-net
+      
+networks:
+  bonos-net:
+    driver: bridge
