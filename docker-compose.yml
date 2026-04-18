@@ -7,11 +7,14 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: bonos_db
+      MYSQL_USER: bonos_user
+      MYSQL_PASSWORD: bonos_pass
 
-    ports:
-      - "3306:3306"
+    #ports:
+    #  - "3306:3306"
 
     volumes:
+      - mysql_data:/var/lib/mysql
       - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
 
     healthcheck:
@@ -28,7 +31,7 @@ services:
     restart: always
 
     ports:
-      - "8000:8000"
+      - "8080:8080"
 
     depends_on:
       mysql:
@@ -60,3 +63,6 @@ services:
 networks:
   bonos-net:
     driver: bridge
+
+volumes:
+  mysql_data:

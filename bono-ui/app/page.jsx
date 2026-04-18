@@ -10,8 +10,18 @@ import {
   CardContent 
 } from '@mui/material';
 import Link from 'next/link';
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function Home() {
+
+  const router = useRouter();
+    useEffect(() =>{
+      const user = localStorage.getItem("user");
+      if(user){
+        router.push("/dashboard");
+      }
+    }, [router]);
   return (
     <Container maxWidth="lg">
 

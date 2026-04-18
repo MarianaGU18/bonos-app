@@ -60,5 +60,13 @@ ALTER TABLE `transacciones`
 ADD FOREIGN KEY (`bono_id`) REFERENCES `bonos` (`id`);
 
 
+INSERT INTO users (name, mail, password, role)
+VALUES (
+  'Mari',
+  'admin@gmail.com',
+  '1234',
+  'ADMIN'
+);
+
 
 

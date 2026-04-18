@@ -1,46 +1,111 @@
 "use client";
 
-import { AppBar, Box, Button, Toolbar, Typography } from "@mui/material";
-import { navItem } from "../constants/AppBarGlobal";
+import {
+  AppBar,
+  Box,
+  Button,
+  Menu,
+  Toolbar,
+  Typography,
+  MenuItem,
+  IconButton
+} from "@mui/material";
 import Link from "next/link";
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import AutoStories from "@mui/icons-material/AutoStories";
+import { useState } from "react";
+import { useAuth } from "../context/AuthContext";
 
 const AppBarGlobal = () => {
+  const { user, logout, loading } = useAuth();
+
+  const [anchorEl, setAnchorEl] = useState(null);
+
+  if (loading) return null;
+
+  // apertura del menú
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  // cerrar menú
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  // logout 
+  const handleLogout = () => {
+    logout();
+    handleClose();
+  };
+
   return (
     <AppBar position="static" sx={{ mb: 2 }}>
       <Toolbar>
-        <AutoStories sx={{ display: { xs: "flex" }, mr: 1 }} />
+        <AutoStories sx={{ mr: 1 }} />
 
-        {/* LOGO */}
-        <Link href="/" style={{ textDecoration: "none", color: "inherit" }}>
-          <Typography
-            variant="h6"
-            noWrap
-            sx={{
-              display: { xs: "none", md: "flex" },
-              fontFamily: "monospace",
-              color: "inherit",
-              fontWeight: "700",
-              letterSpacing: "0.2rem",
-            }}
-          >
-            Bonos
-          </Typography>
-        </Link>
+        <Typography
+          component={Link}
+          href={user ? "/dashboard" : "/"}
+          sx={{
+            textDecoration: "none",
+            color: "secondary.main",
+          }}
+        >
+          Bonos
+        </Typography>
 
-        {/* NAV */}
-        <Box sx={{ ml: "auto", display: { xs: "block" } }}>
-          {navItem.map((item) => (
-            <Link
-              key={item.label}
-              href={item.path}
-              style={{ textDecoration: "none", color: "inherit" }}
-            >
-              <Button color="inherit">
-                {item.label}
-              </Button>
-            </Link>
-          ))}
+        <Box sx={{ ml: "auto" }}>
+          {!user && (
+            <>
+              <Link href="/login">
+                <Button color="secondary">Login</Button>
+              </Link>
+
+              <Link href="/register">
+                <Button color="secondary">Register</Button>
+              </Link>
+            </>
+          )}
+
+          {user && (
+            <>
+              <Link href="/dashboard">
+                <Button color="secondary">Home</Button>
+              </Link>
+
+              {/* ICONO */}
+              <IconButton onClick={handleClick}>
+                <AccountCircleIcon
+                  color="secondary"
+                  sx={{ fontSize: 32 }}
+                />
+              </IconButton>
+
+              {/* MENU */}
+              <Menu
+                anchorEl={anchorEl}
+                open={Boolean(anchorEl)}
+                onClose={handleClose}
+              >
+                <MenuItem onClick={handleClose}>
+                  <Link
+                    href="/perfil"
+                    style={{
+                      textDecoration: "none",
+                      color: "inherit",
+                    }}
+                  >
+                    Profile
+                  </Link>
+                </MenuItem>
+
+                <MenuItem onClick={handleLogout}>
+                  Logout
+                </MenuItem>
+              </Menu>
+            </>
+          )}
         </Box>
       </Toolbar>
     </AppBar>
