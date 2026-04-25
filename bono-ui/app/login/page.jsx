@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Card,
@@ -9,35 +9,33 @@ import {
   TextField,
   Button,
   Container,
-} from '@mui/material';
+} from "@mui/material";
 import NextLink from "next/link";
-import { useRouter } from 'next/navigation';
-import { useAuth } from '../context/AuthContext';
-
+import { useRouter } from "next/navigation";
+import { useAuth } from "../context/AuthContext";
 
 export default function LoginPage() {
-
   const router = useRouter();
   const { login, user, loading } = useAuth();
 
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
-  useEffect(() =>{
-    if(!loading && user){
+  useEffect(() => {
+    if (!loading && user) {
       router.replace("/dashboard");
     }
-  },[user, loading, router]);
+  }, [user, loading, router]);
 
-  if(loading) return null;
+  if (loading) return null;
 
   const handleLogin = async (e) => {
     e.preventDefault();
 
     try {
       await login(email, password);
-      router.push('/dashboard');
-    } catch(error){
+      router.push("/dashboard");
+    } catch (error) {
       alert("Error de autenticación ❌");
       console.error(error);
     }
@@ -46,17 +44,16 @@ export default function LoginPage() {
   return (
     <Box
       sx={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
         p: 2,
       }}
     >
       <Container maxWidth="xs">
-
         {/* Logo */}
-        <Box sx={{ textAlign: 'center', mb: 4 }}>
+        <Box sx={{ textAlign: "center", mb: 4 }}>
           <Typography
             variant="h3"
             sx={{
@@ -88,20 +85,18 @@ export default function LoginPage() {
         {/* Card */}
         <Card sx={{ p: 2, borderRadius: 3 }}>
           <CardContent>
-
             <Typography
               variant="h5"
               sx={{
                 mb: 3,
                 fontWeight: 700,
-                textAlign: 'center',
+                textAlign: "center",
               }}
             >
               Welcome Back
             </Typography>
 
             <form onSubmit={handleLogin}>
-
               <TextField
                 fullWidth
                 label="Correo"
@@ -139,15 +134,15 @@ export default function LoginPage() {
               </Button>
 
               {/* Registro */}
-              <Box sx={{ textAlign: 'center', mt: 2 }}>
+              <Box sx={{ textAlign: "center", mt: 2 }}>
                 <Typography variant="body2" color="text.secondary">
-                  Don't have an account?{" "}
+                  Don t have an account?{" "}
                   <NextLink href="/register" style={{ textDecoration: "none" }}>
                     <Typography
                       component="span"
                       sx={{
                         fontWeight: 600,
-                        cursor: 'pointer',
+                        cursor: "pointer",
                       }}
                     >
                       Create account
@@ -155,11 +150,9 @@ export default function LoginPage() {
                   </NextLink>
                 </Typography>
               </Box>
-
             </form>
           </CardContent>
         </Card>
-
       </Container>
     </Box>
   );

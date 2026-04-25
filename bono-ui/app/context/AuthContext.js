@@ -1,47 +1,53 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 
 const AuthContext = createContext();
 
+const API_URL = "http://localhost:8080/api/v1";
+
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
-  const [token, setToken] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  // 🔄 restore session
-  useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    const storedToken = localStorage.getItem("token");
-
-    if (storedUser && storedToken) {
-      setUser(JSON.parse(storedUser));
-      setToken(storedToken);
+  const [user, setUser] = useState(() => {
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("user");
+      return stored ? JSON.parse(stored) : null;
     }
+    return null;
+  });
 
-    setLoading(false);
-  }, []);
+  const [token, setToken] = useState(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("token");
+    }
+    return null;
+  });
 
-  // 🔐 LOGIN 
+  const [loading, setLoading] = useState(false);
+
+  // 🔐 LOGIN
   const login = async (email, password) => {
-    const res = await fetch("http://localhost:8080/api/auth/login", {
+    const res = await fetch(`${API_URL}/auth/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        mail: email,
-        password: password,
-      }),
+      body: JSON.stringify({ mail: email, password }),
     });
 
-    const data = await res.json();
-
+    let data = null;
+    try {
+      data = await res.json();
+    } catch (error) {
+      throw new Error("Invalid response from server");
+    }
     if (!res.ok || !data.token) {
       throw new Error(data.message || "Login failed");
     }
 
-    const userData = { mail: data.mail };
+    const userData = {
+      mail: data.mail,
+      role: data.role,
+    };
 
     setUser(userData);
     setToken(data.token);
@@ -52,39 +58,78 @@ export function AuthProvider({ children }) {
     return data;
   };
 
-  // 📝 REGISTER
-  const register = async (email, password) => {
-    const res = await fetch("http://localhost:8080/api/auth/register", {
-      method: "POST",
+  // 🔄 REFRESH TOKEN (simulado - listo para backend)
+  const refreshToken = async () => {
+    try {
+      const res = await fetch(`${API_URL}/auth/refresh`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!res.ok) throw new Error("Refresh failed");
+
+      const data = await res.json();
+
+      setToken(data.token);
+      localStorage.setItem("token", data.token);
+
+      return data.token;
+    } catch (error) {
+      logout();
+    }
+  };
+
+  // 🔐 FETCH CON TOKEN AUTOMÁTICO
+  const authFetch = async (url, options = {}) => {
+    let currentToken = token;
+
+    const res = await fetch(`${API_URL}${url}`, {
+      ...options,
       headers: {
+        ...(options.headers || {}),
+        Authorization: `Bearer ${currentToken}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ mail: email, password }),
     });
 
-    const data = await res.json();
+    // 🔥 Si token expiró → intenta refresh
+    if (res.status === 401) {
+      const newToken = await refreshToken();
 
-    if (!res.ok) {
-      throw new Error(data.message || "Register failed");
+      if (!newToken) throw new Error("Session expired");
+
+      return fetch(`${API_URL}${url}`, {
+        ...options,
+        headers: {
+          ...(options.headers || {}),
+          Authorization: `Bearer ${newToken}`,
+          "Content-Type": "application/json",
+        },
+      });
     }
 
-    return data;
+    return res;
   };
 
   // 🚪 LOGOUT
   const logout = () => {
     setUser(null);
     setToken(null);
+
     localStorage.removeItem("user");
     localStorage.removeItem("token");
+
+    window.location.href = "/login";
   };
 
-  const getAuthHeaders = () => {
-    return { 
-      "Content-Type": "application/json",  
-      Authorization: `Bearer ${token}`,
-    };
-  };
+  // 🧠 HELPERS DE ROLES
+  const isAuthenticated = !!user;
+
+  const isAdmin = user?.role === "ADMIN";
+  const isUser = user?.role === "USER";
+  const isColaborador = user?.role === "COLABORADOR";
 
   return (
     <AuthContext.Provider
@@ -93,10 +138,12 @@ export function AuthProvider({ children }) {
         token,
         loading,
         login,
-        register,
         logout,
-        isAuthenticated: !!user,
-        getAuthHeaders,
+        authFetch,
+        isAuthenticated,
+        isAdmin,
+        isUser,
+        isColaborador,
       }}
     >
       {children}

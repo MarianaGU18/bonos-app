@@ -21,7 +21,7 @@ services:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
       interval: 10s
       retries: 10
-    
+
     networks:
       - bonos-net
 
@@ -36,14 +36,12 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
-    
+
     environment:
       DATABASE_URL: mysql://root:root@mysql:3306/bonos_db
-
+      BANXICO_TOKEN: ${BANXICO_TOKEN}
     networks:
       - bonos-net
-
-
 
   frontend:
     build:
@@ -53,13 +51,12 @@ services:
       - "3000:3000"
     restart: always
 
-
     depends_on:
       - backend
 
     networks:
       - bonos-net
-      
+
 networks:
   bonos-net:
     driver: bridge

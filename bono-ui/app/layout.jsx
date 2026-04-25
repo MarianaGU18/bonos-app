@@ -18,7 +18,6 @@ export default function RootLayout({ children }) {
             <AppBarGlobal />
             {children}
           </AuthProvider>
-
         </ThemeProvider>
       </body>
     </html>

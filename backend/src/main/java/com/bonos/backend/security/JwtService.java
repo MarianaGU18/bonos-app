@@ -28,6 +28,15 @@ public class JwtService {
                 .compact();
     }
 
+    public String generateRefreshToken(String mail) {
+        return Jwts.builder()
+            .setSubject(mail)
+            .setIssuedAt(new Date())
+            .setExpiration(new Date(System.currentTimeMillis() + 1000L * 60 * 60 * 24 * 7)) // 7 días
+            .signWith(key)
+            .compact();
+    }
+    
     public boolean isTokenValid(String token) {
         try {
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);

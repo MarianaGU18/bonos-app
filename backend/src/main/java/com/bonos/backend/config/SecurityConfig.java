@@ -24,7 +24,10 @@ public class SecurityConfig {
 
             .authorizeHttpRequests(auth -> auth
                 // 🔓 públicos
-                .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers(
+                    "/api/v1/auth/**",
+                    "/api/v1/cetes/**"
+                ).permitAll()
 
                 // 🔒 protegidos
                 .anyRequest().authenticated()

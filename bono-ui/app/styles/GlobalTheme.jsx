@@ -1,16 +1,6 @@
-'use client';
+"use client";
 
 import { createTheme } from "@mui/material";
-
-//funcion tipo arrow
-/*export const theme = createTheme({
-    //paleta de colores de la aplicacion
-
-    titleStyle : {
-        fontFamily: "Poppins,sans-serif",
-        fontWeight: 700,
-        letterSpacing: "0.2rem",
-    },*/
 
 export const theme = createTheme({
   palette: {
@@ -31,8 +21,8 @@ export const theme = createTheme({
       paper: "#FFFFFF",
     },
     accent: {
-            main: '#D9B310',
-        },
+      main: "#D9B310",
+    },
     error: {
       main: "#ef4444",
     },

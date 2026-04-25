@@ -1,8 +1,14 @@
 package com.bonos.backend.security;
 
-import jakarta.servlet.*;
+import jakarta.servlet.Filter;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.ServletException;
+
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -17,9 +23,7 @@ public class JwtFilter implements Filter {
     }
 
     @Override
-    public void doFilter(ServletRequest request,
-                         ServletResponse response,
-                         FilterChain chain)
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
 
         HttpServletRequest req = (HttpServletRequest) request;
@@ -27,8 +31,8 @@ public class JwtFilter implements Filter {
 
         String path = req.getRequestURI();
 
-        // 🔓 permitir login sin token
-        if (path.startsWith("/api/auth")) {
+        // 🔓 rutas públicas
+        if (path.startsWith("/api/v1/auth") || path.startsWith("/api/v1/cetes")) {
             chain.doFilter(request, response);
             return;
         }

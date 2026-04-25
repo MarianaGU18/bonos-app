@@ -1,34 +1,30 @@
-'use client';
+"use client";
 
-import { 
-  Box, 
-  Container, 
-  Typography, 
-  Button, 
-  Grid, 
-  Card, 
-  CardContent 
-} from '@mui/material';
-import Link from 'next/link';
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import {
+  Box,
+  Container,
+  Typography,
+  Button,
+  Grid,
+  Card,
+  CardContent,
+} from "@mui/material";
+import Link from "next/link";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
-
   const router = useRouter();
-    useEffect(() =>{
-      const user = localStorage.getItem("user");
-      if(user){
-        router.push("/dashboard");
-      }
-    }, [router]);
+  useEffect(() => {
+    const user = localStorage.getItem("user");
+    if (user) {
+      router.push("/dashboard");
+    }
+  }, [router]);
   return (
     <Container maxWidth="lg">
-
-  
       <Box textAlign="center" mt={10} mb={10}>
         <Typography variant="h3" fontWeight="bold" gutterBottom>
-          
           Invest in Bonds with Confidence and Ease
         </Typography>
 
@@ -37,20 +33,20 @@ export default function Home() {
         </Typography>
 
         <Box mt={4}>
-          <Button 
-            variant="contained" 
-            size="large" 
-            component={Link} 
+          <Button
+            variant="contained"
+            size="large"
+            component={Link}
             href="/register"
             sx={{ mr: 2 }}
           >
-            CREATE AN ACCOUNT 
+            CREATE AN ACCOUNT
           </Button>
 
-          <Button 
-            variant="outlined" 
-            size="large" 
-            component={Link} 
+          <Button
+            variant="outlined"
+            size="large"
+            component={Link}
             href="/login"
           >
             SIGN IN
@@ -105,16 +101,15 @@ export default function Home() {
         <Typography variant="h4" gutterBottom>
           Ready to Start Investing?
         </Typography>
-        <Button 
-          variant="contained" 
-          size="large" 
-          component={Link} 
+        <Button
+          variant="contained"
+          size="large"
+          component={Link}
           href="/register"
         >
           CREATE AN ACCOUNT
         </Button>
       </Box>
-
     </Container>
   );
 }

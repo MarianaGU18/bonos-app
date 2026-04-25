@@ -8,7 +8,7 @@ import {
   Toolbar,
   Typography,
   MenuItem,
-  IconButton
+  IconButton,
 } from "@mui/material";
 import Link from "next/link";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
@@ -23,17 +23,17 @@ const AppBarGlobal = () => {
 
   if (loading) return null;
 
-  // apertura del menú
+  // 🔓 Abrir Menu con el click
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
 
-  // cerrar menú
+  // 🔒 Cerrar Menu con el click
   const handleClose = () => {
     setAnchorEl(null);
   };
 
-  // logout 
+  // logout - Cerrar sesión
   const handleLogout = () => {
     logout();
     handleClose();
@@ -58,12 +58,15 @@ const AppBarGlobal = () => {
         <Box sx={{ ml: "auto" }}>
           {!user && (
             <>
+              <Link href="/">
+                <Button color="secondary">Home</Button>
+              </Link>
               <Link href="/login">
-                <Button color="secondary">Login</Button>
+                <Button color="secondary">SIGN IN</Button>
               </Link>
 
               <Link href="/register">
-                <Button color="secondary">Register</Button>
+                <Button color="secondary">REGISTER</Button>
               </Link>
             </>
           )}
@@ -73,13 +76,22 @@ const AppBarGlobal = () => {
               <Link href="/dashboard">
                 <Button color="secondary">Home</Button>
               </Link>
+            </>
+          )}
 
+          {/* Links adicionales */}
+          <Link href="/about">
+            <Button color="secondary">About</Button>
+          </Link>
+          <Link href="/contact">
+            <Button color="secondary">Contact</Button>
+          </Link>
+
+          {user && (
+            <>
               {/* ICONO */}
               <IconButton onClick={handleClick}>
-                <AccountCircleIcon
-                  color="secondary"
-                  sx={{ fontSize: 32 }}
-                />
+                <AccountCircleIcon color="secondary" sx={{ fontSize: 32 }} />
               </IconButton>
 
               {/* MENU */}
@@ -100,9 +112,7 @@ const AppBarGlobal = () => {
                   </Link>
                 </MenuItem>
 
-                <MenuItem onClick={handleLogout}>
-                  Logout
-                </MenuItem>
+                <MenuItem onClick={handleLogout}>Logout</MenuItem>
               </Menu>
             </>
           )}
