@@ -1,132 +1,82 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState } from "react";
 
 const AuthContext = createContext();
 
 const API_URL = "http://localhost:8080/api/v1";
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(() => {
-    if (typeof window !== "undefined") {
-      const stored = localStorage.getItem("user");
-      return stored ? JSON.parse(stored) : null;
-    }
-    return null;
-  });
-
-  const [token, setToken] = useState(() => {
-    if (typeof window !== "undefined") {
-      return localStorage.getItem("token");
-    }
-    return null;
-  });
-
+  const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  // 🔐 LOGIN
+  // 🔐 LOGIN (CON COOKIE)
   const login = async (email, password) => {
     const res = await fetch(`${API_URL}/auth/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ mail: email, password }),
+      credentials: "include", // 🔥 CLAVE
+      body: JSON.stringify({ email, password }),
     });
 
-    let data = null;
-    try {
-      data = await res.json();
-    } catch (error) {
-      throw new Error("Invalid response from server");
-    }
-    if (!res.ok || !data.token) {
+    const data = await res.json();
+
+    console.log("RESPUESTA:", data);
+
+    // ❌ ya NO validar token
+    if (!res.ok || data.message !== "LOGIN OK") {
       throw new Error(data.message || "Login failed");
     }
 
     const userData = {
-      mail: data.mail,
+      email: data.email,
       role: data.role,
     };
 
     setUser(userData);
-    setToken(data.token);
 
+    // ✔ solo guardamos user (opcional)
     localStorage.setItem("user", JSON.stringify(userData));
-    localStorage.setItem("token", data.token);
 
     return data;
   };
 
-  // 🔄 REFRESH TOKEN (simulado - listo para backend)
-  const refreshToken = async () => {
-    try {
-      const res = await fetch(`${API_URL}/auth/refresh`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (!res.ok) throw new Error("Refresh failed");
-
-      const data = await res.json();
-
-      setToken(data.token);
-      localStorage.setItem("token", data.token);
-
-      return data.token;
-    } catch (error) {
-      logout();
-    }
-  };
-
-  // 🔐 FETCH CON TOKEN AUTOMÁTICO
+  // 🔐 FETCH AUTOMÁTICO (USA COOKIE)
   const authFetch = async (url, options = {}) => {
-    let currentToken = token;
-
     const res = await fetch(`${API_URL}${url}`, {
       ...options,
+      credentials: "include", // 🔥 IMPORTANTE
       headers: {
-        ...(options.headers || {}),
-        Authorization: `Bearer ${currentToken}`,
         "Content-Type": "application/json",
+        ...(options.headers || {}),
       },
     });
 
-    // 🔥 Si token expiró → intenta refresh
     if (res.status === 401) {
-      const newToken = await refreshToken();
-
-      if (!newToken) throw new Error("Session expired");
-
-      return fetch(`${API_URL}${url}`, {
-        ...options,
-        headers: {
-          ...(options.headers || {}),
-          Authorization: `Bearer ${newToken}`,
-          "Content-Type": "application/json",
-        },
-      });
+      logout();
+      throw new Error("Session expired");
     }
 
     return res;
   };
 
   // 🚪 LOGOUT
-  const logout = () => {
-    setUser(null);
-    setToken(null);
+  const logout = async () => {
+    await fetch(`${API_URL}/auth/logout`, {
+      method: "POST",
+      credentials: "include",
+    });
 
+    setUser(null);
     localStorage.removeItem("user");
-    localStorage.removeItem("token");
 
     window.location.href = "/login";
   };
 
-  // 🧠 HELPERS DE ROLES
+  // 🧠 ROLES
   const isAuthenticated = !!user;
-
   const isAdmin = user?.role === "ADMIN";
   const isUser = user?.role === "USER";
   const isColaborador = user?.role === "COLABORADOR";
@@ -135,7 +85,6 @@ export function AuthProvider({ children }) {
     <AuthContext.Provider
       value={{
         user,
-        token,
         loading,
         login,
         logout,
