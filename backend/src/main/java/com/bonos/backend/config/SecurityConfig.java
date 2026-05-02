@@ -21,8 +21,16 @@ public class SecurityConfig {
 
         http
             .csrf(csrf -> csrf.disable())
-
             .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/api/v1/auth/**").permitAll()
+
+                .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
+                .requestMatchers("/api/v1/colab/**").hasRole("COLABORADOR")
+                .requestMatchers("/api/v1/user/**").hasRole("USER")
+
+                .anyRequest().authenticated()
+            )
+                        /*.authorizeHttpRequests(auth -> auth
                 // 🔓 públicos
                 .requestMatchers(
                     "/api/v1/auth/**",
@@ -31,7 +39,7 @@ public class SecurityConfig {
 
                 // 🔒 protegidos
                 .anyRequest().authenticated()
-            )
+            )*/
 
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
 

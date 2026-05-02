@@ -17,8 +17,7 @@ import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 
 const AppBarGlobal = () => {
-  const { user, logout, loading } = useAuth();
-
+  const { user, logout, loading, isAdmin, isColaborador, isUser } = useAuth();
   const [anchorEl, setAnchorEl] = useState(null);
 
   if (loading) return null;
@@ -46,7 +45,15 @@ const AppBarGlobal = () => {
 
         <Typography
           component={Link}
-          href={user ? "/dashboard" : "/"}
+          href={
+            isAdmin
+              ? "/admin"
+              : isColaborador
+                ? "/colab"
+                : user
+                  ? "/dashboard"
+                  : "/"
+          }
           sx={{
             textDecoration: "none",
             color: "secondary.main",
@@ -73,19 +80,43 @@ const AppBarGlobal = () => {
 
           {user && (
             <>
-              <Link href="/dashboard">
-                <Button color="secondary">Home</Button>
+              {isAdmin && (
+                <Link href="/admin">
+                  <Button color="secondary">Home</Button>
+                </Link>
+              )}
+
+              {isColaborador && (
+                <Link href="/colab">
+                  <Button color="secondary">Home</Button>
+                </Link>
+              )}
+
+              {isUser && (
+                <Link href="/dashboard">
+                  <Button color="secondary">Home</Button>
+                </Link>
+              )}
+            </>
+          )}
+          {(!user || isUser) && (
+            <>
+              <Link href="/about">
+                <Button color="secondary">About</Button>
+              </Link>
+              <Link href="/contact">
+                <Button color="secondary">Contact</Button>
               </Link>
             </>
           )}
 
           {/* Links adicionales */}
-          <Link href="/about">
+          {/*<Link href="/about">
             <Button color="secondary">About</Button>
           </Link>
           <Link href="/contact">
             <Button color="secondary">Contact</Button>
-          </Link>
+          </Link>*/}
 
           {user && (
             <>

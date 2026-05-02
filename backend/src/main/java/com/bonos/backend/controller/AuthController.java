@@ -1,14 +1,22 @@
 package com.bonos.backend.controller;
 
+import com.bonos.backend.dto.LoginRequest;
 import com.bonos.backend.dto.LoginResponse;
 import com.bonos.backend.model.User;
 import com.bonos.backend.repository.UserRepository;
 import com.bonos.backend.security.JwtService;
+
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
 
-@CrossOrigin(origins = "*")
+@CrossOrigin(
+        origins = "http://localhost:3000", // 🔁 cambiar en producción
+        allowCredentials = "true"
+)
 @RestController
 @RequestMapping("/api/v1/auth")
 public class AuthController {
@@ -17,46 +25,61 @@ public class AuthController {
     private final JwtService jwtService;
 
     public AuthController(UserRepository userRepository,
-                          JwtService jwtService) {
+                           JwtService jwtService) {
         this.userRepository = userRepository;
         this.jwtService = jwtService;
     }
 
     @PostMapping("/login")
-    public LoginResponse login(@RequestBody LoginRequest request) {
+    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
 
-        // 🔥 DEBUG FRONT
-        System.out.println("MAIL FRONT: '" + request.getMail() + "'");
-        System.out.println("PASS FRONT: '" + request.getPassword() + "'");
-
-        Optional<User> userOpt = userRepository.findByMail(request.getMail().trim());
+        Optional<User> userOpt = userRepository.findByEmail(request.getEmail().trim());
 
         if (userOpt.isEmpty()) {
-            System.out.println("USER NOT FOUND");
-            return new LoginResponse(null, null, "Invalid credentials", null, null);
+            return ResponseEntity.status(401)
+                    .body(new LoginResponse(null, null, "Invalid credentials", null, null));
         }
 
         User user = userOpt.get();
 
-        // 🔥 DEBUG DB
-        System.out.println("MAIL DB: '" + user.getMail() + "'");
-        System.out.println("PASS DB: '" + user.getPassword() + "'");
-
         if (!user.getPassword().trim().equals(request.getPassword().trim())) {
-            System.out.println("PASSWORD NOT MATCH");
-            return new LoginResponse(null, null, "Invalid credentials", null, null);
+            return ResponseEntity.status(401)
+                    .body(new LoginResponse(null, null, "Invalid credentials", null, null));
         }
 
-        System.out.println("LOGIN OK");
+        String token = jwtService.generateToken(user);
 
-        String token = jwtService.generateToken(user.getMail());
+        ResponseCookie cookie = ResponseCookie.from("token", token)
+                .httpOnly(true)
+                .secure(false) // ⚠️ EN PRODUCCIÓN = true (HTTPS)
+                .path("/")
+                .sameSite("Lax")
+                .maxAge(60 * 60 * 24)
+                .build();
 
-        return new LoginResponse(
-                token,
-                null,
-                "LOGIN OK",
-                user.getRole().name(),
-                user.getMail()
-        );
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                .body(new LoginResponse(
+                        null,
+                        null,
+                        "LOGIN OK",
+                        user.getRole().name(),
+                        user.getEmail()
+                ));
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout() {
+
+        ResponseCookie cookie = ResponseCookie.from("token", "")
+                .httpOnly(true)
+                .secure(false)
+                .path("/")
+                .maxAge(0)
+                .build();
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                .body("Logged out");
     }
 }

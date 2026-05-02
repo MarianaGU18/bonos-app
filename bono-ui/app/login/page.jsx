@@ -23,7 +23,13 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (!loading && user) {
-      router.replace("/dashboard");
+      if (user.role === "ADMIN") {
+        router.replace("/admin");
+      } else if (user.role == "COLABORADOR") {
+        router.replace("/colab");
+      } else {
+        router.replace("/dashboard");
+      }
     }
   }, [user, loading, router]);
 
@@ -34,7 +40,7 @@ export default function LoginPage() {
 
     try {
       await login(email, password);
-      router.push("/dashboard");
+      //router.push("/dashboard");
     } catch (error) {
       alert("Error de autenticación ❌");
       console.error(error);
