@@ -1,6 +1,5 @@
 "use client";
 
-//import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../context/AuthContext";
 import {
@@ -16,13 +15,6 @@ import ProtectedRoute from "../components/ProtectedRoute";
 export default function ColabPage() {
   const { user, isAdmin } = useAuth();
   const router = useRouter();
-
-  // 🔐 protección
-  /*useEffect(() => {
-    if (!isAdmin) {
-      router.push("/colab");
-    }
-  }, [isAdmin, router]);*/
 
   return (
     <ProtectedRoute role="COLABORADOR">

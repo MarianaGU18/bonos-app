@@ -1,12 +1,13 @@
-'use client'
+"use client";
 
-import { useRouter } from "next/navigation"
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "../context/AuthContext"; // Importar useAuth
 import {
   Box,
   Card,
   CardContent,
   Typography,
-  TextField,
   Button,
   Link,
   Container,
@@ -15,36 +16,136 @@ import {
   ListItem,
   ListItemIcon,
   ListItemText,
-} from '@mui/material';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+  Stepper,
+  Step,
+  StepLabel,
+  CircularProgress,
+  Alert, // Importar Alert
+} from "@mui/material";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import { StyledTextField, PrimaryButton } from "../components/FormComponents";
 
 const benefits = [
-  { title: 'Save and manage your bonds', description: 'Keep all your financial assets in one organized place.' },
-  { title: 'Track performance over time', description: 'Visual representations of your portfolio growth.' },
-  { title: 'Access financial reports', description: 'Download detailed statements for your records.' },
+  {
+    title: "Save and manage your bonds",
+    description: "Keep all your financial assets in one organized place.",
+  },
+  {
+    title: "Track performance over time",
+    description: "Visualize your portfolio growth with clear charts.",
+  },
+  {
+    title: "Access financial reports",
+    description: "Download detailed statements for your records.",
+  },
 ];
+
+const steps = ["Account Information", "Completed"];
 
 export default function RegisterPage() {
   const router = useRouter();
+  const { register } = useAuth(); // Obtener función register
 
-  const handleRegister = (e) => {
+  const [activeStep, setActiveStep] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  // Estados para el formulario
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const handleNext = () => {
+    setActiveStep((prevActiveStep) => prevActiveStep + 1);
+  };
+
+  // Función de registro real
+  const handleRegister = async (e) => {
     e.preventDefault();
-    router.push('/dashboard');
+    setLoading(true);
+    setError(null);
+    try {
+      await register(name, email, password);
+      handleNext(); // Avanzar solo si el registro es exitoso
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getStepContent = (step) => {
+    switch (step) {
+      case 0:
+        return (
+          <form onSubmit={handleRegister}>
+            {error && (
+              <Alert severity="error" sx={{ mb: 2 }}>
+                {error}
+              </Alert>
+            )}
+            <StyledTextField
+              label="Full Name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+            />
+            <StyledTextField
+              label="Email Address"
+              type="email"
+              placeholder="you@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+            <StyledTextField
+              label="Password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+            <PrimaryButton type="submit" disabled={loading}>
+              {loading ? <CircularProgress size={24} /> : "Register"}
+            </PrimaryButton>
+          </form>
+        );
+      case 1:
+        return (
+          <Box textAlign="center">
+            <CheckCircleIcon
+              sx={{ fontSize: 60, color: "success.main", mb: 2 }}
+            />
+            <Typography variant="h5" sx={{ fontWeight: 700, mb: 2 }}>
+              Registration Complete!
+            </Typography>
+            <Typography color="text.secondary" sx={{ mb: 4 }}>
+              Your account has been successfully created.
+            </Typography>
+            <Button
+              variant="contained"
+              size="large"
+              onClick={() => router.push("/dashboard")}
+            >
+              Go to Dashboard
+            </Button>
+          </Box>
+        );
+      default:
+        return "Unknown step";
+    }
   };
 
   return (
     <Box
       sx={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center'
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
       }}
     >
       <Container maxWidth="lg">
         <Grid container spacing={4} alignItems="flex-start">
-          
-          {/* LOGIN UP */}
-
           {/* Left side - Benefits */}
           <Grid item xs={12} md={6}>
             <Box sx={{ mb: 4 }}>
@@ -55,12 +156,15 @@ export default function RegisterPage() {
               <List sx={{ mt: 2 }}>
                 {benefits.map((benefit) => (
                   <ListItem key={benefit.title} disablePadding sx={{ mb: 3 }}>
-                    <ListItemIcon sx={{ minWidth: 40, color: 'primary.main' }}>
+                    <ListItemIcon sx={{ minWidth: 40, color: "primary.main" }}>
                       <CheckCircleIcon fontSize="medium" />
                     </ListItemIcon>
                     <ListItemText
                       primary={
-                        <Typography variant="h6" sx={{ fontWeight: 700, fontSize: '1.1rem' }}>
+                        <Typography
+                          variant="h6"
+                          sx={{ fontWeight: 700, fontSize: "1.1rem" }}
+                        >
                           {benefit.title}
                         </Typography>
                       }
@@ -76,53 +180,33 @@ export default function RegisterPage() {
           <Grid item xs={12} md={6}>
             <Card sx={{ p: 2 }}>
               <CardContent>
-                <Box sx={{ mb: 3, textAlign: 'center' }}>
-                  <Typography variant="h5" sx={{ fontWeight: 700 }}>
-                    Get Started Now
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Create your free account today
-                  </Typography>
-                </Box>
+                <Stepper activeStep={activeStep} sx={{ mb: 4 }}>
+                  {steps.map((label) => (
+                    <Step key={label}>
+                      <StepLabel>{label}</StepLabel>
+                    </Step>
+                  ))}
+                </Stepper>
 
-                <form onSubmit={handleRegister}>
-                  <TextField
-                    fullWidth
-                    label="Email Address"
-                    type="email"
-                    margin="normal"
-                    required
-                    variant="outlined"
-                    placeholder="you@example.com"
-                  />
+                {getStepContent(activeStep)}
 
-                  <Button
-                    fullWidth
-                    type="submit"
-                    variant="contained"
-                    size="large"
-                    sx={{ mt: 3, mb: 2, py: 1.5 }}
-                  >
-                    Submit
-                  </Button>
-
-                  <Box sx={{ textAlign: 'center', mt: 2 }}>
+                {activeStep === 0 && (
+                  <Box sx={{ textAlign: "center", mt: 2 }}>
                     <Typography variant="body2" color="text.secondary">
-                      Already have an account?{' '}
+                      Already have an account?{" "}
                       <Link
                         href="/login"
                         underline="hover"
-                        sx={{ color: 'secondary.main', fontWeight: 600 }}
+                        sx={{ color: "secondary.main", fontWeight: 600 }}
                       >
                         Login
                       </Link>
                     </Typography>
                   </Box>
-                </form>
+                )}
               </CardContent>
             </Card>
           </Grid>
-
         </Grid>
       </Container>
     </Box>

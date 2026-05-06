@@ -44,6 +44,7 @@ const AppBarGlobal = () => {
         <AutoStories sx={{ mr: 1 }} />
 
         <Typography
+          variant="h6"
           component={Link}
           href={
             isAdmin
@@ -57,6 +58,8 @@ const AppBarGlobal = () => {
           sx={{
             textDecoration: "none",
             color: "secondary.main",
+            fontFamily: "serif",
+            fontWeight: "bold",
           }}
         >
           Bonos
@@ -109,14 +112,6 @@ const AppBarGlobal = () => {
               </Link>
             </>
           )}
-
-          {/* Links adicionales */}
-          {/*<Link href="/about">
-            <Button color="secondary">About</Button>
-          </Link>
-          <Link href="/contact">
-            <Button color="secondary">Contact</Button>
-          </Link>*/}
 
           {user && (
             <>

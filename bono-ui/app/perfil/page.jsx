@@ -6,126 +6,171 @@ import {
   Typography,
   Avatar,
   Button,
-  Divider,
   Card,
   CardContent,
-  CssBaseline,
+  Grid,
+  Chip,
+  Tabs,
+  Tab,
+  Alert,
+  CircularProgress,
 } from "@mui/material";
 import { useAuth } from "../context/AuthContext";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+import { deepOrange } from "@mui/material/colors";
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import EditIcon from "@mui/icons-material/Edit";
+import LockIcon from "@mui/icons-material/Lock";
 
-export default function Perfil() {
-  const { user } = useAuth();
+// --- Componente de Contenido de la Página ---
+// Este componente renderiza la UI del perfil y asume que el usuario ya está autenticado.
+function ProfilePageContent({ user }) {
+  const [tabValue, setTabValue] = React.useState(0);
 
-  // Defaults seguros
+  const handleTabChange = (event, newValue) => {
+    setTabValue(newValue);
+  };
+
   const name = user?.name ?? "Usuario";
-  const email = user?.email ?? "usuario@example.com";
+  const email = user?.email ?? "cargando...";
+  const role = user?.role ?? "USER";
+  console.log(user);
 
-  const role =
-    user?.role === "ADMIN"
-      ? "Administrador"
-      : user?.role === "COLABORADOR"
-        ? "Colaborador"
-        : "Usuario";
+  const getRoleChip = (role) => {
+    switch (role) {
+      case "ADMIN":
+        return <Chip label="Administrator" color="error" variant="filled" />;
+      case "COLABORADOR":
+        return <Chip label="Contributor" color="primary" variant="filled" />;
+      default:
+        return <Chip label="User" color="success" variant="filled" />;
+    }
+  };
 
   return (
-    <React.Fragment>
-      <CssBaseline />
-
-      <Box sx={{ display: "flex", minHeight: "100vh" }}>
-        {/* SIDEBAR */}
-        <Box
-          sx={{
-            width: 280,
-            bgcolor: "primary.main",
-            color: "white",
-            display: "flex",
-            flexDirection: "column",
-            p: 3,
-          }}
-        >
-          <Card
-            sx={{
-              borderRadius: 3,
-              boxShadow: "none",
-              bgcolor: "transparent",
-              color: "white",
-            }}
-          >
-            <CardContent sx={{ textAlign: "center" }}>
+    <Box sx={{ flexGrow: 1, p: 4 }}>
+      <Typography variant="h4" component="h1" gutterBottom sx={{ mb: 4 }}>
+        Mi Perfil
+      </Typography>
+      <Grid container spacing={4}>
+        {/* Columna Izquierda: Tarjeta de Perfil */}
+        <Grid item xs={12} md={4}>
+          <Card sx={{ textAlign: "center" }}>
+            <CardContent>
               <Avatar
-                src={user?.avatar || "/profile.svg"}
                 sx={{
-                  mx: "auto",
-                  mb: 2,
-                  width: 100,
-                  height: 100,
-                  bgcolor: "secondary.main",
-                  fontSize: 32,
+                  width: 120,
+                  height: 120,
+                  margin: "0 auto 16px",
+                  bgcolor: deepOrange[500],
                 }}
               >
-                {name.charAt(0)}
+                <AccountCircleIcon sx={{ fontSize: 90 }} />
               </Avatar>
-
-              <Typography variant="h6" fontWeight="bold">
+              <Typography variant="h5" component="div">
                 {name}
               </Typography>
-
-              <Typography variant="body2" sx={{ opacity: 0.8 }}>
+              <Typography sx={{ mb: 1.5 }} color="text.secondary">
                 {email}
               </Typography>
-
-              <Typography variant="body2" sx={{ mt: 1, opacity: 0.8 }}>
-                {role}
-              </Typography>
-
-              <Typography variant="body2" sx={{ mt: 2, opacity: 0.7 }}>
-                Perfil del usuario en el sistema
-              </Typography>
-
-              <Button
-                variant="contained"
-                fullWidth
-                sx={{ mt: 3, bgcolor: "secondary.main" }}
+              {getRoleChip(role)}
+              <Box
+                sx={{ mt: 2, display: "flex", flexDirection: "column", gap: 1 }}
               >
-                Editar perfil
-              </Button>
+                <Button variant="contained" startIcon={<EditIcon />} disabled>
+                  Editar Perfil
+                </Button>
+                <Button variant="outlined" startIcon={<LockIcon />} disabled>
+                  Cambiar Contraseña
+                </Button>
+              </Box>
             </CardContent>
           </Card>
+        </Grid>
 
-          <Divider sx={{ bgcolor: "rgba(255,255,255,0.2)", mt: 2 }} />
-        </Box>
-
-        {/* CONTENIDO PRINCIPAL */}
-        <Box sx={{ flex: 1, p: 4 }}>
-          <Typography variant="h4" fontWeight="bold" gutterBottom>
-            Panel principal
-          </Typography>
-
-          <Typography variant="body1" color="text.secondary">
-            Aquí puedes configurar los detalles de tu cuenta, cambiar tu
-            contraseña y gestionar tus preferencias.
-          </Typography>
-
-          {/* Sección futura */}
-          <Box
-            sx={{
-              mt: 4,
-              p: 3,
-              border: "1px solid #e0e0e0",
-              borderRadius: 2,
-            }}
-          >
-            <Typography variant="h6" fontWeight="bold" gutterBottom>
-              Configuración de cuenta
-            </Typography>
-
-            <Typography variant="body2" color="text.secondary">
-              Aquí puedes agregar módulos como seguridad, notificaciones, roles
-              o actividad reciente.
-            </Typography>
-          </Box>
-        </Box>
-      </Box>
-    </React.Fragment>
+        {/* Columna Derecha: Pestañas de Configuración */}
+        <Grid item xs={12} md={8}>
+          <Card>
+            <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+              <Tabs
+                value={tabValue}
+                onChange={handleTabChange}
+                aria-label="pestañas de configuración"
+              >
+                <Tab label="Configuración de la Cuenta" />
+                <Tab label="Seguridad" />
+                <Tab label="Notificaciones" disabled />
+              </Tabs>
+            </Box>
+            <TabPanel value={tabValue} index={0}>
+              <Typography variant="h6">Detalles de la Cuenta</Typography>
+              <Typography sx={{ mt: 2 }}>
+                Aquí podrás administrar la información de tu cuenta, como tu
+                nombre y correo electrónico.
+              </Typography>
+              <Alert severity="info" sx={{ mt: 2 }}>
+                La funcionalidad para editar la cuenta estará disponible
+                próximamente.
+              </Alert>
+            </TabPanel>
+            <TabPanel value={tabValue} index={1}>
+              <Typography variant="h6">Opciones de Seguridad</Typography>
+              <Typography sx={{ mt: 2 }}>
+                Aquí podrás cambiar tu contraseña y gestionar la autenticación
+                de dos factores (2FA).
+              </Typography>
+              <Alert severity="info" sx={{ mt: 2 }}>
+                Las opciones de seguridad avanzadas se implementarán en una
+                futura actualización.
+              </Alert>
+            </TabPanel>
+          </Card>
+        </Grid>
+      </Grid>
+    </Box>
   );
 }
+
+// --- Componente Envoltorio de Protección ---
+function ProtectedProfilePage() {
+  const { user, isAuthenticated } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    // Si después de la carga inicial el usuario no está autenticado, redirige.
+    if (!isAuthenticated) {
+      router.push("/login");
+    }
+  }, [isAuthenticated, router]);
+
+  // Mientras no esté autenticado (en el proceso de redirección), muestra un loader.
+  if (!isAuthenticated) {
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "80vh",
+        }}
+      >
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  // Si el usuario está autenticado, renderiza la página de perfil con sus datos.
+  return <ProfilePageContent user={user} />;
+}
+
+function TabPanel(props) {
+  const { children, value, index, ...other } = props;
+  return (
+    <div hidden={value !== index}>
+      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
+    </div>
+  );
+}
+
+export default ProtectedProfilePage;

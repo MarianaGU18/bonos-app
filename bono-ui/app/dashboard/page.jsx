@@ -1,89 +1,209 @@
 "use client";
 
+import * as React from "react";
 import {
   Box,
-  Container,
   Typography,
+  Grid,
   Card,
   CardContent,
+  Paper,
+  CircularProgress,
   Button,
+  Container,
+  Divider,
 } from "@mui/material";
-import Grid from "@mui/material/Grid";
 import Link from "next/link";
-import ProtectedRoute from "../components/ProtectedRoute";
+import { useAuth } from "../context/AuthContext";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+import dynamic from "next/dynamic";
 
-export default function DashboardPage() {
+// --- Importación dinámica para el gráfico ---
+const BarChartComponent = dynamic(
+  () =>
+    import("recharts").then((mod) => {
+      const {
+        BarChart,
+        Bar,
+        XAxis,
+        YAxis,
+        CartesianGrid,
+        Tooltip,
+        ResponsiveContainer,
+      } = mod;
+
+      // Este componente envuelve el gráfico para asegurar que se renderice solo en el cliente
+      return function ChartWrapper(props) {
+        return (
+          <ResponsiveContainer width="100%" height="90%">
+            <BarChart
+              data={props.data}
+              margin={{ top: 5, right: 20, left: -10, bottom: -5 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" />
+              <YAxis tickFormatter={(value) => `$${value / 1000}k`} />
+              <Tooltip
+                formatter={(value) => `$${value.toLocaleString("es-MX")}`}
+              />
+              <Bar dataKey="value" name="Valor del Portafolio" fill="#8884d8" />
+            </BarChart>
+          </ResponsiveContainer>
+        );
+      };
+    }),
+  {
+    ssr: false, // <-- La clave está aquí: Deshabilitar el Renderizado en el Servidor
+    loading: () => (
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100%",
+        }}
+      >
+        <CircularProgress />
+      </Box>
+    ),
+  },
+);
+
+// --- Mock Data (Datos de Ejemplo) ---
+const kpiData = {
+  portfolioValue: 52345.67,
+};
+
+const portfolioHistory = [
+  { name: "Ene", value: 45000 },
+  { name: "Feb", value: 46500 },
+  { name: "Mar", value: 47200 },
+  { name: "Abr", value: 48500 },
+  { name: "May", value: 50100 },
+  { name: "Jun", value: 52345 },
+];
+
+// --- Componente de Contenido del Dashboard ---
+function DashboardContent({ user }) {
   return (
-    <ProtectedRoute role="USER">
-      <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-        <Box sx={{ flexGrow: 1 }}>
-          <Typography variant="h4" gutterBottom>
-            Dashboard
-          </Typography>
+    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+      <Typography variant="h4" component="h1" gutterBottom>
+        Dashboard
+      </Typography>
+      <Typography sx={{ mb: 3, color: "text.secondary" }}>
+        Selecciona una acción o revisa el estado de tu portafolio.
+      </Typography>
 
-          <Typography sx={{ mb: 3, color: "text.secondary" }}>
-            Selecciona qué quieres evaluar
-          </Typography>
+      {/* SECCIÓN DE ACCIONES */}
+      <Grid container spacing={3} sx={{ mb: 4 }}>
+        <Grid item xs={12} sm={6} md={4}>
+          <Card
+            sx={{ height: "100%", display: "flex", flexDirection: "column" }}
+          >
+            <CardContent sx={{ flexGrow: 1 }}>
+              <Typography variant="h5" gutterBottom>
+                Valuar CETES
+              </Typography>
+              <Typography variant="body2" sx={{ mb: 2 }}>
+                Calcula el precio con tasas reales de Banxico.
+              </Typography>
+            </CardContent>
+            <Box sx={{ p: 2 }}>
+              <Link href="/cetes" passHref>
+                <Button variant="contained" fullWidth>
+                  Ir a la Calculadora
+                </Button>
+              </Link>
+            </Box>
+          </Card>
+        </Grid>
+        <Grid item xs={12} sm={6} md={4}>
+          <Card
+            sx={{ height: "100%", display: "flex", flexDirection: "column" }}
+          >
+            <CardContent sx={{ flexGrow: 1 }}>
+              <Typography variant="h5" gutterBottom>
+                Valuar Bonos
+              </Typography>
+              <Typography variant="body2" sx={{ mb: 2 }}>
+                Próximamente: Bonos M, Udibonos, etc.
+              </Typography>
+            </CardContent>
+            <Box sx={{ p: 2 }}>
+              <Button variant="contained" disabled fullWidth>
+                Próximamente
+              </Button>
+            </Box>
+          </Card>
+        </Grid>
+      </Grid>
 
-          <Grid container spacing={3}>
-            {/* CARD CETES */}
-            <Grid item xs={12} sm={6} md={4}>
-              <Card
-                sx={{
-                  height: "100%",
-                  transition: "0.3s",
-                  "&:hover": {
-                    transform: "scale(1.03)",
-                    boxShadow: 6,
-                  },
-                }}
-              >
-                <CardContent>
-                  <Typography variant="h5" gutterBottom>
-                    Valuar CETES
-                  </Typography>
+      <Divider sx={{ my: 4 }} />
 
-                  <Typography variant="body2" sx={{ mb: 2 }}>
-                    Calcula el precio con tasas reales de Banxico.
-                  </Typography>
-
-                  <Link href="/cetes" passHref>
-                    <Button variant="contained">Ir</Button>
-                  </Link>
-                </CardContent>
-              </Card>
-            </Grid>
-
-            {/* CARD BONOS */}
-            <Grid item xs={12} sm={6} md={4}>
-              <Card
-                sx={{
-                  height: "100%",
-                  transition: "0.3s",
-                  "&:hover": {
-                    transform: "scale(1.03)",
-                    boxShadow: 6,
-                  },
-                }}
-              >
-                <CardContent>
-                  <Typography variant="h5" gutterBottom>
-                    Valuar Bonos
-                  </Typography>
-
-                  <Typography variant="body2" sx={{ mb: 2 }}>
-                    Próximamente: Bonos M, Udibonos, etc.
-                  </Typography>
-
-                  <Button variant="contained" disabled>
-                    Próximamente
-                  </Button>
-                </CardContent>
-              </Card>
-            </Grid>
-          </Grid>
-        </Box>
-      </Container>
-    </ProtectedRoute>
+      {/* SECCIÓN DE RESUMEN VISUAL */}
+      <Typography variant="h5" component="h2" gutterBottom>
+        Resumen del Portafolio
+      </Typography>
+      <Grid container spacing={3}>
+        {/* KPIs */}
+        <Grid item xs={12} md={4}>
+          <Card
+            sx={{
+              height: "100%",
+              backgroundColor: "primary.main",
+              color: "white",
+            }}
+          >
+            <CardContent>
+              <Typography gutterBottom>Valor Total del Portafolio</Typography>
+              <Typography variant="h4">
+                ${kpiData.portfolioValue.toLocaleString("es-MX")}
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+        <Grid item xs={12} md={8}>
+          <Paper sx={{ p: 2, height: 300 }}>
+            <Typography variant="h6" mb={2}>
+              Evolución del Portafolio (Últimos 6 Meses)
+            </Typography>
+            {/* Usamos el componente cargado dinámicamente */}
+            <BarChartComponent data={portfolioHistory} />
+          </Paper>
+        </Grid>
+      </Grid>
+    </Container>
   );
 }
+
+// --- Componente Envoltorio de Protección ---
+function ProtectedDashboardPage() {
+  const { user, isAuthenticated } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.push("/login");
+    }
+  }, [isAuthenticated, router]);
+
+  if (!isAuthenticated) {
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "80vh",
+        }}
+      >
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  return <DashboardContent user={user} />;
+}
+
+export default ProtectedDashboardPage;

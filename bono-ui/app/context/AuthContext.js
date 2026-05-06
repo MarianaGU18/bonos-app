@@ -7,47 +7,82 @@ const AuthContext = createContext();
 const API_URL = "http://localhost:8080/api/v1";
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
+  // Inicialización correcta sin useEffect
+  const [user, setUser] = useState(() => {
+    if (typeof window !== "undefined") {
+      const storedUser = localStorage.getItem("user");
+      return storedUser ? JSON.parse(storedUser) : null;
+    }
+    return null;
+  });
+
   const [loading, setLoading] = useState(false);
 
-  // 🔐 LOGIN (CON COOKIE)
+  // Register
+  const register = async (name, email, password) => {
+    const res = await fetch(`${API_URL}/auth/register`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify({ name, email, password }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.message || "Registration failed");
+    }
+
+    const userData = {
+      name: data.name,
+      email: data.email,
+      role: data.role,
+    };
+
+    setUser(userData);
+    localStorage.setItem("user", JSON.stringify(userData));
+
+    return data;
+  };
+
+  // Login (con cookie)
   const login = async (email, password) => {
     const res = await fetch(`${API_URL}/auth/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      credentials: "include", // 🔥 CLAVE
-      body: JSON.stringify({ email, password }),
+      credentials: "include",
+      body: JSON.stringify({ email: email.trim(), password }),
     });
 
     const data = await res.json();
 
-    console.log("RESPUESTA:", data);
+    console.log("LOGIN DATA:", data);
 
-    // ❌ ya NO validar token
     if (!res.ok || data.message !== "LOGIN OK") {
       throw new Error(data.message || "Login failed");
     }
 
     const userData = {
+      name: data.name,
       email: data.email,
       role: data.role,
     };
 
     setUser(userData);
-
-    // ✔ solo guardamos user (opcional)
     localStorage.setItem("user", JSON.stringify(userData));
 
     return data;
   };
 
-  // 🔐 FETCH AUTOMÁTICO (USA COOKIE)
+  // Fetch automático
   const authFetch = async (url, options = {}) => {
     const res = await fetch(`${API_URL}${url}`, {
       ...options,
-      credentials: "include", // 🔥 IMPORTANTE
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
         ...(options.headers || {}),
@@ -62,7 +97,7 @@ export function AuthProvider({ children }) {
     return res;
   };
 
-  // 🚪 LOGOUT
+  // Logout
   const logout = async () => {
     await fetch(`${API_URL}/auth/logout`, {
       method: "POST",
@@ -75,7 +110,7 @@ export function AuthProvider({ children }) {
     window.location.href = "/login";
   };
 
-  // 🧠 ROLES
+  // Roles
   const isAuthenticated = !!user;
   const isAdmin = user?.role === "ADMIN";
   const isUser = user?.role === "USER";
@@ -86,6 +121,7 @@ export function AuthProvider({ children }) {
       value={{
         user,
         loading,
+        register,
         login,
         logout,
         authFetch,

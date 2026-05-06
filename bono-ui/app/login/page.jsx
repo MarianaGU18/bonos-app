@@ -1,18 +1,11 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import {
-  Box,
-  Card,
-  CardContent,
-  Typography,
-  TextField,
-  Button,
-  Container,
-} from "@mui/material";
+import { Box, Card, CardContent, Typography, Container } from "@mui/material";
 import NextLink from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../context/AuthContext";
+import { StyledTextField, PrimaryButton } from "../components/FormComponents";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -42,7 +35,7 @@ export default function LoginPage() {
       await login(email, password);
       //router.push("/dashboard");
     } catch (error) {
-      alert("Error de autenticación ❌");
+      alert("Autentication Failed ❌");
       console.error(error);
     }
   };
@@ -103,41 +96,23 @@ export default function LoginPage() {
             </Typography>
 
             <form onSubmit={handleLogin}>
-              <TextField
-                fullWidth
-                label="Correo"
+              <StyledTextField
+                label="Email"
                 type="email"
-                margin="normal"
-                required
                 placeholder="admin@bonos.app"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
 
-              <TextField
-                fullWidth
-                label="Contraseña"
+              <StyledTextField
+                label="Password"
                 type="password"
-                margin="normal"
-                required
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
 
-              <Button
-                fullWidth
-                type="submit"
-                variant="contained"
-                size="large"
-                sx={{
-                  mt: 3,
-                  mb: 2,
-                  py: 1.5,
-                }}
-              >
-                Login
-              </Button>
+              <PrimaryButton type="submit">Login</PrimaryButton>
 
               {/* Registro */}
               <Box sx={{ textAlign: "center", mt: 2 }}>

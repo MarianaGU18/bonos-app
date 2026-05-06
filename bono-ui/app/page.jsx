@@ -29,7 +29,7 @@ export default function Home() {
         </Typography>
 
         <Typography variant="h6" color="text.secondary" gutterBottom>
-          Start investing today and grow your money
+          Start investing today and grow your money securely.
         </Typography>
 
         <Box mt={4}>
@@ -66,7 +66,8 @@ export default function Home() {
               <CardContent>
                 <Typography variant="h6">🔒 Security</Typography>
                 <Typography color="text.secondary">
-                  Tus inversiones están protegidas y reguladas.
+                  Your investments are protected and regulated for your peace of
+                  mind.
                 </Typography>
               </CardContent>
             </Card>
@@ -77,7 +78,7 @@ export default function Home() {
               <CardContent>
                 <Typography variant="h6">📈 Returns</Typography>
                 <Typography color="text.secondary">
-                  Obtain constant gains with low risk.
+                  Get steady returns with low risk and a promising future.
                 </Typography>
               </CardContent>
             </Card>
@@ -86,9 +87,51 @@ export default function Home() {
           <Grid item xs={12} md={4}>
             <Card>
               <CardContent>
-                <Typography variant="h6">⚡ Easy to Use</Typography>
+                <Typography variant="h6">⚡ Ease of Use</Typography>
                 <Typography color="text.secondary">
-                  Invest in minutes from any device.
+                  Invest in minutes from any device, quickly and easily.
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+        </Grid>
+      </Box>
+
+      {/* HOW TO START */}
+      <Box mb={10}>
+        <Typography variant="h4" textAlign="center" gutterBottom>
+          How to Start Investing
+        </Typography>
+
+        <Grid container spacing={4} mt={4}>
+          <Grid item xs={12} md={4}>
+            <Card>
+              <CardContent>
+                <Typography variant="h6">1. Register</Typography>
+                <Typography color="text.secondary">
+                  Create your account in just a few minutes.
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+
+          <Grid item xs={12} md={4}>
+            <Card>
+              <CardContent>
+                <Typography variant="h6">2. Explore</Typography>
+                <Typography color="text.secondary">
+                  Discover the available investment options.
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+
+          <Grid item xs={12} md={4}>
+            <Card>
+              <CardContent>
+                <Typography variant="h6">3. Invest</Typography>
+                <Typography color="text.secondary">
+                  Select a bond and start investing.
                 </Typography>
               </CardContent>
             </Card>
@@ -107,7 +150,7 @@ export default function Home() {
           component={Link}
           href="/register"
         >
-          CREATE AN ACCOUNT
+          CREATE AN ACCOUNT NOW
         </Button>
       </Box>
     </Container>

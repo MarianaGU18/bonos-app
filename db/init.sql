@@ -51,6 +51,7 @@ CREATE TABLE transacciones (
 
 INSERT INTO users (name, email, password, role)
 VALUES
-('Admin', 'admin@gmail.com', '1234', 'ADMIN'),
-('User', 'user@gmail.com', '1234', 'USER'),
-('Colab', 'colab@gmail.com', '1234', 'COLABORADOR');
+
+('Admin', 'admin@gmail.com', '$2a$10$Qsq5WB7IsEp77xkz0U52Cuyh9fcK89veH6AXhs9NZQ2/05CdJeeCy', 'ADMIN'),
+('Yamato', 'user@gmail.com', '$2a$10$Qsq5WB7IsEp77xkz0U52Cuyh9fcK89veH6AXhs9NZQ2/05CdJeeCy', 'USER'),
+('Colab', 'colab@gmail.com', '$2a$10$Qsq5WB7IsEp77xkz0U52Cuyh9fcK89veH6AXhs9NZQ2/05CdJeeCy', 'COLABORADOR');
