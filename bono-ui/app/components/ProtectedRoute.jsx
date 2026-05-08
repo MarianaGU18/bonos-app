@@ -10,13 +10,13 @@ export default function ProtectedRoute({ children, role }) {
 
   useEffect(() => {
     if (!loading) {
-      // 🔒 No autenticado
+      // No autenticado
       if (!user) {
         router.push("/login");
         return;
       }
 
-      // 🔒 No tiene el rol correcto
+      //  No tiene el rol correcto
       if (role && user.role !== role) {
         if (user.role == "ADMIN") {
           router.push("/admin");

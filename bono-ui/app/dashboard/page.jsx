@@ -33,7 +33,6 @@ const BarChartComponent = dynamic(
         ResponsiveContainer,
       } = mod;
 
-      // Este componente envuelve el gráfico para asegurar que se renderice solo en el cliente
       return function ChartWrapper(props) {
         return (
           <ResponsiveContainer width="100%" height="90%">
@@ -54,7 +53,7 @@ const BarChartComponent = dynamic(
       };
     }),
   {
-    ssr: false, // <-- La clave está aquí: Deshabilitar el Renderizado en el Servidor
+    ssr: false,
     loading: () => (
       <Box
         sx={{
@@ -92,10 +91,9 @@ function DashboardContent({ user }) {
         Dashboard
       </Typography>
       <Typography sx={{ mb: 3, color: "text.secondary" }}>
-        Selecciona una acción o revisa el estado de tu portafolio.
+        Select a stock or check the status of your portfolio.
       </Typography>
 
-      {/* SECCIÓN DE ACCIONES */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
         <Grid item xs={12} sm={6} md={4}>
           <Card
@@ -103,16 +101,16 @@ function DashboardContent({ user }) {
           >
             <CardContent sx={{ flexGrow: 1 }}>
               <Typography variant="h5" gutterBottom>
-                Valuar CETES
+                CETES Valuation
               </Typography>
               <Typography variant="body2" sx={{ mb: 2 }}>
-                Calcula el precio con tasas reales de Banxico.
+                Calculate the price using Banxico&apos;s actual exchage.
               </Typography>
             </CardContent>
             <Box sx={{ p: 2 }}>
               <Link href="/cetes" passHref>
                 <Button variant="contained" fullWidth>
-                  Ir a la Calculadora
+                  GO
                 </Button>
               </Link>
             </Box>
@@ -138,12 +136,10 @@ function DashboardContent({ user }) {
           </Card>
         </Grid>
       </Grid>
-
       <Divider sx={{ my: 4 }} />
-
       {/* SECCIÓN DE RESUMEN VISUAL */}
       <Typography variant="h5" component="h2" gutterBottom>
-        Resumen del Portafolio
+        Portfolio Summary
       </Typography>
       <Grid container spacing={3}>
         {/* KPIs */}
@@ -156,7 +152,7 @@ function DashboardContent({ user }) {
             }}
           >
             <CardContent>
-              <Typography gutterBottom>Valor Total del Portafolio</Typography>
+              <Typography gutterBottom>Total Portfolio Value</Typography>
               <Typography variant="h4">
                 ${kpiData.portfolioValue.toLocaleString("es-MX")}
               </Typography>
@@ -166,9 +162,8 @@ function DashboardContent({ user }) {
         <Grid item xs={12} md={8}>
           <Paper sx={{ p: 2, height: 300 }}>
             <Typography variant="h6" mb={2}>
-              Evolución del Portafolio (Últimos 6 Meses)
+              Portfolio Performance (Last 6 Months)
             </Typography>
-            {/* Usamos el componente cargado dinámicamente */}
             <BarChartComponent data={portfolioHistory} />
           </Paper>
         </Grid>
