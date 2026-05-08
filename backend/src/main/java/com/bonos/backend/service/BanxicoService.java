@@ -1,68 +1,107 @@
 package com.bonos.backend.service;
 
-import org.springframework.stereotype.Service;
-import org.springframework.beans.factory.annotation.Value;
-
-import org.springframework.web.client.RestTemplate;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.ResponseEntity;
-import org.springframework.http.HttpMethod;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.*;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 @Service
-
+@RequiredArgsConstructor
 public class BanxicoService {
-    
+
+    // =========================
+    // CONFIG
+    // =========================
+
     @Value("${banxico.token}")
-
     private String token;
-    private final String URL = "https://www.banxico.org.mx/SieAPIRest/service/v1/series/SF60633/datos/oportuno";
 
-    // Obtener la tasa de los CETES a 28 días desde Banxico
-    public double getCetes28dias(){
+    private static final String BASE_URL =
+            "https://www.banxico.org.mx/SieAPIRest/service/v1/series/";
 
-        // Cliente HTTP
-        RestTemplate restTemplate = new RestTemplate();
-        // Headers de la peticion
+    private final RestTemplate restTemplate = new RestTemplate();
+    private final ObjectMapper mapper = new ObjectMapper();
+
+    // =========================
+    // SERIES OFICIALES
+    // =========================
+
+    private static final String CETES_28 = "SF60633";
+    private static final String CETES_91 = "SF60634";
+    private static final String CETES_182 = "SF60635";
+    private static final String CETES_364 = "SF60636";
+
+    // =========================
+    // ENDPOINTS PÚBLICOS
+    // =========================
+
+    public double getCetes28dias() {
+        return obtenerTasa(CETES_28);
+    }
+
+    public double getCetes91dias() {
+        return obtenerTasa(CETES_91);
+    }
+
+    public double getCetes182dias() {
+        return obtenerTasa(CETES_182);
+    }
+
+    public double getCetes364dias() {
+        return obtenerTasa(CETES_364);
+    }
+
+    // =========================
+    // CORE REQUEST
+    // =========================
+
+    private double obtenerTasa(String serie) {
+
+        String url = BASE_URL + serie + "/datos/oportuno";
+
         HttpHeaders headers = new HttpHeaders();
-        // Agregar el token requerido por Banxico
         headers.set("Bmx-Token", token);
 
         HttpEntity<String> entity = new HttpEntity<>(headers);
 
-        // Get de la Api de Banxico
-        ResponseEntity<String> response = restTemplate.exchange(
-            URL, 
-            HttpMethod.GET, 
-            entity, 
-            String.class
-        );
-        
-        System.out.println("Status Code: " + response.getStatusCode());
-        System.out.println("Cuerpo recibido: " + response.getBody());
+        ResponseEntity<String> response =
+                restTemplate.exchange(
+                        url,
+                        HttpMethod.GET,
+                        entity,
+                        String.class
+                );
+
         return parseRate(response.getBody());
     }
 
-    //  Extraer la tasa desde la respuesta JSON de Banxico
+    // =========================
+    // PARSER JSON BANXICO
+    // =========================
+
     private double parseRate(String json) {
-        try{
-            ObjectMapper mapper = new ObjectMapper();
+
+        try {
             JsonNode root = mapper.readTree(json);
+
             String valor = root
-                .path("bmx")
-                .path("series").get(0)
-                .path("datos").get(0)
-                .path("dato")
-                .asText();
+                    .path("bmx")
+                    .path("series")
+                    .get(0)
+                    .path("datos")
+                    .get(0)
+                    .path("dato")
+                    .asText();
+
             return Double.parseDouble(valor);
 
-        } catch (Exception e){
-            throw new RuntimeException("No se encontraron datos válidos en la respuesta de Banxico.");
-          
+        } catch (Exception e) {
+            throw new RuntimeException(
+                    "Error al leer respuesta de Banxico"
+            );
         }
-
     }
 }

@@ -1,58 +1,62 @@
 package com.bonos.backend.controller;
 
-import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
 
+import com.bonos.backend.dto.CetesResponse;
 import com.bonos.backend.service.BanxicoService;
 import com.bonos.backend.service.CetesService;
-import com.bonos.backend.dto.CetesResponse;
-
 
 @RestController
 @RequestMapping("/api/v1/cetes")
 @CrossOrigin(origins = "*")
-
 public class CetesController {
+
+    @Autowired
+    private CetesService cetesService;
 
     @Autowired
     private BanxicoService banxicoService;
 
-    @Autowired
-    private CetesService cetesService;
-    private static final double VALOR_NOMINAL = 10.0;
+    @GetMapping("/calcular")
+    public CetesResponse calcularInversion(
+            @RequestParam double monto,
+            @RequestParam int dias) {
 
-    @GetMapping("/precio")
-    public CetesResponse getPrecioCete(@RequestParam int dias) {
-        
-        // Obtener tasa desde Banxico y calcular precio del Cete a 28 días
-        double tasa;
-        switch (dias) {
-            case 28:
-                tasa = banxicoService.getCetes28dias();
-                break;
-            /*case 91:
-                tasa = banxicoService.getCetes91dias();
-                break;
-            case 182:
-                tasa = banxicoService.getCetes182dias() ;
-                break;
-            case 364:
-                tasa = banxicoService.getCetes364dias();
-                break;*/
-            default:
-                throw new IllegalArgumentException(
-                    "Días no válidos. Solo se permiten: 28, 91, 182, 364.");
+        if(monto <100 || monto > 10_000_000){
+            throw new IllegalArgumentException(
+                "El monto debe ser entre 100 y 10,000,,000"
+            );
         }
 
-        // convertir SOLO una vez a decimal
-        //double tasaDecimal = tasa / 100;
+        double tasa = obtenerTasa(dias);
 
-        double precio = cetesService.calcularPrecio(tasa, dias);
+        return cetesService.calcularInversion(
+                monto,
+                dias,
+                tasa
+        );
+    }
 
-        return new CetesResponse(
-        VALOR_NOMINAL, 
-        tasa, 
-        dias, 
-        precio);
+    // =========================
+    // MAPEO OFICIAL CETES
+    // =========================
+
+    private double obtenerTasa(int dias) {
+
+        return switch (dias) {
+
+            case 28 -> banxicoService.getCetes28dias();
+
+            case 91 -> banxicoService.getCetes91dias();
+
+            case 182 -> banxicoService.getCetes182dias();
+
+            case 364 -> banxicoService.getCetes364dias();
+
+            default -> throw new IllegalArgumentException(
+                    "Días no válidos. Solo: 28, 91, 182, 364"
+            );
+        };
     }
 }

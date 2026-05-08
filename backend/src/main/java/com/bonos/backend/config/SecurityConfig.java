@@ -48,17 +48,33 @@ public class SecurityConfig {
     }
 
     @Bean
+
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
         http
-            .cors(withDefaults()) // usa el bean de arriba
+            .cors(withDefaults())
             .csrf(csrf -> csrf.disable())
 
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/v1/auth/**", "/api/v1/cetes/**").permitAll()
+
+                .requestMatchers("/api/v1/auth/**",
+                    "/v3/api-docs/**",
+                    "/swagger-ui/**",
+                    "/swagger-ui.html"
+                ).permitAll()
+
+                // 🔒 CETES PROTEGIDO
+                .requestMatchers("/api/v1/cetes/**")
+                .hasAnyAuthority(
+                        "ROLE_USER",
+                        "ROLE_ADMIN",
+                        "ROLE_COLABORADOR"
+                )
+
                 .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                 .requestMatchers("/api/v1/colab/**").hasRole("COLABORADOR")
                 .requestMatchers("/api/v1/user/**").hasRole("USER")
+
                 .anyRequest().authenticated()
             )
 

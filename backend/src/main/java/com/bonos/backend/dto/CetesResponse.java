@@ -1,20 +1,29 @@
 package com.bonos.backend.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import java.math.BigDecimal;
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class CetesResponse {
-    private double vn;
-    private double tasa;
+
+    private BigDecimal montoInvertido;
     private int plazo;
-    private double precio;
+    private BigDecimal totalFinal;
 
-    public CetesResponse(double vn, double tasa, int plazo, double precio) {
-        this.vn = vn;
-        this.tasa = tasa;
-        this.plazo = plazo;
-        this.precio = precio;
-    }
+    private int titulosCetes;
+    private BigDecimal tasaCetes;
+    private BigDecimal inversionCetes;
+    private BigDecimal interesBrutoCetes;
 
-    public double getVn() { return vn; }
-    public double getTasa() { return tasa; }
-    public int getPlazo() { return plazo; }
-    public double getPrecio() { return precio; }
+    private BigDecimal remanente;
+
+    private int titulosBonddia;
+    private BigDecimal tasaBonddia;
+    private BigDecimal inversionBonddia;
+    private BigDecimal interesBonddia;
+
+    private BigDecimal isr;
 }
