@@ -1,7 +1,10 @@
 import { CssBaseline, ThemeProvider } from "@mui/material";
 import { theme } from "./styles/GlobalTheme";
 import AppBarGlobal from "./components/AppBarGlobal";
+import Footer from "./components/Footer";
+
 import { AuthProvider } from "./context/AuthContext";
+
 export const metadata = {
   title: "Bonos",
   description: "Bonos Management App",
@@ -17,6 +20,7 @@ export default function RootLayout({ children }) {
           <AuthProvider>
             <AppBarGlobal />
             {children}
+            <Footer />
           </AuthProvider>
         </ThemeProvider>
       </body>
