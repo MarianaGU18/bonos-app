@@ -1,19 +1,12 @@
 package com.bonos.backend.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-public class LoginResponse {
-
-    private String token;
-    private String refreshToken;
-    private String name;
-    private String message;
-    private String role;
-    private String email;
-
+public record LoginResponse(
+        Long id,
+        String name,
+        String lastname,
+        String maternallast,
+        String message,
+        String role,
+        String email
+) {
 }

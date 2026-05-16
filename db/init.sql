@@ -1,9 +1,9 @@
 CREATE TABLE users (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
   name VARCHAR(255),
-  last_name VARCHAR(255),
-  maternal_last VARCHAR(255),
-  birthDate DATE,
+  lastname VARCHAR(255),
+  maternallast VARCHAR(255),
+  birthdate DATE,
   email VARCHAR(255) UNIQUE NOT NULL,
   password VARCHAR(255) NOT NULL,
   role ENUM('ADMIN', 'COLABORADOR', 'USER') DEFAULT 'USER',
@@ -55,7 +55,7 @@ CREATE TABLE transacciones (
   FOREIGN KEY (bono_id) REFERENCES bonos(id) -- Puede ser NULL para depositos/retiros
 );
 
-INSERT INTO users (name, last_name, maternal_last, email, password, role)
+INSERT INTO users (name, lastname, maternallast, email, password, role)
 VALUES
 
 ('Admin', 'Istrador', 'DelSistema', 'admin@gmail.com', '$2a$10$Qsq5WB7IsEp77xkz0U52Cuyh9fcK89veH6AXhs9NZQ2/05CdJeeCy', 'ADMIN'),

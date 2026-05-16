@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useAuth } from "../context/AuthContext"; // Importar useAuth
+import { useAuth } from "../context/AuthContext";
 import {
   Box,
   Card,
@@ -20,7 +20,7 @@ import {
   Step,
   StepLabel,
   CircularProgress,
-  Alert, // Importar Alert
+  Alert,
 } from "@mui/material";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { StyledTextField, PrimaryButton } from "../components/FormComponents";
@@ -44,7 +44,7 @@ const steps = ["Account Information", "Completed"];
 
 export default function RegisterPage() {
   const router = useRouter();
-  const { register } = useAuth(); // Obtener función register
+  const { register } = useAuth();
 
   const [activeStep, setActiveStep] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -52,6 +52,8 @@ export default function RegisterPage() {
 
   // Estados para el formulario
   const [name, setName] = useState("");
+  const [lastname, setLastname] = useState("");
+  const [maternallast, setMaternallast] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -59,14 +61,13 @@ export default function RegisterPage() {
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
   };
 
-  // Función de registro real
   const handleRegister = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
     try {
-      await register(name, email, password);
-      handleNext(); // Avanzar solo si el registro es exitoso
+      await register(name, lastname, maternallast, email, password);
+      handleNext();
     } catch (err) {
       setError(err.message);
     } finally {
@@ -85,9 +86,21 @@ export default function RegisterPage() {
               </Alert>
             )}
             <StyledTextField
-              label="Full Name"
+              label="Name"
               value={name}
               onChange={(e) => setName(e.target.value)}
+              required
+            />
+            <StyledTextField
+              label="Last Name"
+              value={lastname}
+              onChange={(e) => setLastname(e.target.value)}
+              required
+            />
+            <StyledTextField
+              label="Maternal Last Name"
+              value={maternallast}
+              onChange={(e) => setMaternallast(e.target.value)}
               required
             />
             <StyledTextField

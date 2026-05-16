@@ -10,8 +10,8 @@ services:
       MYSQL_USER: bonos_user
       MYSQL_PASSWORD: bonos_pass
 
-    #ports:
-    #  - "3306:3306"
+    ports:
+      - "3306:3306"
 
     volumes:
       - mysql_data:/var/lib/mysql

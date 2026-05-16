@@ -7,7 +7,6 @@ const AuthContext = createContext();
 const API_URL = "http://localhost:8080/api/v1";
 
 export function AuthProvider({ children }) {
-  // Inicialización correcta sin useEffect
   const [user, setUser] = useState(() => {
     if (typeof window !== "undefined") {
       const storedUser = localStorage.getItem("user");
@@ -18,15 +17,21 @@ export function AuthProvider({ children }) {
 
   const [loading, setLoading] = useState(false);
 
-  // Register
-  const register = async (name, email, password) => {
+  const updateUser = (userData) => {
+    setUser(userData);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("user", JSON.stringify(userData));
+    }
+  };
+
+  const register = async (name, lastname, maternallast, email, password) => {
     const res = await fetch(`${API_URL}/auth/register`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       credentials: "include",
-      body: JSON.stringify({ name, email, password }),
+      body: JSON.stringify({ name, lastname, maternallast, email, password }),
     });
 
     const data = await res.json();
@@ -36,18 +41,19 @@ export function AuthProvider({ children }) {
     }
 
     const userData = {
+      id: data.id,
       name: data.name,
+      lastname: data.lastname,
+      maternallast: data.maternallast,
       email: data.email,
       role: data.role,
     };
 
-    setUser(userData);
-    localStorage.setItem("user", JSON.stringify(userData));
+    updateUser(userData);
 
     return data;
   };
 
-  // Login (con cookie)
   const login = async (email, password) => {
     const res = await fetch(`${API_URL}/auth/login`, {
       method: "POST",
@@ -60,25 +66,24 @@ export function AuthProvider({ children }) {
 
     const data = await res.json();
 
-    console.log("LOGIN DATA:", data);
-
     if (!res.ok || data.message !== "LOGIN OK") {
       throw new Error(data.message || "Login failed");
     }
 
     const userData = {
+      id: data.id,
       name: data.name,
+      lastname: data.lastname,
+      maternallast: data.maternallast,
       email: data.email,
       role: data.role,
     };
 
-    setUser(userData);
-    localStorage.setItem("user", JSON.stringify(userData));
+    updateUser(userData);
 
     return data;
   };
 
-  // Fetch automático
   const authFetch = async (url, options = {}) => {
     const res = await fetch(`${API_URL}${url}`, {
       ...options,
@@ -97,20 +102,19 @@ export function AuthProvider({ children }) {
     return res;
   };
 
-  // Logout
   const logout = async () => {
-    await fetch(`${API_URL}/auth/logout`, {
-      method: "POST",
-      credentials: "include",
-    });
-
-    setUser(null);
-    localStorage.removeItem("user");
-
-    window.location.href = "/login";
+    try {
+      await fetch(`${API_URL}/auth/logout`, {
+        method: "POST",
+        credentials: "include",
+      });
+    } finally {
+      setUser(null);
+      localStorage.removeItem("user");
+      window.location.href = "/login";
+    }
   };
 
-  // Roles
   const isAuthenticated = !!user;
   const isAdmin = user?.role === "ADMIN";
   const isUser = user?.role === "USER";
@@ -120,6 +124,7 @@ export function AuthProvider({ children }) {
     <AuthContext.Provider
       value={{
         user,
+        updateUser,
         loading,
         register,
         login,

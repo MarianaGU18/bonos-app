@@ -2,12 +2,12 @@ package com.bonos.backend.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "users")
 @Data
-
 public class User {
 
     @Id
@@ -15,6 +15,12 @@ public class User {
     private Long id;
 
     private String name;
+    
+    private String lastname;
+
+    private String maternallast;
+
+    private LocalDate birthdate;
 
     @Column(unique = true)
     private String email;
@@ -25,6 +31,4 @@ public class User {
     private Role role;
 
     private LocalDateTime createdAt;
- 
-
 }

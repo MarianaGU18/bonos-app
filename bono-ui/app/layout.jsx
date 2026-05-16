@@ -3,7 +3,7 @@ import { theme } from "./styles/GlobalTheme";
 import AppBarGlobal from "./components/AppBarGlobal";
 import Footer from "./components/Footer";
 
-import { AuthProvider } from "./context/AuthContext";
+import ClientAuthProvider from "./context/ClientAuthProvider";
 
 export const metadata = {
   title: "Bonos",
@@ -17,11 +17,11 @@ export default function RootLayout({ children }) {
         <ThemeProvider theme={theme}>
           <CssBaseline />
 
-          <AuthProvider>
+          <ClientAuthProvider>
             <AppBarGlobal />
             {children}
             <Footer />
-          </AuthProvider>
+          </ClientAuthProvider>
         </ThemeProvider>
       </body>
     </html>
