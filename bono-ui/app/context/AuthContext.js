@@ -17,10 +17,37 @@ export function AuthProvider({ children }) {
 
   const [loading, setLoading] = useState(false);
 
-  const updateUser = (userData) => {
-    setUser(userData);
-    if (typeof window !== "undefined") {
-      localStorage.setItem("user", JSON.stringify(userData));
+  const updateUser = async (userData) => {
+    console.log("AuthContext: Attempting to update user with data:", userData);
+    setLoading(true);
+    try {
+      const res = await authFetch(`/auth/user/${userData.id}`, {
+        method: "PUT",
+        body: JSON.stringify(userData),
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        console.error("AuthContext: Error response from server:", errorData);
+        throw new Error(errorData.message || "Failed to update user profile.");
+      }
+
+      const updatedUser = await res.json();
+      console.log(
+        "AuthContext: User updated successfully. Server response:",
+        updatedUser,
+      );
+
+      setUser(updatedUser);
+      if (typeof window !== "undefined") {
+        localStorage.setItem("user", JSON.stringify(updatedUser));
+      }
+      return updatedUser;
+    } catch (error) {
+      console.error("AuthContext: Error in updateUser function:", error);
+      throw error;
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -49,7 +76,10 @@ export function AuthProvider({ children }) {
       role: data.role,
     };
 
-    updateUser(userData);
+    setUser(userData);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("user", JSON.stringify(userData));
+    }
 
     return data;
   };
@@ -79,7 +109,10 @@ export function AuthProvider({ children }) {
       role: data.role,
     };
 
-    updateUser(userData);
+    setUser(userData);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("user", JSON.stringify(userData));
+    }
 
     return data;
   };
