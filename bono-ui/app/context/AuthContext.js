@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useCallback } from "react";
 
 const AuthContext = createContext();
 
@@ -17,37 +17,151 @@ export function AuthProvider({ children }) {
 
   const [loading, setLoading] = useState(false);
 
-  const updateUser = async (userData) => {
-    console.log("AuthContext: Attempting to update user with data:", userData);
+  const authFetch = useCallback(async (url, options = {}) => {
+    const res = await fetch(`${API_URL}${url}`, {
+      ...options,
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        ...(options.headers || {}),
+      },
+    });
+
+    if (res.status === 401) {
+      logout();
+      throw new Error("Session expired");
+    }
+
+    return res;
+  }, []);
+
+  // This function remains for profile text updates (name, etc.)
+  const updateUser = async (newUserData) => {
+    if (!user || !user.id) {
+      console.error(
+        "AuthContext: Cannot update user. User or user.id is missing.",
+      );
+      throw new Error("User not authenticated or available.");
+    }
+
     setLoading(true);
+    const updatedData = { ...user, ...newUserData };
+
     try {
-      const res = await authFetch(`/auth/user/${userData.id}`, {
+      const res = await authFetch(`/auth/user/${user.id}`, {
         method: "PUT",
-        body: JSON.stringify(userData),
+        body: JSON.stringify(updatedData),
       });
 
       if (!res.ok) {
-        const errorData = await res.json();
-        console.error("AuthContext: Error response from server:", errorData);
-        throw new Error(errorData.message || "Failed to update user profile.");
+        const errorText = await res.text();
+        throw new Error(errorText || "Failed to update user profile.");
       }
 
-      const updatedUser = await res.json();
-      console.log(
-        "AuthContext: User updated successfully. Server response:",
-        updatedUser,
-      );
+      const updatedUserFromServer = await res.json();
+      // Combine server response with existing balance to keep UI consistent
+      const finalUser = { ...updatedUserFromServer, balance: user.balance };
 
-      setUser(updatedUser);
+      setUser(finalUser);
       if (typeof window !== "undefined") {
-        localStorage.setItem("user", JSON.stringify(updatedUser));
+        localStorage.setItem("user", JSON.stringify(finalUser));
       }
-      return updatedUser;
+      return finalUser;
     } catch (error) {
       console.error("AuthContext: Error in updateUser function:", error);
       throw error;
     } finally {
       setLoading(false);
+    }
+  };
+
+  // --- NEW FUNCTION FOR DEPOSITS ---
+  const makeDeposit = async (userId, amount) => {
+    if (!userId) {
+      throw new Error("User ID is required to make a deposit.");
+    }
+    setLoading(true);
+    try {
+      const res = await authFetch(`/portafolio/deposito/${userId}`, {
+        method: "POST",
+        body: JSON.stringify({ monto: amount }),
+      });
+
+      if (!res.ok) {
+        const errorText = await res.text();
+        throw new Error(errorText || "Failed to process deposit.");
+      }
+
+      const updatedPortfolio = await res.json();
+
+      // Update the user state with the new balance from the portfolio
+      const updatedUser = { ...user, balance: updatedPortfolio.cashBalance };
+      setUser(updatedUser);
+      if (typeof window !== "undefined") {
+        localStorage.setItem("user", JSON.stringify(updatedUser));
+      }
+
+      return updatedUser;
+    } catch (error) {
+      console.error("AuthContext: Error in makeDeposit function:", error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const login = async (email, password) => {
+    const res = await fetch(`${API_URL}/auth/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ email: email.trim(), password }),
+    });
+
+    const data = await res.json();
+    if (!res.ok || data.message !== "LOGIN OK") {
+      throw new Error(data.message || "Login failed");
+    }
+
+    // After login, fetch the portfolio to get the correct balance
+    try {
+      const portfolioRes = await fetch(`${API_URL}/portafolio/${data.id}`, {
+        credentials: "include",
+      });
+      if (!portfolioRes.ok) {
+        // If portfolio doesn't exist, default balance to 0
+        console.warn(
+          "Could not fetch portfolio after login. Defaulting balance to 0.",
+        );
+        data.balance = 0;
+      } else {
+        const portfolioData = await portfolioRes.json();
+        data.balance = portfolioData.cashBalance;
+      }
+    } catch (e) {
+      console.error("Error fetching portfolio, defaulting balance to 0:", e);
+      data.balance = 0;
+    }
+
+    setUser(data);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("user", JSON.stringify(data));
+    }
+    return data;
+  };
+
+  const logout = async () => {
+    try {
+      await fetch(`${API_URL}/auth/logout`, {
+        method: "POST",
+        credentials: "include",
+      });
+    } finally {
+      setUser(null);
+      localStorage.removeItem("user");
+      if (typeof window !== "undefined") {
+        window.location.href = "/login";
+      }
     }
   };
 
@@ -84,89 +198,18 @@ export function AuthProvider({ children }) {
     return data;
   };
 
-  const login = async (email, password) => {
-    const res = await fetch(`${API_URL}/auth/login`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-      body: JSON.stringify({ email: email.trim(), password }),
-    });
-
-    const data = await res.json();
-
-    if (!res.ok || data.message !== "LOGIN OK") {
-      throw new Error(data.message || "Login failed");
-    }
-
-    const userData = {
-      id: data.id,
-      name: data.name,
-      lastname: data.lastname,
-      maternallast: data.maternallast,
-      email: data.email,
-      role: data.role,
-    };
-
-    setUser(userData);
-    if (typeof window !== "undefined") {
-      localStorage.setItem("user", JSON.stringify(userData));
-    }
-
-    return data;
-  };
-
-  const authFetch = async (url, options = {}) => {
-    const res = await fetch(`${API_URL}${url}`, {
-      ...options,
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-        ...(options.headers || {}),
-      },
-    });
-
-    if (res.status === 401) {
-      logout();
-      throw new Error("Session expired");
-    }
-
-    return res;
-  };
-
-  const logout = async () => {
-    try {
-      await fetch(`${API_URL}/auth/logout`, {
-        method: "POST",
-        credentials: "include",
-      });
-    } finally {
-      setUser(null);
-      localStorage.removeItem("user");
-      window.location.href = "/login";
-    }
-  };
-
-  const isAuthenticated = !!user;
-  const isAdmin = user?.role === "ADMIN";
-  const isUser = user?.role === "USER";
-  const isColaborador = user?.role === "COLABORADOR";
-
   return (
     <AuthContext.Provider
       value={{
         user,
         updateUser,
+        makeDeposit, // <-- Expose the new function
         loading,
         register,
         login,
         logout,
         authFetch,
-        isAuthenticated,
-        isAdmin,
-        isUser,
-        isColaborador,
+        isAuthenticated: !!user,
       }}
     >
       {children}

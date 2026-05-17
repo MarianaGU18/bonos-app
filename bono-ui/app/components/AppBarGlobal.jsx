@@ -116,8 +116,24 @@ const AppBarGlobal = () => {
           {user && (
             <>
               {/* ICONO */}
-              <IconButton onClick={handleClick}>
-                <AccountCircleIcon color="secondary" sx={{ fontSize: 32 }} />
+              <IconButton
+                onClick={handleClick}
+                sx={{
+                  p: 0.5,
+
+                  transition: "0.2s ease",
+
+                  "&:hover": {
+                    transform: "scale(1.08)",
+                  },
+                }}
+              >
+                <AccountCircleIcon
+                  color="secondary"
+                  sx={{
+                    fontSize: 42,
+                  }}
+                />
               </IconButton>
 
               {/* MENU */}
