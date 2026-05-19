@@ -165,14 +165,28 @@ export function AuthProvider({ children }) {
     }
   };
 
-  const register = async (name, lastname, maternallast, email, password) => {
+  const register = async (
+    name,
+    lastname,
+    maternallast,
+    birthdate,
+    email,
+    password,
+  ) => {
     const res = await fetch(`${API_URL}/auth/register`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       credentials: "include",
-      body: JSON.stringify({ name, lastname, maternallast, email, password }),
+      body: JSON.stringify({
+        name,
+        lastname,
+        maternallast,
+        birthdate,
+        email,
+        password,
+      }),
     });
 
     const data = await res.json();
@@ -186,6 +200,7 @@ export function AuthProvider({ children }) {
       name: data.name,
       lastname: data.lastname,
       maternallast: data.maternallast,
+      birthdate: data.birthdate,
       email: data.email,
       role: data.role,
     };

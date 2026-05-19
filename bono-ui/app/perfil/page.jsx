@@ -36,7 +36,9 @@ function TabPanel(props) {
       aria-labelledby={`profile-tab-${index}`}
       {...other}
     >
-      {value === index && <Box sx={{ pt: 3 }}>{children}</Box>}
+      {value === index && (
+        <Box sx={{ pt: 3 /*border: "2px dashed #06b6d4"*/ }}>{children}</Box>
+      )}
     </div>
   );
 }
@@ -63,7 +65,7 @@ export default function ProfilePage() {
         name: user.name || "",
         lastname: user.lastname || "",
         maternallast: user.maternallast || "",
-        birthdate: user.birthdate || "",
+        birthdate: user.birthdate ? user.birthdate.split("T")[0] : "",
       });
     }
   }, [user]);
@@ -129,7 +131,7 @@ export default function ProfilePage() {
         name: user.name,
         lastname: user.lastname,
         maternallast: user.maternallast,
-        birthdate: user.birthdate,
+        birthdate: user.birthdate ? user.birthdate.split("T")[0] : "",
       });
     }
   };
@@ -154,7 +156,8 @@ export default function ProfilePage() {
     <Box
       sx={{
         minHeight: "100vh",
-        bgcolor: "#f8fafc",
+        bgcolor: "#ffffff", // Fondo blanco puro
+        //border: "5px solid #eab308", // 🟡 AMARILLO: Wrapper principal de la página
       }}
     >
       <Container
@@ -162,13 +165,13 @@ export default function ProfilePage() {
         sx={{
           pt: 5,
           pb: 5,
-
           px: {
             xs: 2,
             sm: 3,
             md: 6,
             lg: 8,
           },
+          //border: "3px solid #ef4444", // 🔴 ROJO: Contenedor root del Layout
         }}
       >
         {/* HERO SECTION */}
@@ -176,14 +179,11 @@ export default function ProfilePage() {
           variant="h3"
           sx={{
             fontWeight: 700,
-
             fontFamily: "'Poppins', sans-serif",
-
             letterSpacing: "-1px",
-
             color: "#0f172a",
-
             mb: 4,
+            //border: "3px solid #44ef91",
           }}
         >
           My Profile
@@ -191,25 +191,22 @@ export default function ProfilePage() {
 
         <Grid container spacing={5}>
           {/* LEFT SIDEBAR */}
-          <Grid item xs={12} lg={4}>
+          <Grid item xs={12} lg={4} /*sx={{ border: "3px solid #3b82f6" }}*/>
+            {/* 🔵 AZUL: Columna Izquierda (Sidebar) */}
             <Paper
               sx={{
                 p: 4,
-
                 borderRadius: 5,
+                bgcolor: "#f8fafc", // Blanco "fuerte" para resaltar sobre el fondo blanco
 
-                background: "linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)",
+                // BORDE DEL CONTENEDOR IZQUIERDO (CREMA)
+                //border: "2px solid #10b981", // 🟢 VERDE: Card de Perfil
 
-                border: "1px solid",
-                borderColor: "grey.200",
-
-                boxShadow: "0 10px 30px rgba(0,0,0,0.06)",
-
-                transition: "all 0.3s ease",
-
+                boxShadow: 2,
+                transition: "0.2s ease",
                 "&:hover": {
-                  transform: "translateY(-6px)",
-                  boxShadow: "0 16px 40px rgba(0,0,0,0.10)",
+                  transform: "translateY(-4px)",
+                  boxShadow: 5,
                 },
               }}
             >
@@ -220,12 +217,11 @@ export default function ProfilePage() {
                   sx={{
                     width: 120,
                     height: 120,
-
-                    border: "5px solid white",
-
-                    boxShadow: "0 8px 20px rgba(0,0,0,0.15)",
-
+                    boxShadow: "0 8px 20px rgba(0,0,0,0.08)",
                     bgcolor: "white",
+
+                    // BORDE DEL AVATAR (CREMA)
+                    // border: "5px solid #ce9015",
                   }}
                 />
 
@@ -233,6 +229,7 @@ export default function ProfilePage() {
                   sx={{
                     textAlign: "center",
                     width: "100%",
+                    //border: "1px dotted #f97316", // 🟠 NARANJA: Box de Info de Usuario
                   }}
                 >
                   <Typography
@@ -248,7 +245,8 @@ export default function ProfilePage() {
                   <Typography color="text.secondary">{user.email}</Typography>
                 </Box>
 
-                <Divider sx={{ width: "100%" }} />
+                {/* BORDE DEL SEPARADOR INTERNO (CREMA) */}
+                <Divider sx={{ width: "100%" /*borderColor: "#e2dcd0" */ }} />
 
                 {/* ROLE */}
                 <Stack
@@ -278,20 +276,17 @@ export default function ProfilePage() {
                 <Box
                   sx={{
                     width: "100%",
-
                     py: 2,
                     px: 2.5,
-
                     borderRadius: 3,
-
                     background:
-                      "linear-gradient(135deg, #16a34a 0%, #22c55e 100%)",
-
+                      "linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)",
                     color: "white",
-
                     textAlign: "center",
+                    boxShadow: "0 6px 16px rgba(59,130,246,0.2)",
 
-                    boxShadow: "0 6px 16px rgba(34,197,94,0.22)",
+                    // BORDE OPCIONAL DISCRETO PARA LA TARJETA DE BALANCE (AZUL)
+                    //border: "1px solid #1e3a8a",
                   }}
                 >
                   <Typography
@@ -328,20 +323,20 @@ export default function ProfilePage() {
                   fullWidth
                   sx={{
                     py: 1,
-
                     borderRadius: 2.5,
-
                     fontWeight: 600,
-
                     textTransform: "none",
-
                     fontSize: "0.95rem",
-
                     boxShadow: 2,
+                    backgroundColor: "#1e3a8a",
+
+                    // BORDE DEL BOTÓN EN AZUL
+                    //border: "1px solid #1e3a8a",
 
                     transition: "0.25s ease",
-
                     "&:hover": {
+                      backgroundColor: "#1d4ed8",
+                      //borderColor: "#1d4ed8",
                       transform: "translateY(-2px)",
                       boxShadow: 5,
                     },
@@ -354,31 +349,27 @@ export default function ProfilePage() {
             </Paper>
           </Grid>
 
-          {/* LEFT SIDEBAR */}
-
           {/* RIGHT CONTENT */}
-          <Grid item xs={12} lg={8}>
+          <Grid item xs={12} lg={8} /*sx={{ border: "3px solid #3b82f6" }}*/>
+            {/* 🔵 AZUL: Columna Derecha (Contenido) */}
             <Paper
               sx={{
                 p: {
                   xs: 3,
                   md: 4,
                 },
-
                 borderRadius: 5,
+                bgcolor: "#f8fafc", // Blanco "fuerte" para resaltar sobre el fondo blanco
+                boxShadow: "0 10px 30px rgba(0,0,0,0.03)",
 
-                border: "1px solid",
-                borderColor: "grey.200",
+                // BORDE DEL CONTENEDOR PRINCIPAL DERECHO (CREMA)
+                //border: "2px solid #d946ef", // 💗 ROSA: Card de Datos Personales/Historial
 
-                backgroundColor: "white",
-
-                boxShadow: "0 10px 30px rgba(0,0,0,0.06)",
-
-                transition: "all 0.3s ease",
-
+                boxShadow: 2,
+                transition: "0.2s ease",
                 "&:hover": {
                   transform: "translateY(-4px)",
-                  boxShadow: "0 16px 40px rgba(0,0,0,0.10)",
+                  boxShadow: 5,
                 },
               }}
             >
@@ -387,14 +378,18 @@ export default function ProfilePage() {
                 onChange={(e, newValue) => setTabValue(newValue)}
                 sx={{
                   mb: 3,
-
                   borderBottom: 1,
-                  borderColor: "divider",
+
+                  // BORDE DE LA LÍNEA INFERIOR DE LAS PESTAÑAS (CREMA)
+                  borderColor: "#ded0e2",
 
                   "& .MuiTab-root": {
                     textTransform: "none",
                     fontWeight: 600,
                     fontSize: "1rem",
+                  },
+                  "& .MuiTabs-indicator": {
+                    backgroundColor: "#1e3a8a", // Línea indicadora activa (Azul)
                   },
                 }}
               >
@@ -439,6 +434,19 @@ export default function ProfilePage() {
                         "& .MuiOutlinedInput-root": {
                           borderRadius: 3,
                           backgroundColor: "#fafafa",
+
+                          // 1. Borde en estado normal/reposo (Crema)
+                          "& fieldset": {
+                            borderColor: "#e2dcd0",
+                          },
+                          // 2. Borde cuando pasas el cursor por encima (Crema un poco más oscuro)
+                          "&:hover fieldset": {
+                            borderColor: "#c1b8aa",
+                          },
+                          // 3. Borde cuando haces click / estás editando (Azul)
+                          "&.Mui-focused fieldset": {
+                            borderColor: "#1e3a8a",
+                          },
                         },
                       }}
                     />
@@ -456,6 +464,15 @@ export default function ProfilePage() {
                         "& .MuiOutlinedInput-root": {
                           borderRadius: 3,
                           backgroundColor: "#fafafa",
+                          "& fieldset": {
+                            borderColor: "#e2dcd0",
+                          },
+                          "&:hover fieldset": {
+                            borderColor: "#c1b8aa",
+                          },
+                          "&.Mui-focused fieldset": {
+                            borderColor: "#1e3a8a",
+                          },
                         },
                       }}
                     />
@@ -473,6 +490,15 @@ export default function ProfilePage() {
                         "& .MuiOutlinedInput-root": {
                           borderRadius: 3,
                           backgroundColor: "#fafafa",
+                          "& fieldset": {
+                            borderColor: "#e2dcd0",
+                          },
+                          "&:hover fieldset": {
+                            borderColor: "#c1b8aa",
+                          },
+                          "&.Mui-focused fieldset": {
+                            borderColor: "#1e3a8a",
+                          },
                         },
                       }}
                     />
@@ -492,6 +518,15 @@ export default function ProfilePage() {
                         "& .MuiOutlinedInput-root": {
                           borderRadius: 3,
                           backgroundColor: "#fafafa",
+                          "& fieldset": {
+                            borderColor: "#e2dcd0",
+                          },
+                          "&:hover fieldset": {
+                            borderColor: "#c1b8aa",
+                          },
+                          "&.Mui-focused fieldset": {
+                            borderColor: "#1e3a8a",
+                          },
                         },
                       }}
                     />
@@ -501,7 +536,6 @@ export default function ProfilePage() {
                 <Box
                   sx={{
                     mt: 5,
-
                     display: "flex",
                     justifyContent: "flex-end",
                     gap: 2,
@@ -539,6 +573,12 @@ export default function ProfilePage() {
                           textTransform: "none",
                           px: 3,
                           fontWeight: 600,
+                          backgroundColor: "#16a34a",
+                          //border: "1px solid #16a34a",
+                          "&:hover": {
+                            backgroundColor: "#15803d",
+                            borderColor: "#15803d",
+                          },
                         }}
                       >
                         Save Changes
@@ -554,6 +594,15 @@ export default function ProfilePage() {
                         textTransform: "none",
                         px: 3,
                         fontWeight: 600,
+
+                        // BORDE DEL BOTÓN EDITAR EN AZUL CORPORATIVO
+                        borderColor: "#1e3a8a",
+                        color: "#1e3a8a",
+
+                        "&:hover": {
+                          borderColor: "#1d4ed8",
+                          backgroundColor: "rgba(30, 58, 138, 0.04)",
+                        },
                       }}
                     >
                       Edit Profile

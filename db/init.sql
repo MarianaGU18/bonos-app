@@ -46,8 +46,8 @@ CREATE TABLE transacciones (
   user_id BIGINT NOT NULL,
   bono_id BIGINT,
   tipo ENUM('DEPOSITO', 'RETIRO', 'COMPRA', 'VENTA') NOT NULL,
-  cantidad INT, -- Para compras/ventas
-  monto DECIMAL(10,2), -- Para depositos/retiros
+  cantidad INT DEFAULT 0, -- Para compras/ventas
+  monto DECIMAL(10,2) DEFAULT 0, -- Para depositos/retros
   precio_unitario DECIMAL(10,2), -- Para compras/ventas
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 

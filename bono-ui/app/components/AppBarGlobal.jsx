@@ -38,6 +38,13 @@ const AppBarGlobal = () => {
     handleClose();
   };
 
+  const getHomePath = () => {
+    if (isAdmin) return "/admin";
+    if (isColaborador) return "/colab";
+    if (user) return "/dashboard";
+    return "/";
+  };
+
   return (
     <AppBar position="static" sx={{ mb: 2 }}>
       <Toolbar>
@@ -46,15 +53,7 @@ const AppBarGlobal = () => {
         <Typography
           variant="h6"
           component={Link}
-          href={
-            isAdmin
-              ? "/admin"
-              : isColaborador
-                ? "/colab"
-                : user
-                  ? "/dashboard"
-                  : "/"
-          }
+          href={getHomePath()}
           sx={{
             textDecoration: "none",
             color: "secondary.main",
@@ -82,25 +81,9 @@ const AppBarGlobal = () => {
           )}
 
           {user && (
-            <>
-              {isAdmin && (
-                <Link href="/admin">
-                  <Button color="secondary">Home</Button>
-                </Link>
-              )}
-
-              {isColaborador && (
-                <Link href="/colab">
-                  <Button color="secondary">Home</Button>
-                </Link>
-              )}
-
-              {isUser && (
-                <Link href="/dashboard">
-                  <Button color="secondary">Home</Button>
-                </Link>
-              )}
-            </>
+            <Link href={getHomePath()}>
+              <Button color="secondary">Home</Button>
+            </Link>
           )}
           {(!user || isUser) && (
             <>

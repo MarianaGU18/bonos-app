@@ -54,6 +54,7 @@ export default function RegisterPage() {
   const [name, setName] = useState("");
   const [lastname, setLastname] = useState("");
   const [maternallast, setMaternallast] = useState("");
+  const [birthdate, setBirthdate] = useState(""); // Nuevo estado para la fecha de nacimiento
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -66,7 +67,7 @@ export default function RegisterPage() {
     setLoading(true);
     setError(null);
     try {
-      await register(name, lastname, maternallast, email, password);
+      await register(name, lastname, maternallast, birthdate, email, password); // Se pasa birthdate
       handleNext();
     } catch (err) {
       setError(err.message);
@@ -101,6 +102,14 @@ export default function RegisterPage() {
               label="Maternal Last Name"
               value={maternallast}
               onChange={(e) => setMaternallast(e.target.value)}
+              required
+            />
+            <StyledTextField
+              label="Date of Birth"
+              type="date"
+              value={birthdate}
+              onChange={(e) => setBirthdate(e.target.value)}
+              InputLabelProps={{ shrink: true }}
               required
             />
             <StyledTextField

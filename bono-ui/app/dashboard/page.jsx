@@ -36,7 +36,7 @@ const BarChartComponent = dynamic(
 
       return function ChartWrapper(props) {
         return (
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer width="99%" height={220}>
             <BarChart
               data={props.data}
               margin={{ top: 10, right: 20, left: -10, bottom: 0 }}
@@ -101,10 +101,12 @@ const dashboardCardStyle = {
   borderRadius: 4,
   boxShadow: 2,
   transition: "0.2s ease",
+  //border: "2px solid #10b981", // 🟢 VERDE: Cards de Acción (Cetes/Bonds)
 
   "&:hover": {
     transform: "translateY(-4px)",
     boxShadow: 5,
+    //borderColor: "#8b1fac",
   },
 };
 
@@ -114,7 +116,8 @@ function DashboardContent({ user }) {
     <Box
       sx={{
         minHeight: "100vh",
-        bgcolor: "grey.100",
+        bgcolor: "#eae8dff3", // Fondo crema general para consistencia
+        //border: "5px solid #eab308", // 🟡 AMARILLO: Wrapper principal del Dashboard
       }}
     >
       <Container
@@ -129,10 +132,12 @@ function DashboardContent({ user }) {
             md: 6,
             lg: 8,
           },
+          //border: "3px solid #ef4444", // 🔴 ROJO: Contenedor root del Layout
         }}
       >
         {/* HEADER */}
         <Box sx={{ mb: 5 }}>
+          {/* 🔘 GRIS: Box del Header  border: "1px dashed #64748b" }}*/}
           <Typography
             variant="h4"
             sx={{
@@ -142,7 +147,6 @@ function DashboardContent({ user }) {
           >
             Dashboard
           </Typography>
-
           <Typography variant="body1" color="text.secondary">
             Welcome back, {user?.name}. Track your investments and portfolio
             performance.
@@ -152,6 +156,7 @@ function DashboardContent({ user }) {
         {/* ACTION CARDS */}
         <Grid container spacing={3} sx={{ mb: 5 }}>
           <Grid item xs={12} md={6} lg={4}>
+            {/* 🔵 AZUL: Grid Item (Acción) sx={{ border: "3px solid #3b82f6" }}*/}
             <Card sx={dashboardCardStyle}>
               <CardContent
                 sx={{
@@ -196,6 +201,7 @@ function DashboardContent({ user }) {
           </Grid>
 
           <Grid item xs={12} md={6} lg={4}>
+            {/* 🔵 AZUL: Grid Item (Próximamente) sx={{ border: "3px solid #3b82f6" }}*/}
             <Card sx={dashboardCardStyle}>
               <CardContent
                 sx={{
@@ -242,6 +248,7 @@ function DashboardContent({ user }) {
 
         {/* SUMMARY */}
         <Box sx={{ mb: 3 }}>
+          {/* 🟠 NARANJA: Box de Título del Resumen , border: "1px dotted #f97316" */}
           <Typography
             variant="h5"
             sx={{
@@ -251,7 +258,6 @@ function DashboardContent({ user }) {
           >
             Portfolio Summary
           </Typography>
-
           <Typography color="text.secondary">
             Overview of your current portfolio performance.
           </Typography>
@@ -259,12 +265,14 @@ function DashboardContent({ user }) {
 
         {/* CHART */}
         <Grid item xs={12} md={8}>
+          {/* 🔵 AZUL: Grid Item del Gráfico sx={{ border: "3px solid #3b82f6" }}*/}
           <Paper
             sx={{
               p: 3,
               height: 320,
               borderRadius: 4,
               boxShadow: 2,
+              //border: "2px solid #d946ef", // 💗 ROSA: Card del Historial/Gráfico
             }}
           >
             <Stack

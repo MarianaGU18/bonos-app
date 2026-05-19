@@ -22,19 +22,15 @@ public class Transaccion {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(name = "bono_id")
-    private Long bonoId; // We'll map this properly later
-
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private TipoTransaccion tipo;
 
-    private Integer cantidad; // For buy/sell transactions
+    @Column(nullable = false)
+    private BigDecimal monto;
 
-    private BigDecimal monto; // For deposit/withdrawal transactions
-
-    @Column(name = "precio_unitario")
-    private BigDecimal precioUnitario; // For buy/sell transactions
+    @Column
+    private String descripcion;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false, nullable = false)
@@ -43,11 +39,21 @@ public class Transaccion {
     // Constructor for Deposits/Withdrawals
     public Transaccion(User user, TipoTransaccion tipo, BigDecimal monto) {
         if (tipo != TipoTransaccion.DEPOSITO && tipo != TipoTransaccion.RETIRO) {
-            throw new IllegalArgumentException("This constructor is for deposits and withdrawals only.");
+            throw new IllegalArgumentException("This constructor is only for DEPOSITO or RETIRO.");
         }
         this.user = user;
         this.tipo = tipo;
         this.monto = monto;
     }
 
+    // Constructor for Buy/Sell with description
+    public Transaccion(User user, TipoTransaccion tipo, BigDecimal monto, String descripcion) {
+        if (tipo != TipoTransaccion.COMPRA && tipo != TipoTransaccion.VENTA) {
+            throw new IllegalArgumentException("This constructor is only for COMPRA or VENTA.");
+        }
+        this.user = user;
+        this.tipo = tipo;
+        this.monto = monto;
+        this.descripcion = descripcion;
+    }
 }

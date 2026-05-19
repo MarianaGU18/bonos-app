@@ -11,14 +11,15 @@ import {
   CircularProgress,
   Grid,
   Alert,
-  Icon,
   Paper,
   Divider,
+  Stack,
 } from "@mui/material";
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import SavingsIcon from "@mui/icons-material/Savings";
+import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 
 import { StyledTextField, PrimaryButton } from "../components/FormComponents";
 
@@ -37,29 +38,13 @@ export default function CetesPage() {
   // 🔐 Validate session
   useEffect(() => {
     const validateSession = async () => {
-      try {
-        const res = await fetch(
-          "http://localhost:8080/api/v1/cetes/calcular?monto=1000&dias=28",
-          {
-            method: "GET",
-            credentials: "include",
-          },
-        );
-
-        if (res.status === 401) {
-          router.push("/login");
-        }
-      } catch (error) {
-        router.push("/login");
-      }
+      /* COMENTADO PARA MODO FRONT-ONLY */
     };
-
     validateSession();
   }, [router]);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
-
     setFormData((prev) => ({
       ...prev,
       [name]: value,
@@ -68,329 +53,627 @@ export default function CetesPage() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-
     setLoading(true);
     setResult(null);
     setError(null);
 
-    try {
-      const res = await fetch(
-        `http://localhost:8080/api/v1/cetes/calcular?monto=${formData.monto}&dias=${formData.plazo}`,
-        {
-          method: "GET",
-          credentials: "include",
-        },
-      );
+    // --- CÁLCULOS ALINEADOS A LA PLATAFORMA REAL ---
+    setTimeout(() => {
+      const montoInvertido = Number(formData.monto);
+      const dias = Number(formData.plazo);
 
-      if (!res.ok) {
-        if (res.status === 401) {
-          router.push("/login");
+      // Tasas base simuladas a partir de los valores reales de Cetesdirecto
+      const tCetes = 0.0654; // 6.54%
+      const tBonddia = 0.064; // 6.40%
 
-          throw new Error("Session expired. Please log in again.");
-        }
+      // 1. Calcular precio de descuento del CETES (Valor Nominal = $10)
+      const precioCetes = 10 / (1 + (tCetes * dias) / 360);
 
-        throw new Error(`Error ${res.status}`);
-      }
+      // 2. Determinar títulos de CETES asignados
+      const titulosCetes = Math.floor(montoInvertido / precioCetes);
+      const inversionCetes = titulosCetes * precioCetes;
 
-      const data = await res.json();
+      // 3. El remanente primario se envía a BONDDIA automáticamente
+      const sobranteParaBonddia = montoInvertido - inversionCetes;
+      const precioBonddia = 2.325; // Precio promedio por título de Bonddia
+      const titulosBonddia = Math.floor(sobranteParaBonddia / precioBonddia);
+      const inversionBonddia = titulosBonddia * precioBonddia;
 
-      setResult(data);
-    } catch (err) {
-      setError(err.message || "An unexpected error occurred.");
-    } finally {
+      // 4. Remanente final líquido en efectivo
+      const remanente = sobranteParaBonddia - inversionBonddia;
+
+      // 5. Cálculo de Rendimientos (Intereses Devengados)
+      const interesBrutoCetes = titulosCetes * (10 - precioCetes);
+      const interesBonddia = inversionBonddia * tBonddia * (dias / 360);
+
+      // 6. Retención provisional de impuesto (ISR)
+      const isr = inversionCetes * 0.005 * (dias / 365);
+
+      // 7. Monto obtenido al final del plazo
+      const totalFinal =
+        inversionCetes +
+        inversionBonddia +
+        interesBrutoCetes +
+        interesBonddia -
+        isr +
+        remanente;
+
+      setResult({
+        plazo: dias,
+        tasaCetes: tCetes * 100,
+        tasaBonddia: tBonddia * 100,
+        montoInvertido,
+        titulosCetes,
+        titulosBonddia,
+        inversionCetes,
+        inversionBonddia,
+        interesBrutoCetes,
+        interesBonddia,
+        remanente,
+        isr,
+        totalFinal,
+      });
       setLoading(false);
-    }
+    }, 800);
   };
 
-  // 💰 Currency formatter
+  // 💰 Currency formatter (Formato estándar regional de México)
   const fmt = (val) =>
-    new Intl.NumberFormat("en-US", {
+    new Intl.NumberFormat("es-MX", {
       style: "currency",
       currency: "MXN",
     }).format(val || 0);
 
   return (
-    <Container maxWidth="lg" sx={{ mt: 6, mb: 6 }}>
-      {/* HEADER */}
-      <Box
+    <Box
+      sx={{
+        display: "flex",
+        justifyContent: "center", // Centrado horizontal
+        alignItems: "center", // Centrado vertical
+        minHeight: "100vh", // Ocupa el 100% de la altura de la pantalla
+        width: "100%", // Asegura que el Box ocupe todo el ancho disponible
+        bgcolor: "#ffffff", // Fondo blanco puro
+        //border: "5px solid #eab308", // 🟡 AMARILLO: Wrapper principal de la página
+      }}
+    >
+      <Container
+        maxWidth={false}
         sx={{
-          display: "flex",
-          alignItems: "center",
-          mb: 5,
+          pt: 5,
+          pb: 6,
+          px: 2, // Ajustado para compensar el spacing={4} del Grid y maximizar el ancho
+          width: "100%",
+          minHeight: "100vh",
+          //border: "3px solid #ef4444", // 🔴 ROJO: Contenedor Root de la página
         }}
       >
-        <Icon
-          component={SavingsIcon}
+        {/* HEADER */}
+        <Box
           sx={{
-            fontSize: 42,
-            mr: 2,
-            color: "primary.main",
+            display: "flex",
+            alignItems: "center",
+            mb: 4,
+            //border: "1px dashed #64748b",
           }}
-        />
-
-        <Box>
-          <Typography
-            variant="h4"
+        >
+          <Box
             sx={{
-              color: "primary.main",
-              fontWeight: 800,
-            }}
-          >
-            CETES Valuation
-          </Typography>
-
-          <Typography
-            variant="body1"
-            sx={{
-              color: "text.secondary",
-              mt: 0.5,
-            }}
-          >
-            Simulate your government bond investment returns
-          </Typography>
-        </Box>
-      </Box>
-
-      <Grid container spacing={4}>
-        {/* FORM */}
-        <Grid item xs={12} md={5}>
-          <Paper
-            elevation={0}
-            sx={{
-              p: 4,
+              width: 64,
+              height: 64,
               borderRadius: 4,
-              border: "1px solid",
-              borderColor: "secondary.main",
-              backgroundColor: "background.paper",
+              bgcolor: "white",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              mr: 3,
+              boxShadow: "0 8px 24px rgba(15,23,42,0.06)",
+              //border: "1px solid",
+              //borderColor: "grey.200",
             }}
           >
+            <SavingsIcon sx={{ fontSize: 32, color: "#003366" }} />
+          </Box>
+          <Box>
             <Typography
-              variant="h6"
+              variant="h4"
               sx={{
-                color: "primary.main",
-                mb: 3,
+                fontWeight: 700,
+                fontFamily: "'Poppins', sans-serif",
+                color: "#0f172a",
+                lineHeight: 1.1,
               }}
             >
-              Investment Parameters
+              CETES Valuation
             </Typography>
+            <Typography
+              variant="body2"
+              sx={{ color: "text.secondary", mt: 0.5 }}
+            >
+              Simulate your government bond investment returns
+            </Typography>
+          </Box>
+        </Box>
 
-            <Box component="form" onSubmit={handleSubmit} noValidate>
-              <StyledTextField
-                label="Investment Amount ($)"
-                name="monto"
-                type="number"
-                value={formData.monto}
-                onChange={handleChange}
-              />
+        <Grid
+          container
+          spacing={4}
+          sx={{ width: "100%" /*, border: "2px solid #7a7116" */ }}
+        >
+          {/* PANEL IZQUIERDO (Formulario de Parámetros) */}
+          <Grid item xs={12} md={4} lg={3}>
+            {/* 🔵 Columna Izquierda */}
+            <Paper
+              sx={{
+                p: { xs: 3, md: 4 },
+                borderRadius: 4,
+                bgcolor: "#f8fafc", // Blanco "fuerte" para resaltar
+                boxShadow: 2,
+                transition: "0.2s ease",
 
-              <FormControl fullWidth margin="normal">
-                <InputLabel>Investment Term</InputLabel>
+                //border: "2px solid #10b981", // 🟢 VERDE: Card del Formulario
+                "&:hover": {
+                  transform: "translateY(-4px)",
+                  boxShadow: 5,
+                },
+              }}
+            >
+              <Typography
+                variant="h6"
+                sx={{ fontWeight: 700, /*color: "#0f172a",*/ mb: 1 }}
+              >
+                Investment Parameters
+              </Typography>
+              <Typography
+                variant="body2"
+                sx={{ color: "text.secondary", mb: 4 }}
+              >
+                Configure your CETES investment simulation.
+              </Typography>
 
-                <Select
-                  name="plazo"
-                  value={formData.plazo}
-                  label="Investment Term"
+              <Box component="form" onSubmit={handleSubmit} noValidate>
+                <StyledTextField
+                  fullWidth
+                  label="Investment Amount ($)"
+                  name="monto"
+                  type="number"
+                  value={formData.monto}
                   onChange={handleChange}
                   sx={{
+                    mb: 3,
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: 3,
+                      backgroundColor: "#f8fafc",
+                    },
+                  }}
+                />
+
+                <FormControl fullWidth sx={{ mb: 4 }}>
+                  <InputLabel>Investment Term</InputLabel>
+                  <Select
+                    name="plazo"
+                    value={formData.plazo}
+                    label="Investment Term"
+                    onChange={handleChange}
+                    sx={{
+                      borderRadius: 3,
+                      backgroundColor: "#f8fafc",
+                    }}
+                  >
+                    <MenuItem value={28}>1 Month (28 days)</MenuItem>
+                    <MenuItem value={91}>3 Months (91 days)</MenuItem>
+                    <MenuItem value={182}>6 Months (182 days)</MenuItem>
+                    <MenuItem value={364}>1 Year (364 days)</MenuItem>
+                  </Select>
+                </FormControl>
+
+                <PrimaryButton
+                  type="submit"
+                  disabled={loading}
+                  fullWidth
+                  sx={{
+                    py: 1.5,
                     borderRadius: 3,
-                    backgroundColor: "background.paper",
+                    textTransform: "none",
+                    fontWeight: 600,
+                    fontSize: "1rem",
+                    bgcolor: "#003366",
+                    "&:hover": { bgcolor: "#002244" },
                   }}
                 >
-                  <MenuItem value={28}>1 Month (28 days)</MenuItem>
-                  <MenuItem value={91}>3 Months (91 days)</MenuItem>
-                  <MenuItem value={182}>6 Months (182 days)</MenuItem>
-                  <MenuItem value={364}>1 Year (364 days)</MenuItem>
-                </Select>
-              </FormControl>
+                  {loading ? (
+                    <CircularProgress size={24} color="inherit" />
+                  ) : (
+                    "Calculate Returns"
+                  )}
+                </PrimaryButton>
+              </Box>
+            </Paper>
+          </Grid>
 
-              <PrimaryButton
-                type="submit"
-                disabled={loading}
+          {/* PANEL DERECHO (Resumen estructurado como Ticket Oficial) */}
+          <Grid
+            item
+            xs={12}
+            md={result ? 4 : 8}
+            lg={result ? 5 : 9}
+            //sx={{ border: "2px solid #031d48" }}
+          >
+            {/* 🔵 AZUL: Columna Derecha */}
+            {error && (
+              <Alert severity="error" sx={{ mb: 3, borderRadius: 3 }}>
+                {error}
+              </Alert>
+            )}
+
+            {result && (
+              <Paper
                 sx={{
-                  mt: 4,
-                  backgroundColor: "primary.main",
+                  p: { xs: 3, sm: 4 },
+                  borderRadius: 4,
+                  bgcolor: "#f8fafc", // Blanco "fuerte" para resaltar
+                  position: "relative",
+                  boxShadow: 2,
+                  transition: "0.2s ease",
 
+                  //border: "2px solid #a855f7", // 🟣 PÚRPURA: Sección de datos del ticket
                   "&:hover": {
-                    backgroundColor: "#082C44",
+                    transform: "translateY(-4px)",
+                    boxShadow: 5,
                   },
                 }}
               >
-                {loading ? (
-                  <CircularProgress size={24} color="inherit" />
-                ) : (
-                  "CALCULATE RETURNS"
-                )}
-              </PrimaryButton>
-            </Box>
-          </Paper>
-        </Grid>
+                {/* Distintivo de Plazo Estilo Botón */}
+                <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
+                  <Box
+                    sx={{
+                      bgcolor: "#1a83dd",
+                      color: "white",
+                      fontWeight: 700,
+                      px: 3,
+                      py: 0.8,
+                      borderRadius: 2,
+                      fontSize: "0.85rem",
+                      textTransform: "uppercase",
+                      letterSpacing: 1,
+                    }}
+                  >
+                    CETES {result.plazo}
+                  </Box>
+                </Box>
 
-        {/* RESULTS */}
-        <Grid item xs={12} md={7}>
-          {error && (
-            <Alert severity="error" sx={{ mb: 2 }}>
-              {error}
-            </Alert>
-          )}
-
-          {result && (
-            <Paper
-              elevation={0}
-              sx={{
-                p: 4,
-                borderRadius: 4,
-                backgroundColor: "background.paper",
-                border: "1px solid",
-                borderColor: "secondary.main",
-              }}
-            >
-              {/* TITLE */}
-              <Box
-                sx={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  mb: 4,
-                }}
-              >
-                <Typography
-                  variant="h6"
-                  sx={{
-                    color: "primary.main",
-                  }}
-                >
-                  Investment Summary
-                </Typography>
-
+                {/* Cabecera del desglose */}
                 <Box
                   sx={{
-                    px: 2,
-                    py: 1,
-                    borderRadius: 2,
-                    backgroundColor: "accent.main",
-                    color: "#000",
-                    fontWeight: 700,
-                    fontSize: "0.85rem",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    mt: 3,
+                    mb: 2,
                   }}
                 >
-                  CETES {result.plazo}
-                </Box>
-              </Box>
-
-              <Grid container spacing={4}>
-                {/* LEFT */}
-                <Grid item xs={12} md={6}>
-                  <Typography fontWeight={700} color="primary.main">
-                    Invested Amount
+                  <Typography
+                    variant="body1"
+                    sx={{ color: "#003366", fontWeight: 700 }}
+                  >
+                    Monto invertido:
                   </Typography>
-
-                  <Typography sx={{ mb: 2 }}>
+                  <Typography
+                    variant="body1"
+                    sx={{
+                      fontWeight: 700,
+                      color: "#003366",
+                      fontFamily: "monospace",
+                    }}
+                  >
                     {fmt(result.montoInvertido)}
                   </Typography>
+                </Box>
 
-                  <Typography fontWeight={700} color="primary.main">
-                    CETES Investment
+                {/* TABLA SUB-CONCEPTOS (Títulos y Tasas Brutas) */}
+                <Box
+                  sx={{
+                    display: "grid",
+                    gridTemplateColumns: "2fr 1fr 1fr",
+                    gap: 1,
+                    pb: 1.5,
+                    borderBottom: "1px solid #e2e8f0",
+                    mb: 2,
+                  }}
+                >
+                  <Typography
+                    variant="caption"
+                    sx={{ color: "text.secondary" }}
+                  />
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      color: "text.secondary",
+                      textAlign: "right",
+                      fontWeight: 700,
+                    }}
+                  >
+                    Títulos
+                  </Typography>
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      color: "text.secondary",
+                      textAlign: "right",
+                      fontWeight: 700,
+                    }}
+                  >
+                    Tasa Bruta
                   </Typography>
 
-                  <Typography sx={{ mb: 2 }}>
-                    {fmt(result.inversionCetes)}
+                  <Typography variant="body2" sx={{ color: "text.secondary" }}>
+                    Cetes:
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      textAlign: "right",
+                      fontFamily: "monospace",
+                      fontWeight: 700,
+                      color: "#003366",
+                    }}
+                  >
+                    {result.titulosCetes}
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      textAlign: "right",
+                      fontFamily: "monospace",
+                      color: "#1a83dd",
+                      fontWeight: 600,
+                    }}
+                  >
+                    {result.tasaCetes.toFixed(2)} %
                   </Typography>
 
-                  <Typography fontWeight={700} color="primary.main">
-                    Gross Interest
+                  <Typography variant="body2" sx={{ color: "text.secondary" }}>
+                    bonddia:
                   </Typography>
-
-                  <Typography sx={{ mb: 2 }}>
-                    {fmt(result.interesBrutoCetes)}
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      textAlign: "right",
+                      fontFamily: "monospace",
+                      fontWeight: 700,
+                      color: "#003366",
+                    }}
+                  >
+                    {result.titulosBonddia}
                   </Typography>
-
-                  <Typography fontWeight={700} color="primary.main">
-                    Remaining Balance
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      textAlign: "right",
+                      fontFamily: "monospace",
+                      color: "#1a83dd",
+                      fontWeight: 600,
+                    }}
+                  >
+                    {result.tasaBonddia.toFixed(2)} %
                   </Typography>
+                </Box>
 
-                  <Typography>{fmt(result.remanente)}</Typography>
-                </Grid>
+                {/* VALORES MONETARIOS DESGLOSADOS */}
+                <Stack spacing={1.5}>
+                  <Box
+                    sx={{ display: "flex", justifyContent: "space-between" }}
+                  >
+                    <Typography
+                      variant="body2"
+                      sx={{ color: "text.secondary" }}
+                    >
+                      Inversión Cetes:
+                    </Typography>
+                    <Typography
+                      variant="body2"
+                      sx={{ fontFamily: "monospace", fontWeight: 600 }}
+                    >
+                      {fmt(result.inversionCetes)}
+                    </Typography>
+                  </Box>
 
-                {/* RIGHT */}
-                <Grid item xs={12} md={6}>
-                  <Typography fontWeight={700} color="primary.main">
-                    CETES Bonds
-                  </Typography>
+                  <Box
+                    sx={{ display: "flex", justifyContent: "space-between" }}
+                  >
+                    <Typography
+                      variant="body2"
+                      sx={{ color: "text.secondary" }}
+                    >
+                      Inversión Bonddia:
+                    </Typography>
+                    <Typography
+                      variant="body2"
+                      sx={{ fontFamily: "monospace", fontWeight: 600 }}
+                    >
+                      {fmt(result.inversionBonddia)}
+                    </Typography>
+                  </Box>
 
-                  <Typography sx={{ mb: 2 }}>
-                    {result.titulosCetes} bonds
-                  </Typography>
+                  <Box
+                    sx={{ display: "flex", justifyContent: "space-between" }}
+                  >
+                    <Typography
+                      variant="body2"
+                      sx={{ color: "text.secondary" }}
+                    >
+                      Interés Bruto:
+                    </Typography>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        fontFamily: "monospace",
+                        color: "#1a83dd",
+                        fontWeight: 600,
+                      }}
+                    >
+                      {fmt(result.interesBrutoCetes)}
+                    </Typography>
+                  </Box>
 
-                  <Typography fontWeight={700} color="primary.main">
-                    BONDDIA Bonds
-                  </Typography>
+                  <Box
+                    sx={{ display: "flex", justifyContent: "space-between" }}
+                  >
+                    <Typography
+                      variant="body2"
+                      sx={{ color: "text.secondary" }}
+                    >
+                      Interés Bonddia:
+                    </Typography>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        fontFamily: "monospace",
+                        color: "#1a83dd",
+                        fontWeight: 600,
+                      }}
+                    >
+                      {fmt(result.interesBonddia)}
+                    </Typography>
+                  </Box>
 
-                  <Typography sx={{ mb: 2 }}>
-                    {result.titulosBonddia} bonds
-                  </Typography>
+                  <Box
+                    sx={{ display: "flex", justifyContent: "space-between" }}
+                  >
+                    <Typography
+                      variant="body2"
+                      sx={{ color: "text.secondary" }}
+                    >
+                      Remanente:
+                    </Typography>
+                    <Typography
+                      variant="body2"
+                      sx={{ fontFamily: "monospace", fontWeight: 600 }}
+                    >
+                      {fmt(result.remanente)}
+                    </Typography>
+                  </Box>
 
-                  <Typography fontWeight={700} color="primary.main">
-                    BONDDIA Interest
-                  </Typography>
+                  <Box
+                    sx={{ display: "flex", justifyContent: "space-between" }}
+                  >
+                    <Typography
+                      variant="body2"
+                      sx={{ color: "text.secondary" }}
+                    >
+                      ISR:
+                    </Typography>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        fontFamily: "monospace",
+                        color: "error.main",
+                        fontWeight: 600,
+                      }}
+                    >
+                      {fmt(result.isr)}
+                    </Typography>
+                  </Box>
+                </Stack>
+              </Paper>
+            )}
 
-                  <Typography sx={{ mb: 2 }}>
-                    {fmt(result.interesBonddia)}
-                  </Typography>
-
-                  <Typography fontWeight={700} color="primary.main">
-                    Tax Withholding (ISR)
-                  </Typography>
-
-                  <Typography>{fmt(result.isr)}</Typography>
-                </Grid>
-              </Grid>
-
-              <Divider sx={{ my: 4 }} />
-
-              {/* FINAL */}
-              <Box
+            {/* ESTADO INICIAL (Mismo ancho máximo del ticket para simetría) */}
+            {!result && !loading && !error && (
+              <Paper
                 sx={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
+                  p: 4,
+                  borderRadius: 4,
+                  bgcolor: "#f8fafc", // Blanco "fuerte" para resaltar
+                  width: "100%",
+                  margin: "0 auto",
+                  boxShadow: 2,
+                  transition: "0.2s ease",
+
+                  //border: "2px solid #10b981", // 🟢 VERDE: Card del estado inicial informativo
+                  "&:hover": {
+                    transform: "translateY(-4px)",
+                    boxShadow: 5,
+                  },
                 }}
               >
-                <Typography
-                  variant="h5"
-                  sx={{
-                    color: "primary.main",
-                    fontWeight: 800,
-                  }}
-                >
-                  Final Amount
-                </Typography>
+                <Alert severity="info" sx={{ borderRadius: 3 }}>
+                  Enter an investment amount and select a term to simulate your
+                  CETES investment performance.
+                </Alert>
+              </Paper>
+            )}
+          </Grid>
 
-                <Typography
-                  variant="h5"
-                  sx={{
-                    color: "accent.main",
-                    fontWeight: 800,
-                  }}
-                >
-                  {fmt(result.totalFinal)}
-                </Typography>
-              </Box>
-            </Paper>
-          )}
-
-          {!result && !loading && !error && (
-            <Alert
-              severity="info"
-              sx={{
-                borderRadius: 3,
-              }}
+          {/* PANEL DERECHO (Total Final) */}
+          {result && (
+            <Grid
+              item
+              xs={12}
+              md={4}
+              lg={4}
+              /*sx={{ border: "2px solid #a855f7" }}*/
             >
-              Enter an investment amount and select a term to simulate your
-              CETES investment performance.
-            </Alert>
+              <Paper
+                sx={{
+                  p: { xs: 3, sm: 4 },
+                  borderRadius: 4,
+                  bgcolor: "#f8fafc", // Blanco "fuerte" para resaltar
+                  boxShadow: 2,
+                  transition: "0.2s ease",
+
+                  //border: "2px solid #a855f7", // 🟣 PÚRPURA: Card del Total
+                  "&:hover": {
+                    transform: "translateY(-4px)",
+                    boxShadow: 5,
+                  },
+                }}
+              >
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    mb: 4,
+                  }}
+                >
+                  <Typography
+                    variant="subtitle1"
+                    sx={{ fontWeight: 700, color: "#003366" }}
+                  >
+                    Obtienes al final:
+                  </Typography>
+                  <Typography
+                    variant="subtitle1"
+                    sx={{
+                      fontWeight: 800,
+                      color: "#1a83dd",
+                      fontFamily: "monospace",
+                    }}
+                  >
+                    {fmt(result.totalFinal)}
+                  </Typography>
+                </Box>
+
+                <PrimaryButton
+                  fullWidth
+                  sx={{
+                    py: 1.5,
+                    borderRadius: 3,
+                    fontWeight: 600,
+                    textTransform: "none",
+                    fontSize: "1rem",
+                    bgcolor: "#003366",
+                    "&:hover": { bgcolor: "#002244" },
+                  }}
+                  startIcon={<ShoppingCartIcon />}
+                >
+                  Purchase CETES
+                </PrimaryButton>
+              </Paper>
+            </Grid>
           )}
         </Grid>
-      </Grid>
-    </Container>
+      </Container>
+    </Box>
   );
 }

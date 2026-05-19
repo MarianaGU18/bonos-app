@@ -5,6 +5,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "portafolio")
@@ -20,8 +22,11 @@ public class Portafolio {
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     private User user;
 
-    @Column(name = "cash_balance", nullable = false, precision = 15, scale = 2)
+    @Column(name = "cash_balance", nullable = false, precision = 19, scale = 4)
     private BigDecimal cashBalance = BigDecimal.ZERO;
+
+    @OneToMany(mappedBy = "portafolio", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<Cete> cetes = new ArrayList<>();
 
     public Portafolio(User user) {
         this.user = user;
