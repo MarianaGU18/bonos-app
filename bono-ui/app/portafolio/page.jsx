@@ -19,13 +19,13 @@ import {
   Alert,
   Stack,
   Chip,
-  Divider,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
   Snackbar,
 } from "@mui/material";
+
 import NextLink from "next/link";
 import HistoryIcon from "@mui/icons-material/History";
 import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
@@ -33,8 +33,31 @@ import InsightsIcon from "@mui/icons-material/Insights";
 import AddIcon from "@mui/icons-material/Add";
 import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
+
 import { useAuth } from "../context/AuthContext";
 import SellCeteModal from "../components/SellCeteModal";
+
+/* ----------------- UI PRIMITIVE ----------------- */
+const AppCard = ({ children, sx = {} }) => (
+  <Paper
+    elevation={0}
+    sx={(theme) => ({
+      p: 3,
+      borderRadius: 4,
+      bgcolor: "background.paper",
+      border: `1px solid ${theme.palette.divider}`,
+      boxShadow: "0 2px 10px rgba(15,23,42,0.05)",
+      transition: "0.2s ease",
+      "&:hover": {
+        transform: "translateY(-3px)",
+        boxShadow: "0 8px 24px rgba(15,23,42,0.08)",
+      },
+      ...sx,
+    })}
+  >
+    {children}
+  </Paper>
+);
 
 export default function PortfolioPage() {
   const { user, makeDeposit, authFetch, loading: authLoading } = useAuth();
@@ -45,10 +68,13 @@ export default function PortfolioPage() {
     bondsBalance: 0,
     total: 0,
   });
+
   const [investments, setInvestments] = useState([]);
   const [transactions, setTransactions] = useState([]);
+
   const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
   const [depositAmount, setDepositAmount] = useState("");
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState("");
@@ -62,15 +88,17 @@ export default function PortfolioPage() {
       currency: "MXN",
     }).format(val || 0);
 
+  /* ----------------- DATA ----------------- */
   const loadAllData = useCallback(async () => {
     if (!user) return;
+
     try {
       setLoading(true);
       setError(null);
 
-      // 1. Fetch Portfolio summary
       const portRes = await authFetch(`/portafolio/user/${user.id}`);
-      if (!portRes.ok) throw new Error("Could not retrieve portfolio data");
+      if (!portRes.ok) throw new Error();
+
       const portData = await portRes.json();
 
       setPortfolio({
@@ -80,7 +108,6 @@ export default function PortfolioPage() {
         total: portData.totalBalance,
       });
 
-      // 2. Fetch Active Holdings & Transactions in parallel
       const [cetesRes, transRes] = await Promise.all([
         authFetch(`/cetes/portafolio/${user.id}`),
         authFetch(`/portafolio/transacciones/${user.id}`),
@@ -89,31 +116,31 @@ export default function PortfolioPage() {
       if (cetesRes.ok) setInvestments(await cetesRes.json());
       if (transRes.ok) setTransactions(await transRes.json());
     } catch (err) {
-      console.error("Error loading portfolio:", err);
-      setError("Connection error. Please ensure the backend is running.");
+      setError("Connection error. Please try again.");
     } finally {
       setLoading(false);
     }
   }, [user, authFetch]);
 
   useEffect(() => {
-    if (!authLoading && user) {
-      loadAllData();
-    }
+    if (!authLoading && user) loadAllData();
   }, [user, authLoading, loadAllData]);
 
+  /* ----------------- ACTIONS ----------------- */
   const handleDeposit = async (e) => {
     e.preventDefault();
+
     const amount = parseFloat(depositAmount);
-    if (isNaN(amount) || amount <= 0) return;
+    if (!amount || amount <= 0) return;
 
     try {
       await makeDeposit(user.id, amount);
       await loadAllData();
+
       setIsDepositModalOpen(false);
       setDepositAmount("");
-      setSuccessMessage(`Deposit of ${fmt(amount)} completed!`);
-    } catch (err) {
+      setSuccessMessage(`Deposit completed: ${fmt(amount)}`);
+    } catch {
       setError("Could not process deposit.");
     }
   };
@@ -127,402 +154,185 @@ export default function PortfolioPage() {
     try {
       const res = await authFetch(
         `/cetes/vender/${id}?includeBonddia=${includeBonddia}`,
-        {
-          method: "POST",
-        },
+        { method: "POST" },
       );
 
-      if (res.ok) {
-        setSellModalOpen(false);
-        setSuccessMessage("Asset sold successfully!");
-        await loadAllData();
-      } else {
-        const errData = await res.json();
-        setError(errData.message || "Error processing sale.");
-      }
-    } catch (err) {
-      setError("An unexpected error occurred during the sale.");
+      if (!res.ok) throw new Error();
+
+      setSellModalOpen(false);
+      setSuccessMessage("Asset sold successfully!");
+      await loadAllData();
+    } catch {
+      setError("Sale failed.");
     }
   };
 
-  const getDisplayType = (tipo) => {
-    const types = {
-      DEPOSITO: "Deposit",
-      RETIRO: "Withdrawal",
-      COMPRA: "Purchase",
-      VENTA: "Sale",
-    };
-    return types[tipo] || tipo;
-  };
-
-  const getChipColor = (tipo) => {
-    switch (tipo) {
-      case "DEPOSITO":
-        return "success";
-      case "RETIRO":
-        return "error";
-      case "COMPRA":
-        return "info";
-      case "VENTA":
-        return "warning";
-      default:
-        return "default";
-    }
-  };
-
+  /* ----------------- LOADING ----------------- */
   if (authLoading || (loading && investments.length === 0)) {
     return (
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          minHeight: "80vh",
-        }}
-      >
+      <Box sx={{ display: "flex", justifyContent: "center", py: 10 }}>
         <CircularProgress />
       </Box>
     );
   }
 
+  /* ----------------- UI ----------------- */
   return (
     <Container maxWidth="lg" sx={{ py: 6 }}>
       {/* HEADER */}
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          mb: 4,
-        }}
-      >
-        <Stack direction="row" alignItems="center" spacing={2}>
+      <Box sx={{ display: "flex", justifyContent: "space-between", mb: 4 }}>
+        <Stack direction="row" spacing={2}>
           <AccountBalanceWalletIcon color="primary" sx={{ fontSize: 40 }} />
+
           <Box>
-            <Typography variant="h4" sx={{ fontWeight: 800, color: "#0f172a" }}>
-              MY PORTFOLIO
+            <Typography variant="h4" sx={{ fontWeight: 800 }}>
+              My Portfolio
             </Typography>
             <Typography variant="body2" color="text.secondary">
               Manage your investments and cash flow
             </Typography>
           </Box>
         </Stack>
+
         <Stack direction="row" spacing={2}>
           <Button
             component={NextLink}
             href="/cetes"
             variant="outlined"
             startIcon={<TrendingUpIcon />}
-            sx={{
-              borderRadius: 3,
-              px: 3,
-              textTransform: "none",
-              fontWeight: 700,
-              borderColor: "#003366",
-              color: "#003366",
-            }}
           >
             Buy CETES
           </Button>
+
           <Button
             variant="contained"
             startIcon={<AddIcon />}
             onClick={() => setIsDepositModalOpen(true)}
-            sx={{
-              borderRadius: 3,
-              px: 3,
-              textTransform: "none",
-              fontWeight: 700,
-              bgcolor: "#003366",
-              "&:hover": { bgcolor: "#002244" },
-            }}
           >
             Add Funds
           </Button>
         </Stack>
       </Box>
 
+      {/* ERROR */}
       {error && (
-        <Alert severity="error" sx={{ mb: 3, borderRadius: 3 }}>
+        <Alert severity="error" sx={{ mb: 3 }}>
           {error}
         </Alert>
       )}
 
-      {/* SUMMARY CARDS */}
+      {/* SUMMARY */}
       <Grid container spacing={2} mb={4}>
         <Grid item xs={12} md={4}>
-          <Paper
-            sx={{
-              p: 3,
-              borderRadius: 4,
-              boxShadow: 2,
-              bgcolor: "#f8fafc",
-              height: "100%",
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "space-between",
-            }}
-          >
-            <Stack direction="row" spacing={1} alignItems="center" mb={1}>
-              <AccountBalanceWalletIcon fontSize="small" color="primary" />
-              <Typography variant="overline" sx={{ fontWeight: 700 }}>
-                Available Cash
-              </Typography>
-            </Stack>
-            <Typography
-              variant="h4"
-              sx={{ fontWeight: 700, fontFamily: "monospace" }}
-            >
-              {fmt(portfolio.cashBalance)}
-            </Typography>
-          </Paper>
+          <AppCard>
+            <Typography variant="overline">Available Cash</Typography>
+            <Typography variant="h4">{fmt(portfolio.cashBalance)}</Typography>
+          </AppCard>
         </Grid>
+
         <Grid item xs={12} md={2}>
-          <Paper
-            sx={{
-              p: 3,
-              borderRadius: 4,
-              boxShadow: 2,
-              bgcolor: "#f8fafc",
-              height: "100%",
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "space-between",
-            }}
-          >
-            <Stack direction="row" spacing={1} alignItems="center" mb={1}>
-              <InsightsIcon fontSize="small" sx={{ color: "#16a34a" }} />
-              <Typography variant="overline" sx={{ fontWeight: 700 }}>
-                Bonddia
-              </Typography>
-            </Stack>
-            <Typography
-              variant="h5"
-              sx={{ fontWeight: 700, fontFamily: "monospace" }}
-            >
-              {fmt(portfolio.bondsBalance)}
-            </Typography>
-          </Paper>
+          <AppCard>
+            <Typography variant="overline">Bonddia</Typography>
+            <Typography variant="h5">{fmt(portfolio.bondsBalance)}</Typography>
+          </AppCard>
         </Grid>
+
         <Grid item xs={12} md={2}>
-          <Paper
-            sx={{
-              p: 3,
-              borderRadius: 4,
-              boxShadow: 2,
-              bgcolor: "#f8fafc",
-              height: "100%",
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "space-between",
-            }}
-          >
-            <Stack direction="row" spacing={1} alignItems="center" mb={1}>
-              <TrendingUpIcon fontSize="small" color="secondary" />
-              <Typography variant="overline" sx={{ fontWeight: 700 }}>
-                Invested in CETES
-              </Typography>
-            </Stack>
-            <Typography
-              variant="h4"
-              sx={{ fontWeight: 700, fontFamily: "monospace" }}
-            >
-              {fmt(portfolio.cetesBalance)}
-            </Typography>
-          </Paper>
+          <AppCard>
+            <Typography variant="overline">CETES</Typography>
+            <Typography variant="h4">{fmt(portfolio.cetesBalance)}</Typography>
+          </AppCard>
         </Grid>
+
         <Grid item xs={12} md={4}>
-          <Paper
-            sx={{
-              p: 3,
-              borderRadius: 4,
-              boxShadow: 2,
-              bgcolor: "#0f172a",
-              color: "white",
-              height: "100%",
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "space-between",
-            }}
-          >
-            <Typography
-              variant="overline"
-              sx={{ fontWeight: 700, opacity: 0.8, display: "block", mb: 1 }}
-            >
-              Total Portfolio Value
-            </Typography>
-            <Typography
-              variant="h4"
-              sx={{ fontWeight: 700, fontFamily: "monospace" }}
-            >
-              {fmt(portfolio.total)}
-            </Typography>
-          </Paper>
+          <AppCard sx={{ bgcolor: "primary.main", color: "white" }}>
+            <Typography variant="overline">Total</Typography>
+            <Typography variant="h4">{fmt(portfolio.total)}</Typography>
+          </AppCard>
         </Grid>
       </Grid>
 
-      {/* ACTIVE HOLDINGS TABLE */}
-      <Paper sx={{ borderRadius: 4, overflow: "hidden", boxShadow: 2, mb: 4 }}>
-        <Box
-          sx={{
-            p: 3,
-            borderBottom: "1px solid #e2e8f0",
-            bgcolor: "#f8fafc",
-            display: "flex",
-            alignItems: "center",
-            gap: 2,
-          }}
-        >
-          <ReceiptLongIcon color="action" />
-          <Typography variant="h6" sx={{ fontWeight: 700 }}>
-            My Active Holdings
-          </Typography>
-        </Box>
+      {/* TABLE: INVESTMENTS */}
+      <AppCard sx={{ mb: 4 }}>
+        <Stack direction="row" spacing={1} mb={2}>
+          <ReceiptLongIcon />
+          <Typography variant="h6">Active Holdings</Typography>
+        </Stack>
+
         <TableContainer>
           <Table>
-            <TableHead sx={{ bgcolor: "#f1f5f9" }}>
-              <TableRow>
-                <TableCell sx={{ fontWeight: 700 }}>ASSET</TableCell>
-                <TableCell sx={{ fontWeight: 700 }}>TERM</TableCell>
-                <TableCell sx={{ fontWeight: 700 }}>RATE</TableCell>
-                <TableCell sx={{ fontWeight: 700 }}>INVESTED</TableCell>
-                <TableCell sx={{ fontWeight: 700 }}>MATURITY</TableCell>
-                <TableCell align="center" sx={{ fontWeight: 700 }}>
-                  ACTIONS
-                </TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {investments.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={6} align="center" sx={{ py: 4 }}>
-                    <Typography color="text.secondary">
-                      No active holdings yet.
-                    </Typography>
-                  </TableCell>
-                </TableRow>
-              ) : (
-                investments.map((cete) => (
-                  <TableRow key={cete.id} hover>
-                    <TableCell>
-                      <Chip
-                        label="CETE"
-                        size="small"
-                        color="primary"
-                        variant="outlined"
-                        sx={{ fontWeight: 600 }}
-                      />
-                    </TableCell>
-                    <TableCell>{cete.plazo} Days</TableCell>
-                    <TableCell sx={{ fontWeight: 600, color: "primary.main" }}>
-                      {cete.tasaCompra}%
-                    </TableCell>
-                    <TableCell
-                      sx={{ fontFamily: "monospace", fontWeight: 700 }}
-                    >
-                      {fmt(cete.montoInvertido)}
-                    </TableCell>
-                    <TableCell>
-                      {new Date(cete.fechaVencimiento).toLocaleDateString()}
-                    </TableCell>
-                    <TableCell align="center">
-                      <Button
-                        variant="contained"
-                        color="error"
-                        size="small"
-                        onClick={() => handleOpenSellModal(cete.id)}
-                        sx={{ borderRadius: 2, textTransform: "none" }}
-                      >
-                        Sell
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </Paper>
-
-      {/* RECENT HISTORY TABLE */}
-      <Paper sx={{ borderRadius: 4, overflow: "hidden", boxShadow: 2 }}>
-        <Box
-          sx={{
-            p: 3,
-            borderBottom: "1px solid #e2e8f0",
-            bgcolor: "#f8fafc",
-            display: "flex",
-            alignItems: "center",
-            gap: 2,
-          }}
-        >
-          <HistoryIcon color="action" />
-          <Typography variant="h6" sx={{ fontWeight: 700 }}>
-            Recent History
-          </Typography>
-        </Box>
-        <TableContainer>
-          <Table size="small">
             <TableHead>
               <TableRow>
-                <TableCell sx={{ fontWeight: 700 }}>Date</TableCell>
-                <TableCell sx={{ fontWeight: 700 }}>Type</TableCell>
-                <TableCell align="right" sx={{ fontWeight: 700, pr: 3 }}>
-                  Amount
-                </TableCell>
+                <TableCell>Asset</TableCell>
+                <TableCell>Term</TableCell>
+                <TableCell>Rate</TableCell>
+                <TableCell>Amount</TableCell>
+                <TableCell>Actions</TableCell>
               </TableRow>
             </TableHead>
+
             <TableBody>
-              {transactions.length === 0 ? (
-                <TableRow>
-                  <TableCell
-                    colSpan={3}
-                    align="center"
-                    sx={{ py: 3, color: "text.secondary" }}
-                  >
-                    No transactions recorded yet.
+              {investments.map((cete) => (
+                <TableRow key={cete.id}>
+                  <TableCell>
+                    <Chip label="CETE" color="primary" size="small" />
+                  </TableCell>
+
+                  <TableCell>{cete.plazo} days</TableCell>
+                  <TableCell>{cete.tasaCompra}%</TableCell>
+
+                  <TableCell sx={{ fontFamily: "monospace" }}>
+                    {fmt(cete.montoInvertido)}
+                  </TableCell>
+
+                  <TableCell>
+                    <Button
+                      color="error"
+                      onClick={() => handleOpenSellModal(cete.id)}
+                    >
+                      Sell
+                    </Button>
                   </TableCell>
                 </TableRow>
-              ) : (
-                transactions.slice(0, 8).map((t) => (
-                  <TableRow key={t.id}>
-                    <TableCell
-                      sx={{ color: "text.secondary", fontSize: "0.85rem" }}
-                    >
-                      {new Date(t.createdAt).toLocaleString()}
-                    </TableCell>
-                    <TableCell>
-                      <Chip
-                        label={getDisplayType(t.tipo)}
-                        size="small"
-                        color={getChipColor(t.tipo)}
-                        variant="outlined"
-                      />
-                    </TableCell>
-                    <TableCell
-                      align="right"
-                      sx={{
-                        fontWeight: 700,
-                        fontFamily: "monospace",
-                        color:
-                          t.tipo === "DEPOSITO" || t.tipo === "VENTA"
-                            ? "success.main"
-                            : "text.primary",
-                        pr: 3,
-                      }}
-                    >
-                      {t.tipo === "DEPOSITO" || t.tipo === "VENTA" ? "+" : "-"}{" "}
-                      {fmt(t.monto)}
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
+              ))}
             </TableBody>
           </Table>
         </TableContainer>
-      </Paper>
+      </AppCard>
 
-      {/* MODALS & NOTIFICATIONS */}
+      {/* HISTORY */}
+      <AppCard>
+        <Stack direction="row" spacing={1} mb={2}>
+          <HistoryIcon />
+          <Typography variant="h6">Recent History</Typography>
+        </Stack>
+
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>Date</TableCell>
+              <TableCell>Type</TableCell>
+              <TableCell align="right">Amount</TableCell>
+            </TableRow>
+          </TableHead>
+
+          <TableBody>
+            {transactions.slice(0, 8).map((t) => (
+              <TableRow key={t.id}>
+                <TableCell>{new Date(t.createdAt).toLocaleString()}</TableCell>
+                <TableCell>
+                  <Chip label={t.tipo} size="small" />
+                </TableCell>
+                <TableCell align="right" sx={{ fontFamily: "monospace" }}>
+                  {fmt(t.monto)}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </AppCard>
+
+      {/* MODALS */}
       <SellCeteModal
         open={sellModalOpen}
         onClose={() => setSellModalOpen(false)}
@@ -534,41 +344,21 @@ export default function PortfolioPage() {
       <Dialog
         open={isDepositModalOpen}
         onClose={() => setIsDepositModalOpen(false)}
-        PaperProps={{ sx: { borderRadius: 4, p: 1, maxWidth: "400px" } }}
       >
-        <DialogTitle sx={{ fontWeight: 700 }}>Add Funds</DialogTitle>
+        <DialogTitle>Add Funds</DialogTitle>
+
         <DialogContent>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-            The amount will be added to your available cash balance.
-          </Typography>
           <TextField
             fullWidth
-            autoFocus
-            label="Amount (MXN)"
             type="number"
             value={depositAmount}
             onChange={(e) => setDepositAmount(e.target.value)}
-            InputProps={{ sx: { borderRadius: 3, fontFamily: "monospace" } }}
           />
         </DialogContent>
-        <DialogActions sx={{ p: 3 }}>
-          <Button
-            onClick={() => setIsDepositModalOpen(false)}
-            sx={{ textTransform: "none", color: "text.secondary" }}
-          >
-            Cancel
-          </Button>
-          <Button
-            variant="contained"
-            onClick={handleDeposit}
-            sx={{
-              borderRadius: 3,
-              px: 3,
-              textTransform: "none",
-              fontWeight: 700,
-              bgcolor: "#003366",
-            }}
-          >
+
+        <DialogActions>
+          <Button onClick={() => setIsDepositModalOpen(false)}>Cancel</Button>
+          <Button onClick={handleDeposit} variant="contained">
             Confirm
           </Button>
         </DialogActions>
@@ -576,17 +366,10 @@ export default function PortfolioPage() {
 
       <Snackbar
         open={!!successMessage}
-        autoHideDuration={4000}
+        autoHideDuration={3000}
         onClose={() => setSuccessMessage("")}
-        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
       >
-        <Alert
-          severity="success"
-          variant="filled"
-          sx={{ width: "100%", borderRadius: 2 }}
-        >
-          {successMessage}
-        </Alert>
+        <Alert severity="success">{successMessage}</Alert>
       </Snackbar>
     </Container>
   );

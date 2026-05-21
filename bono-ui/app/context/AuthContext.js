@@ -37,12 +37,24 @@ export function AuthProvider({ children }) {
     return res;
   }, []);
 
+  const handleResponse = async (res) => {
+    const contentType = res.headers.get("content-type");
+    let data;
+    if (contentType && contentType.includes("application/json")) {
+      data = await res.json();
+    } else {
+      data = { message: await res.text() };
+    }
+
+    if (!res.ok) {
+      throw new Error(data.message || data.error || "Request failed");
+    }
+    return data;
+  };
+
   // This function remains for profile text updates (name, etc.)
   const updateUser = async (newUserData) => {
     if (!user || !user.id) {
-      console.error(
-        "AuthContext: Cannot update user. User or user.id is missing.",
-      );
       throw new Error("User not authenticated or available.");
     }
 
@@ -50,17 +62,13 @@ export function AuthProvider({ children }) {
     const updatedData = { ...user, ...newUserData };
 
     try {
-      const res = await authFetch(`/auth/user/${user.id}`, {
+      const response = await authFetch(`/auth/user/${user.id}`, {
         method: "PUT",
         body: JSON.stringify(updatedData),
       });
 
-      if (!res.ok) {
-        const errorText = await res.text();
-        throw new Error(errorText || "Failed to update user profile.");
-      }
+      const updatedUserFromServer = await handleResponse(response);
 
-      const updatedUserFromServer = await res.json();
       // Combine server response with existing balance to keep UI consistent
       const finalUser = { ...updatedUserFromServer, balance: user.balance };
 
@@ -84,17 +92,12 @@ export function AuthProvider({ children }) {
     }
     setLoading(true);
     try {
-      const res = await authFetch(`/portafolio/deposito/${userId}`, {
+      const response = await authFetch(`/portafolio/deposito/${userId}`, {
         method: "POST",
         body: JSON.stringify({ monto: amount }),
       });
 
-      if (!res.ok) {
-        const errorText = await res.text();
-        throw new Error(errorText || "Failed to process deposit.");
-      }
-
-      const updatedPortfolio = await res.json();
+      const updatedPortfolio = await handleResponse(response);
 
       // Update the user state with the new balance from the portfolio
       const updatedUser = { ...user, balance: updatedPortfolio.cashBalance };
@@ -113,15 +116,15 @@ export function AuthProvider({ children }) {
   };
 
   const login = async (email, password) => {
-    const res = await fetch(`${API_URL}/auth/login`, {
+    const response = await fetch(`${API_URL}/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
       body: JSON.stringify({ email: email.trim(), password }),
     });
 
-    const data = await res.json();
-    if (!res.ok || data.message !== "LOGIN OK") {
+    const data = await handleResponse(response);
+    if (data.message !== "LOGIN OK") {
       throw new Error(data.message || "Login failed");
     }
 
@@ -165,13 +168,13 @@ export function AuthProvider({ children }) {
       setUser(null);
       localStorage.removeItem("user");
       if (typeof window !== "undefined") {
-        window.location.href = "/login";
+        window.location.assign("/login");
       }
     }
   };
 
   const register = async (userData) => {
-    const res = await fetch(`${API_URL}/auth/register`, {
+    const response = await fetch(`${API_URL}/auth/register`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -180,21 +183,8 @@ export function AuthProvider({ children }) {
       body: JSON.stringify(userData),
     });
 
-    const data = await res.json();
-
-    if (!res.ok) {
-      throw new Error(data.message || "Registration failed");
-    }
-
-    const authUser = {
-      id: data.id,
-      name: data.name,
-      lastname: data.lastname,
-      maternallast: data.maternallast,
-      birthdate: data.birthdate,
-      email: data.email,
-      role: data.role,
-    };
+    const data = await handleResponse(response);
+    const authUser = { ...data, balance: 0 };
 
     setUser(authUser);
     if (typeof window !== "undefined") {
@@ -207,16 +197,11 @@ export function AuthProvider({ children }) {
   const sellCetes = async (ceteId) => {
     setLoading(true);
     try {
-      const res = await authFetch(`/cetes/vender/${ceteId}`, {
+      const response = await authFetch(`/cetes/vender/${ceteId}`, {
         method: "POST",
       });
 
-      if (!res.ok) {
-        const errorText = await res.text();
-        throw new Error(errorText || "Failed to sell CETES.");
-      }
-
-      const updatedPortfolio = await res.json();
+      const updatedPortfolio = await handleResponse(response);
       // Actualizar el balance del usuario en el estado global
       const updatedUser = { ...user, balance: updatedPortfolio.cashBalance };
       setUser(updatedUser);
@@ -233,14 +218,12 @@ export function AuthProvider({ children }) {
     if (!user) return;
     setLoading(true);
     try {
-      const res = await authFetch("/cetes/comprar", {
+      const response = await authFetch("/cetes/comprar", {
         method: "POST",
         body: JSON.stringify({ userId: user.id, monto, dias }),
       });
 
-      if (!res.ok) throw new Error("Failed to process purchase");
-
-      const updatedPortfolio = await res.json();
+      const updatedPortfolio = await handleResponse(response);
       const updatedUser = { ...user, balance: updatedPortfolio.cashBalance };
       setUser(updatedUser);
       if (typeof window !== "undefined") {
@@ -254,15 +237,10 @@ export function AuthProvider({ children }) {
   const estimateCeteSale = async (ceteId) => {
     setLoading(true); // Consider using a separate loading state for estimates if needed
     try {
-      const res = await authFetch(`/cetes/estimar-venta/${ceteId}`, {
+      const response = await authFetch(`/cetes/estimar-venta/${ceteId}`, {
         method: "GET",
       });
-
-      if (!res.ok) {
-        const errorText = await res.text();
-        throw new Error(errorText || "Failed to estimate CETE sale.");
-      }
-      return await res.json();
+      return await handleResponse(response);
     } finally {
       setLoading(false); // Reset loading state
     }

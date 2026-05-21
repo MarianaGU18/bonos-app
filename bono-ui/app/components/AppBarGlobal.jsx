@@ -10,15 +10,14 @@ import {
   MenuItem,
   IconButton,
   Avatar,
-  Chip,
-  Tooltip,
-  Stack,
   Divider,
-  Container,
+  Stack,
 } from "@mui/material";
+
 import Link from "next/link";
-import AutoStories from "@mui/icons-material/AutoStories";
+import AutoStoriesIcon from "@mui/icons-material/AutoStories";
 import LogoutIcon from "@mui/icons-material/Logout";
+
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 
@@ -28,20 +27,12 @@ const AppBarGlobal = () => {
 
   if (loading) return null;
 
-  // 🔓 Abrir Menu con el click
-  const handleClick = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
+  const openMenu = (event) => setAnchorEl(event.currentTarget);
+  const closeMenu = () => setAnchorEl(null);
 
-  // 🔒 Cerrar Menu con el click
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
-
-  // logout - Cerrar sesión
   const handleLogout = () => {
     logout();
-    handleClose();
+    closeMenu();
   };
 
   const getHomePath = () => {
@@ -52,85 +43,88 @@ const AppBarGlobal = () => {
   };
 
   return (
-    <AppBar position="static" sx={{ mb: 2 }}>
+    <AppBar
+      position="static"
+      elevation={0}
+      sx={{
+        bgcolor: "primary.main",
+        mb: 2,
+        borderRadius: 0, // Hace que sea cuadrado
+        border: "none", // Elimina el borde definido en el tema global para Paper
+        "&:hover": {
+          transform: "none", // Desactiva la animación de "flotado" del GlobalTheme
+        },
+        transition: "none", // Elimina cualquier transición suave de movimiento
+      }}
+    >
       <Toolbar>
-        <AutoStories sx={{ mr: 1 }} />
+        {/* LOGO */}
+        <Stack direction="row" alignItems="center" spacing={1}>
+          <AutoStoriesIcon />
+          <Typography
+            component={Link}
+            href={getHomePath()}
+            sx={{
+              textDecoration: "none",
+              color: "inherit",
+              typography: "titleLogo", // Usa la fuente Nunito 800 del tema
+            }}
+          >
+            Bonos
+          </Typography>
+        </Stack>
 
-        <Typography
-          variant="h6"
-          component={Link}
-          href={getHomePath()}
-          sx={{
-            textDecoration: "none",
-            color: "secondary.main",
-            fontFamily: "serif",
-            fontWeight: "bold",
-          }}
-        >
-          Bonos
-        </Typography>
-
+        {/* NAV */}
         <Box sx={{ ml: "auto", display: "flex", alignItems: "center" }}>
-          <Stack direction="row" spacing={4} alignItems="center">
+          <Stack direction="row" spacing={2} alignItems="center">
+            {/* LINKS PUBLICOS */}
             {!user && (
-              <Stack direction="row" spacing={2}>
-                <Link href="/">
-                  <Button color="secondary">HOME</Button>
-                </Link>
-                <Link href="/login">
-                  <Button color="secondary">SIGN IN</Button>
-                </Link>
-                <Link href="/register">
-                  <Button color="secondary">REGISTER</Button>
-                </Link>
-              </Stack>
+              <>
+                <Button component={Link} href="/" color="inherit">
+                  Home
+                </Button>
+                <Button component={Link} href="/login" color="inherit">
+                  Sign in
+                </Button>
+                <Button component={Link} href="/register" color="inherit">
+                  Register
+                </Button>
+              </>
             )}
 
+            {/* LINKS USUARIO */}
             {user && (
-              <Stack direction="row" spacing={3}>
-                <Link href={getHomePath()}>
-                  <Button color="secondary">DASHBOARD</Button>
-                </Link>
-                <Link href="/portafolio">
-                  <Button color="secondary">PORTAFOLIO</Button>
-                </Link>
-              </Stack>
+              <>
+                <Button component={Link} href={getHomePath()} color="inherit">
+                  Dashboard
+                </Button>
+                <Button component={Link} href="/portafolio" color="inherit">
+                  Portfolio
+                </Button>
+              </>
             )}
 
-            {(!user || isUser) && (
-              <Stack direction="row" spacing={2}>
-                <Link href="/about">
-                  <Button color="secondary">ABOUT</Button>
-                </Link>
-                <Link href="/contact">
-                  <Button color="secondary">CONTACT</Button>
-                </Link>
-              </Stack>
+            {/* INFO GENERAL */}
+            {!isAdmin && (
+              <>
+                <Button component={Link} href="/about" color="inherit">
+                  About
+                </Button>
+                <Button component={Link} href="/contact" color="inherit">
+                  Contact
+                </Button>
+              </>
             )}
 
+            {/* USER MENU */}
             {user && (
-              <Stack
-                direction="row"
-                spacing={2}
-                alignItems="center"
-                sx={{ display: "inline-flex" }}
-              >
-                {/* ICONO */}
-                <IconButton
-                  onClick={handleClick}
-                  sx={{
-                    p: 0.5,
-                    transition: "0.2s ease",
-                    "&:hover": {
-                      transform: "scale(1.08)",
-                    },
-                  }}
-                >
+              <>
+                <IconButton onClick={openMenu} sx={{ ml: 1 }}>
                   <Avatar
                     sx={{
+                      width: 36,
+                      height: 36,
                       bgcolor: "secondary.main",
-                      width: 35,
-                      height: 35,
                       fontSize: "1rem",
                     }}
                   >
@@ -138,52 +132,36 @@ const AppBarGlobal = () => {
                   </Avatar>
                 </IconButton>
 
-                {/* MENU */}
                 <Menu
                   anchorEl={anchorEl}
                   open={Boolean(anchorEl)}
-                  onClose={handleClose}
+                  onClose={closeMenu}
                   PaperProps={{
-                    elevation: 3,
                     sx: { mt: 1.5, minWidth: 180, borderRadius: 2 },
                   }}
-                  transformOrigin={{ horizontal: "right", vertical: "top" }}
-                  anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
+                  anchorOrigin={{
+                    vertical: "bottom",
+                    horizontal: "right",
+                  }}
+                  transformOrigin={{
+                    vertical: "top",
+                    horizontal: "right",
+                  }}
                 >
-                  <MenuItem onClick={handleClose}>
-                    <Link
-                      href="/perfil"
-                      style={{
-                        textDecoration: "none",
-                        color: "inherit",
-                      }}
-                    >
-                      Profile
-                    </Link>
+                  <MenuItem component={Link} href="/perfil" onClick={closeMenu}>
+                    Profile
                   </MenuItem>
 
-                  <MenuItem onClick={handleClose}>
-                    <Link
-                      href="/about"
-                      style={{
-                        textDecoration: "none",
-                        color: "inherit",
-                      }}
-                    >
-                      About
-                    </Link>
+                  <MenuItem component={Link} href="/about" onClick={closeMenu}>
+                    About
                   </MenuItem>
 
-                  <MenuItem onClick={handleClose}>
-                    <Link
-                      href="/contact"
-                      style={{
-                        textDecoration: "none",
-                        color: "inherit",
-                      }}
-                    >
-                      Contact
-                    </Link>
+                  <MenuItem
+                    component={Link}
+                    href="/contact"
+                    onClick={closeMenu}
+                  >
+                    Contact
                   </MenuItem>
 
                   <Divider sx={{ my: 1 }} />
@@ -193,7 +171,7 @@ const AppBarGlobal = () => {
                     Logout
                   </MenuItem>
                 </Menu>
-              </Stack>
+              </>
             )}
           </Stack>
         </Box>
