@@ -1,62 +1,69 @@
 package com.bonos.backend.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import com.bonos.backend.dto.CeteSaleEstimateResponse;
+import com.bonos.backend.service.CetesService;
+import com.bonos.backend.repository.UserRepository;
+import com.bonos.backend.model.Portafolio;
+import com.bonos.backend.model.Cete;
+import com.bonos.backend.model.User;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.bonos.backend.dto.CetesResponse;
-import com.bonos.backend.service.BanxicoService;
-import com.bonos.backend.service.CetesService;
+import java.util.List;
+import java.util.Map;
 
+@CrossOrigin(
+        origins = "http://localhost:3000",
+        allowCredentials = "true"
+)
 @RestController
 @RequestMapping("/api/v1/cetes")
-@CrossOrigin(origins = "*")
 public class CetesController {
 
-    @Autowired
-    private CetesService cetesService;
+    private final CetesService cetesService;
+    private final UserRepository userRepository;
 
-    @Autowired
-    private BanxicoService banxicoService;
-
-    @GetMapping("/calcular")
-    public CetesResponse calcularInversion(
-            @RequestParam double monto,
-            @RequestParam int dias) {
-
-        if(monto <100 || monto > 10_000_000){
-            throw new IllegalArgumentException(
-                "El monto debe ser entre 100 y 10,000,,000"
-            );
-        }
-
-        double tasa = obtenerTasa(dias);
-
-        return cetesService.calcularInversion(
-                monto,
-                dias,
-                tasa
-        );
+    public CetesController(CetesService cetesService, UserRepository userRepository) {
+        this.cetesService = cetesService;
+        this.userRepository = userRepository;
     }
 
-    // =========================
-    // MAPEO OFICIAL CETES
-    // =========================
+    @PostMapping("/comprar")
+    public ResponseEntity<?> comprarCetes(@RequestBody Map<String, Object> request) {
+        Long userId = Long.valueOf(request.get("userId").toString());
+        double monto = Double.parseDouble(request.get("monto").toString());
+        int plazo = Integer.parseInt(request.get("dias").toString());
+        
+        // Obtenemos la tasa actual del servicio para este plazo
+        double tasa = cetesService.getCurrentRates()
+                        .getOrDefault(plazo, java.math.BigDecimal.valueOf(6.54))
+                        .doubleValue();
 
-    private double obtenerTasa(int dias) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
-        return switch (dias) {
+        return ResponseEntity.ok(cetesService.comprarCetes(user, monto, plazo, tasa));
+    }
 
-            case 28 -> banxicoService.getCetes28dias();
+    @GetMapping("/tasas")
+    public ResponseEntity<?> obtenerTasasActuales() {
+        return ResponseEntity.ok(cetesService.getCurrentRates());
+    }
 
-            case 91 -> banxicoService.getCetes91dias();
+    @PostMapping("/vender/{ceteId}")
+    public ResponseEntity<?> venderCetes(@PathVariable Long ceteId, 
+                                       @RequestParam(defaultValue = "false") boolean includeBonddia) {
+        return ResponseEntity.ok(cetesService.venderCetes(ceteId, includeBonddia));
+    }
 
-            case 182 -> banxicoService.getCetes182dias();
+    @GetMapping("/portafolio/{portfolioId}")
+    public ResponseEntity<List<Cete>> obtenerInversiones(@PathVariable Long portfolioId) {
+        return ResponseEntity.ok(cetesService.obtenerInversiones(portfolioId));
+    }
 
-            case 364 -> banxicoService.getCetes364dias();
-
-            default -> throw new IllegalArgumentException(
-                    "Días no válidos. Solo: 28, 91, 182, 364"
-            );
-        };
+    @GetMapping("/estimar-venta/{ceteId}")
+    public ResponseEntity<CeteSaleEstimateResponse> estimarVentaCetes(@PathVariable Long ceteId) {
+        CeteSaleEstimateResponse estimate = cetesService.estimarVentaCetes(ceteId);
+        return ResponseEntity.ok(estimate);
     }
 }

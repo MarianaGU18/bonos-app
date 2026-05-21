@@ -4,6 +4,7 @@ import com.bonos.backend.security.JwtFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -18,6 +19,7 @@ import java.util.List;
 import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
+@EnableWebSecurity
 public class SecurityConfig {
 
     private final JwtFilter jwtFilter;
@@ -70,6 +72,10 @@ public class SecurityConfig {
                         "ROLE_ADMIN",
                         "ROLE_COLABORADOR"
                 )
+
+                // 🔒 PORTAFOLIO PROTEGIDO
+                .requestMatchers("/api/v1/portafolio/**")
+                .authenticated()
 
                 .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                 .requestMatchers("/api/v1/colab/**").hasRole("COLABORADOR")

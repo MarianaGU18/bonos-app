@@ -14,6 +14,7 @@ import {
   Paper,
   Divider,
   Stack,
+  Snackbar,
 } from "@mui/material";
 
 import { useState, useEffect } from "react";
@@ -22,26 +23,39 @@ import SavingsIcon from "@mui/icons-material/Savings";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 
 import { StyledTextField, PrimaryButton } from "../components/FormComponents";
+import { useAuth } from "../context/AuthContext";
 
 export default function CetesPage() {
   const router = useRouter();
+  const { user, buyCetes, authFetch } = useAuth();
 
   const [formData, setFormData] = useState({
     plazo: 28,
     monto: 1000,
   });
+  const [backendRates, setBackendRates] = useState(null);
 
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [purchaseLoading, setPurchaseLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(false);
 
   // 🔐 Validate session
   useEffect(() => {
-    const validateSession = async () => {
-      /* COMENTADO PARA MODO FRONT-ONLY */
+    const fetchRates = async () => {
+      try {
+        const res = await authFetch("/cetes/tasas");
+        if (res.ok) {
+          const data = await res.json();
+          setBackendRates(data);
+        }
+      } catch (err) {
+        console.error("Failed to load rates", err);
+      }
     };
-    validateSession();
-  }, [router]);
+    fetchRates();
+  }, [authFetch]);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -62,9 +76,9 @@ export default function CetesPage() {
       const montoInvertido = Number(formData.monto);
       const dias = Number(formData.plazo);
 
-      // Tasas base simuladas a partir de los valores reales de Cetesdirecto
-      const tCetes = 0.0654; // 6.54%
-      const tBonddia = 0.064; // 6.40%
+      // Usar tasa de Banxico si está disponible, de lo contrario un fallback
+      const tCetes = backendRates ? backendRates[dias] / 100 : 0.0645;
+      const tBonddia = 0.0598; // 5.98% (Alineado a tu ejemplo)
 
       // 1. Calcular precio de descuento del CETES (Valor Nominal = $10)
       const precioCetes = 10 / (1 + (tCetes * dias) / 360);
@@ -75,7 +89,7 @@ export default function CetesPage() {
 
       // 3. El remanente primario se envía a BONDDIA automáticamente
       const sobranteParaBonddia = montoInvertido - inversionCetes;
-      const precioBonddia = 2.325; // Precio promedio por título de Bonddia
+      const precioBonddia = 2.325028; // Precio exacto para obtener 2 títulos con $4.65
       const titulosBonddia = Math.floor(sobranteParaBonddia / precioBonddia);
       const inversionBonddia = titulosBonddia * precioBonddia;
 
@@ -87,7 +101,7 @@ export default function CetesPage() {
       const interesBonddia = inversionBonddia * tBonddia * (dias / 360);
 
       // 6. Retención provisional de impuesto (ISR)
-      const isr = inversionCetes * 0.005 * (dias / 365);
+      const isr = (inversionCetes + inversionBonddia) * 0.009 * (dias / 366);
 
       // 7. Monto obtenido al final del plazo
       const totalFinal =
@@ -115,6 +129,22 @@ export default function CetesPage() {
       });
       setLoading(false);
     }, 800);
+  };
+
+  const handlePurchase = async () => {
+    if (!user) return;
+    setPurchaseLoading(true);
+    setError(null);
+
+    try {
+      await buyCetes(formData.monto, formData.plazo);
+      setSuccess(true);
+      setTimeout(() => router.push("/portafolio"), 2000);
+    } catch (err) {
+      setError("Error processing purchase. Please check your balance.");
+    } finally {
+      setPurchaseLoading(false);
+    }
   };
 
   // 💰 Currency formatter (Formato estándar regional de México)
@@ -286,6 +316,28 @@ export default function CetesPage() {
                     "Calculate Returns"
                   )}
                 </PrimaryButton>
+
+                <PrimaryButton
+                  onClick={handlePurchase}
+                  disabled={loading || purchaseLoading || !result}
+                  fullWidth
+                  sx={{
+                    mt: 2,
+                    py: 1.5,
+                    borderRadius: 3,
+                    textTransform: "none",
+                    fontWeight: 600,
+                    fontSize: "1rem",
+                    bgcolor: "#1a83dd",
+                    "&:hover": { bgcolor: "#1565c0" },
+                  }}
+                >
+                  {purchaseLoading ? (
+                    <CircularProgress size={24} color="inherit" />
+                  ) : (
+                    "Confirm Purchase"
+                  )}
+                </PrimaryButton>
               </Box>
             </Paper>
           </Grid>
@@ -355,7 +407,7 @@ export default function CetesPage() {
                     variant="body1"
                     sx={{ color: "#003366", fontWeight: 700 }}
                   >
-                    Monto invertido:
+                    Amount Invested:
                   </Typography>
                   <Typography
                     variant="body1"
@@ -392,7 +444,7 @@ export default function CetesPage() {
                       fontWeight: 700,
                     }}
                   >
-                    Títulos
+                    Units
                   </Typography>
                   <Typography
                     variant="caption"
@@ -402,7 +454,7 @@ export default function CetesPage() {
                       fontWeight: 700,
                     }}
                   >
-                    Tasa Bruta
+                    Gross Rate
                   </Typography>
 
                   <Typography variant="body2" sx={{ color: "text.secondary" }}>
@@ -467,7 +519,7 @@ export default function CetesPage() {
                       variant="body2"
                       sx={{ color: "text.secondary" }}
                     >
-                      Inversión Cetes:
+                      CETES Investment:
                     </Typography>
                     <Typography
                       variant="body2"
@@ -484,7 +536,7 @@ export default function CetesPage() {
                       variant="body2"
                       sx={{ color: "text.secondary" }}
                     >
-                      Inversión Bonddia:
+                      Bonddia Investment:
                     </Typography>
                     <Typography
                       variant="body2"
@@ -501,7 +553,7 @@ export default function CetesPage() {
                       variant="body2"
                       sx={{ color: "text.secondary" }}
                     >
-                      Interés Bruto:
+                      Gross Interest:
                     </Typography>
                     <Typography
                       variant="body2"
@@ -522,7 +574,7 @@ export default function CetesPage() {
                       variant="body2"
                       sx={{ color: "text.secondary" }}
                     >
-                      Interés Bonddia:
+                      Bonddia Interest:
                     </Typography>
                     <Typography
                       variant="body2"
@@ -543,7 +595,7 @@ export default function CetesPage() {
                       variant="body2"
                       sx={{ color: "text.secondary" }}
                     >
-                      Remanente:
+                      Remainder:
                     </Typography>
                     <Typography
                       variant="body2"
@@ -571,6 +623,25 @@ export default function CetesPage() {
                       }}
                     >
                       {fmt(result.isr)}
+                    </Typography>
+                  </Box>
+
+                  <Box>
+                    <Typography
+                      variant="subtitle1"
+                      sx={{ fontWeight: 700, color: "#003366" }}
+                    >
+                      Total at Maturity:
+                    </Typography>
+                    <Typography
+                      variant="subtitle1"
+                      sx={{
+                        fontWeight: 800,
+                        color: "#1a83dd",
+                        fontFamily: "monospace",
+                      }}
+                    >
+                      {fmt(result.totalFinal)}
                     </Typography>
                   </Box>
                 </Stack>
@@ -603,77 +674,18 @@ export default function CetesPage() {
               </Paper>
             )}
           </Grid>
-
-          {/* PANEL DERECHO (Total Final) */}
-          {result && (
-            <Grid
-              item
-              xs={12}
-              md={4}
-              lg={4}
-              /*sx={{ border: "2px solid #a855f7" }}*/
-            >
-              <Paper
-                sx={{
-                  p: { xs: 3, sm: 4 },
-                  borderRadius: 4,
-                  bgcolor: "#f8fafc", // Blanco "fuerte" para resaltar
-                  boxShadow: 2,
-                  transition: "0.2s ease",
-
-                  //border: "2px solid #a855f7", // 🟣 PÚRPURA: Card del Total
-                  "&:hover": {
-                    transform: "translateY(-4px)",
-                    boxShadow: 5,
-                  },
-                }}
-              >
-                <Box
-                  sx={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    mb: 4,
-                  }}
-                >
-                  <Typography
-                    variant="subtitle1"
-                    sx={{ fontWeight: 700, color: "#003366" }}
-                  >
-                    Obtienes al final:
-                  </Typography>
-                  <Typography
-                    variant="subtitle1"
-                    sx={{
-                      fontWeight: 800,
-                      color: "#1a83dd",
-                      fontFamily: "monospace",
-                    }}
-                  >
-                    {fmt(result.totalFinal)}
-                  </Typography>
-                </Box>
-
-                <PrimaryButton
-                  fullWidth
-                  sx={{
-                    py: 1.5,
-                    borderRadius: 3,
-                    fontWeight: 600,
-                    textTransform: "none",
-                    fontSize: "1rem",
-                    bgcolor: "#003366",
-                    "&:hover": { bgcolor: "#002244" },
-                  }}
-                  startIcon={<ShoppingCartIcon />}
-                >
-                  Purchase CETES
-                </PrimaryButton>
-              </Paper>
-            </Grid>
-          )}
         </Grid>
       </Container>
+
+      <Snackbar
+        open={success}
+        autoHideDuration={6000}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert severity="success" sx={{ width: "100%", borderRadius: 3 }}>
+          Purchase successful! Redirecting to your portfolio...
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }

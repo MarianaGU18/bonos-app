@@ -1,47 +1,31 @@
 package com.bonos.backend.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
+import lombok.Data;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Entity
 @Table(name = "cetes")
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
+@Data
 public class Cete {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "portafolio_id", nullable = false)
-    @JsonIgnore
-    private Portafolio portafolio;
-
-    @Column(nullable = false)
-    private int titulos;
-
-    @Column(name = "valor_adquisicion", nullable = false, precision = 19, scale = 4)
-    private BigDecimal valorAdquisicion;
-
-    @Column(name = "tasa_compra", nullable = false, precision = 10, scale = 4)
-    private BigDecimal tasaCompra;
-
-    @Column(name = "fecha_compra", nullable = false)
-    private LocalDate fechaCompra;
-
-    @Column(nullable = false)
-    private int plazo;
-
     @Column(name = "fecha_vencimiento", nullable = false)
     private LocalDate fechaVencimiento;
+
+    @Column(nullable = false)
+    private Integer plazo;
+
+    @Column(name = "tasa_compra", nullable = false)
+    private BigDecimal tasaCompra;
+
+    @Column(name = "monto_invertido", nullable = false)
+    private BigDecimal montoInvertido;
+
+    @ManyToOne
+    @JoinColumn(name = "portafolio_id", nullable = false)
+    private Portafolio portafolio;
 }

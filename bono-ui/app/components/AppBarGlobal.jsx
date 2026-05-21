@@ -9,10 +9,16 @@ import {
   Typography,
   MenuItem,
   IconButton,
+  Avatar,
+  Chip,
+  Tooltip,
+  Stack,
+  Divider,
+  Container,
 } from "@mui/material";
 import Link from "next/link";
-import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import AutoStories from "@mui/icons-material/AutoStories";
+import LogoutIcon from "@mui/icons-material/Logout";
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 
@@ -64,83 +70,132 @@ const AppBarGlobal = () => {
           Bonos
         </Typography>
 
-        <Box sx={{ ml: "auto" }}>
-          {!user && (
-            <>
-              <Link href="/">
-                <Button color="secondary">Home</Button>
-              </Link>
-              <Link href="/login">
-                <Button color="secondary">SIGN IN</Button>
-              </Link>
+        <Box sx={{ ml: "auto", display: "flex", alignItems: "center" }}>
+          <Stack direction="row" spacing={4} alignItems="center">
+            {!user && (
+              <Stack direction="row" spacing={2}>
+                <Link href="/">
+                  <Button color="secondary">HOME</Button>
+                </Link>
+                <Link href="/login">
+                  <Button color="secondary">SIGN IN</Button>
+                </Link>
+                <Link href="/register">
+                  <Button color="secondary">REGISTER</Button>
+                </Link>
+              </Stack>
+            )}
 
-              <Link href="/register">
-                <Button color="secondary">REGISTER</Button>
-              </Link>
-            </>
-          )}
+            {user && (
+              <Stack direction="row" spacing={3}>
+                <Link href={getHomePath()}>
+                  <Button color="secondary">DASHBOARD</Button>
+                </Link>
+                <Link href="/portafolio">
+                  <Button color="secondary">PORTAFOLIO</Button>
+                </Link>
+              </Stack>
+            )}
 
-          {user && (
-            <Link href={getHomePath()}>
-              <Button color="secondary">Home</Button>
-            </Link>
-          )}
-          {(!user || isUser) && (
-            <>
-              <Link href="/about">
-                <Button color="secondary">About</Button>
-              </Link>
-              <Link href="/contact">
-                <Button color="secondary">Contact</Button>
-              </Link>
-            </>
-          )}
+            {(!user || isUser) && (
+              <Stack direction="row" spacing={2}>
+                <Link href="/about">
+                  <Button color="secondary">ABOUT</Button>
+                </Link>
+                <Link href="/contact">
+                  <Button color="secondary">CONTACT</Button>
+                </Link>
+              </Stack>
+            )}
 
-          {user && (
-            <>
-              {/* ICONO */}
-              <IconButton
-                onClick={handleClick}
-                sx={{
-                  p: 0.5,
-
-                  transition: "0.2s ease",
-
-                  "&:hover": {
-                    transform: "scale(1.08)",
-                  },
-                }}
+            {user && (
+              <Stack
+                direction="row"
+                spacing={2}
+                alignItems="center"
+                sx={{ display: "inline-flex" }}
               >
-                <AccountCircleIcon
-                  color="secondary"
+                {/* ICONO */}
+                <IconButton
+                  onClick={handleClick}
                   sx={{
-                    fontSize: 42,
+                    p: 0.5,
+                    transition: "0.2s ease",
+                    "&:hover": {
+                      transform: "scale(1.08)",
+                    },
                   }}
-                />
-              </IconButton>
-
-              {/* MENU */}
-              <Menu
-                anchorEl={anchorEl}
-                open={Boolean(anchorEl)}
-                onClose={handleClose}
-              >
-                <MenuItem onClick={handleClose}>
-                  <Link
-                    href="/perfil"
-                    style={{
-                      textDecoration: "none",
-                      color: "inherit",
+                >
+                  <Avatar
+                    sx={{
+                      bgcolor: "secondary.main",
+                      width: 35,
+                      height: 35,
+                      fontSize: "1rem",
                     }}
                   >
-                    Profile
-                  </Link>
-                </MenuItem>
+                    {user.name?.charAt(0).toUpperCase()}
+                  </Avatar>
+                </IconButton>
 
-                <MenuItem onClick={handleLogout}>Logout</MenuItem>
-              </Menu>
-            </>
-          )}
+                {/* MENU */}
+                <Menu
+                  anchorEl={anchorEl}
+                  open={Boolean(anchorEl)}
+                  onClose={handleClose}
+                  PaperProps={{
+                    elevation: 3,
+                    sx: { mt: 1.5, minWidth: 180, borderRadius: 2 },
+                  }}
+                  transformOrigin={{ horizontal: "right", vertical: "top" }}
+                  anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
+                >
+                  <MenuItem onClick={handleClose}>
+                    <Link
+                      href="/perfil"
+                      style={{
+                        textDecoration: "none",
+                        color: "inherit",
+                      }}
+                    >
+                      Profile
+                    </Link>
+                  </MenuItem>
+
+                  <MenuItem onClick={handleClose}>
+                    <Link
+                      href="/about"
+                      style={{
+                        textDecoration: "none",
+                        color: "inherit",
+                      }}
+                    >
+                      About
+                    </Link>
+                  </MenuItem>
+
+                  <MenuItem onClick={handleClose}>
+                    <Link
+                      href="/contact"
+                      style={{
+                        textDecoration: "none",
+                        color: "inherit",
+                      }}
+                    >
+                      Contact
+                    </Link>
+                  </MenuItem>
+
+                  <Divider sx={{ my: 1 }} />
+
+                  <MenuItem onClick={handleLogout} sx={{ color: "error.main" }}>
+                    <LogoutIcon fontSize="small" sx={{ mr: 1 }} />
+                    Logout
+                  </MenuItem>
+                </Menu>
+              </Stack>
+            )}
+          </Stack>
         </Box>
       </Toolbar>
     </AppBar>

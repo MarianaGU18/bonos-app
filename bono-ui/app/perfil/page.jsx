@@ -24,6 +24,7 @@ import {
 
 import EditIcon from "@mui/icons-material/Edit";
 import SaveIcon from "@mui/icons-material/Save";
+import PersonIcon from "@mui/icons-material/Person";
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -36,9 +37,7 @@ function TabPanel(props) {
       aria-labelledby={`profile-tab-${index}`}
       {...other}
     >
-      {value === index && (
-        <Box sx={{ pt: 3 /*border: "2px dashed #06b6d4"*/ }}>{children}</Box>
-      )}
+      {value === index && <Box sx={{ pt: 3 }}>{children}</Box>}
     </div>
   );
 }
@@ -48,6 +47,7 @@ export default function ProfilePage() {
 
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isDepositing, setIsDepositing] = useState(false);
 
   const [formData, setFormData] = useState(null);
 
@@ -73,11 +73,11 @@ export default function ProfilePage() {
   const balance = useMemo(() => user?.balance ?? 0, [user?.balance]);
 
   const handleAddFunds = async (amount) => {
-    if (!user || !user.id) {
-      setError("User not found. Cannot add funds.");
+    if (!user || !user.id || isDepositing) {
       return;
     }
 
+    setIsDepositing(true);
     try {
       setError("");
 
@@ -93,6 +93,8 @@ export default function ProfilePage() {
       setIsFundsModalOpen(false);
     } catch (err) {
       setError(err.message || "Failed to add funds.");
+    } finally {
+      setIsDepositing(false);
     }
   };
 
@@ -156,52 +158,41 @@ export default function ProfilePage() {
     <Box
       sx={{
         minHeight: "100vh",
-        bgcolor: "#ffffff", // Fondo blanco puro
-        //border: "5px solid #eab308", // 🟡 AMARILLO: Wrapper principal de la página
+        bgcolor: "#ffffff",
       }}
     >
       <Container
-        maxWidth={false}
         sx={{
           pt: 5,
           pb: 5,
-          px: {
-            xs: 2,
-            sm: 3,
-            md: 6,
-            lg: 8,
-          },
-          //border: "3px solid #ef4444", // 🔴 ROJO: Contenedor root del Layout
         }}
       >
         {/* HERO SECTION */}
-        <Typography
-          variant="h3"
-          sx={{
-            fontWeight: 700,
-            fontFamily: "'Poppins', sans-serif",
-            letterSpacing: "-1px",
-            color: "#0f172a",
-            mb: 4,
-            //border: "3px solid #44ef91",
-          }}
-        >
-          My Profile
-        </Typography>
+        <Box sx={{ display: "flex", alignItems: "center", mb: 4 }}>
+          <Stack direction="row" alignItems="center" spacing={2}>
+            <PersonIcon color="primary" sx={{ fontSize: 40 }} />
+            <Box>
+              <Typography
+                variant="h4"
+                sx={{ fontWeight: 800, color: "#0f172a" }}
+              >
+                MY PROFILE
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                View and manage your personal information
+              </Typography>
+            </Box>
+          </Stack>
+        </Box>
 
         <Grid container spacing={5}>
           {/* LEFT SIDEBAR */}
-          <Grid item xs={12} lg={4} /*sx={{ border: "3px solid #3b82f6" }}*/>
-            {/* 🔵 AZUL: Columna Izquierda (Sidebar) */}
+          <Grid item xs={12} lg={4}>
             <Paper
               sx={{
                 p: 4,
                 borderRadius: 5,
                 bgcolor: "#f8fafc", // Blanco "fuerte" para resaltar sobre el fondo blanco
-
-                // BORDE DEL CONTENEDOR IZQUIERDO (CREMA)
-                //border: "2px solid #10b981", // 🟢 VERDE: Card de Perfil
-
                 boxShadow: 2,
                 transition: "0.2s ease",
                 "&:hover": {
@@ -229,7 +220,6 @@ export default function ProfilePage() {
                   sx={{
                     textAlign: "center",
                     width: "100%",
-                    //border: "1px dotted #f97316", // 🟠 NARANJA: Box de Info de Usuario
                   }}
                 >
                   <Typography
@@ -271,87 +261,12 @@ export default function ProfilePage() {
                     {user.role}
                   </Typography>
                 </Stack>
-
-                {/* BALANCE CARD */}
-                <Box
-                  sx={{
-                    width: "100%",
-                    py: 2,
-                    px: 2.5,
-                    borderRadius: 3,
-                    background:
-                      "linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)",
-                    color: "white",
-                    textAlign: "center",
-                    boxShadow: "0 6px 16px rgba(59,130,246,0.2)",
-
-                    // BORDE OPCIONAL DISCRETO PARA LA TARJETA DE BALANCE (AZUL)
-                    //border: "1px solid #1e3a8a",
-                  }}
-                >
-                  <Typography
-                    variant="overline"
-                    sx={{
-                      opacity: 0.8,
-                      letterSpacing: 1,
-                    }}
-                  >
-                    CURRENT BALANCE
-                  </Typography>
-
-                  <Typography
-                    variant="h4"
-                    sx={{
-                      fontWeight: 700,
-                      mt: 0.5,
-                      fontSize: {
-                        xs: "1.8rem",
-                        md: "2rem",
-                      },
-                    }}
-                  >
-                    {new Intl.NumberFormat("en-US", {
-                      style: "currency",
-                      currency: "USD",
-                    }).format(balance)}
-                  </Typography>
-                </Box>
-
-                {/* BUTTON */}
-                <Button
-                  variant="contained"
-                  fullWidth
-                  sx={{
-                    py: 1,
-                    borderRadius: 2.5,
-                    fontWeight: 600,
-                    textTransform: "none",
-                    fontSize: "0.95rem",
-                    boxShadow: 2,
-                    backgroundColor: "#1e3a8a",
-
-                    // BORDE DEL BOTÓN EN AZUL
-                    //border: "1px solid #1e3a8a",
-
-                    transition: "0.25s ease",
-                    "&:hover": {
-                      backgroundColor: "#1d4ed8",
-                      //borderColor: "#1d4ed8",
-                      transform: "translateY(-2px)",
-                      boxShadow: 5,
-                    },
-                  }}
-                  onClick={() => setIsFundsModalOpen(true)}
-                >
-                  Add Funds
-                </Button>
               </Stack>
             </Paper>
           </Grid>
 
           {/* RIGHT CONTENT */}
-          <Grid item xs={12} lg={8} /*sx={{ border: "3px solid #3b82f6" }}*/>
-            {/* 🔵 AZUL: Columna Derecha (Contenido) */}
+          <Grid item xs={12} lg={8}>
             <Paper
               sx={{
                 p: {
@@ -394,7 +309,6 @@ export default function ProfilePage() {
                 }}
               >
                 <Tab label="Personal Data" />
-                <Tab label="Transaction History" />
               </Tabs>
 
               {/* PERSONAL DATA */}
@@ -610,23 +524,6 @@ export default function ProfilePage() {
                   )}
                 </Box>
               </TabPanel>
-
-              {/* TRANSACTION HISTORY */}
-              <TabPanel value={tabValue} index={1}>
-                <Typography
-                  variant="h5"
-                  sx={{
-                    fontWeight: 700,
-                    mb: 2,
-                  }}
-                >
-                  Transaction History
-                </Typography>
-
-                <Typography color="text.secondary">
-                  Your transaction history will be displayed here.
-                </Typography>
-              </TabPanel>
             </Paper>
           </Grid>
         </Grid>
@@ -636,6 +533,7 @@ export default function ProfilePage() {
         open={isFundsModalOpen}
         onClose={() => setIsFundsModalOpen(false)}
         onAddFunds={handleAddFunds}
+        loading={isDepositing}
       />
 
       <Snackbar

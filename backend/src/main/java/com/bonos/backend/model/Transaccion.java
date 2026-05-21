@@ -1,6 +1,7 @@
 package com.bonos.backend.model;
 
 import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
@@ -18,6 +19,7 @@ public class Transaccion {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
@@ -38,19 +40,13 @@ public class Transaccion {
 
     // Constructor for Deposits/Withdrawals
     public Transaccion(User user, TipoTransaccion tipo, BigDecimal monto) {
-        if (tipo != TipoTransaccion.DEPOSITO && tipo != TipoTransaccion.RETIRO) {
-            throw new IllegalArgumentException("This constructor is only for DEPOSITO or RETIRO.");
-        }
         this.user = user;
         this.tipo = tipo;
         this.monto = monto;
     }
 
-    // Constructor for Buy/Sell with description
+    // Constructor with description (Used for all types)
     public Transaccion(User user, TipoTransaccion tipo, BigDecimal monto, String descripcion) {
-        if (tipo != TipoTransaccion.COMPRA && tipo != TipoTransaccion.VENTA) {
-            throw new IllegalArgumentException("This constructor is only for COMPRA or VENTA.");
-        }
         this.user = user;
         this.tipo = tipo;
         this.monto = monto;

@@ -1,158 +1,137 @@
 "use client";
 
+import React from "react";
 import {
-  Box,
   Container,
+  Box,
   Typography,
   Button,
   Grid,
-  Card,
-  CardContent,
+  Paper,
+  Stack,
 } from "@mui/material";
 import Link from "next/link";
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import TrendingUpIcon from "@mui/icons-material/TrendingUp";
+import SecurityIcon from "@mui/icons-material/Security";
+import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
 
-export default function Home() {
-  const router = useRouter();
-  useEffect(() => {
-    const user = localStorage.getItem("user");
-    if (user) {
-      router.push("/dashboard");
-    }
-  }, [router]);
+export default function LandingPage() {
   return (
-    <Container maxWidth="lg">
-      <Box textAlign="center" mt={10} mb={10}>
-        <Typography variant="h3" fontWeight="bold" gutterBottom>
-          Invest in Bonds with Confidence and Ease
-        </Typography>
-
-        <Typography variant="h6" color="text.secondary" gutterBottom>
-          Start investing today and grow your money securely.
-        </Typography>
-
-        <Box mt={4}>
-          <Button
-            variant="contained"
-            size="large"
-            component={Link}
-            href="/register"
-            sx={{ mr: 2 }}
-          >
-            CREATE AN ACCOUNT
-          </Button>
-
-          <Button
-            variant="outlined"
-            size="large"
-            component={Link}
-            href="/login"
-          >
-            SIGN IN
-          </Button>
-        </Box>
-      </Box>
-
-      {/* BENEFITS */}
-      <Box mb={10}>
-        <Typography variant="h4" textAlign="center" gutterBottom>
-          Why Invest with Us?
-        </Typography>
-
-        <Grid container spacing={4} mt={4}>
-          <Grid item xs={12} md={4}>
-            <Card>
-              <CardContent>
-                <Typography variant="h6">🔒 Security</Typography>
-                <Typography color="text.secondary">
-                  Your investments are protected and regulated for your peace of
-                  mind.
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-
-          <Grid item xs={12} md={4}>
-            <Card>
-              <CardContent>
-                <Typography variant="h6">📈 Returns</Typography>
-                <Typography color="text.secondary">
-                  Get steady returns with low risk and a promising future.
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-
-          <Grid item xs={12} md={4}>
-            <Card>
-              <CardContent>
-                <Typography variant="h6">⚡ Ease of Use</Typography>
-                <Typography color="text.secondary">
-                  Invest in minutes from any device, quickly and easily.
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-        </Grid>
-      </Box>
-
-      {/* HOW TO START */}
-      <Box mb={10}>
-        <Typography variant="h4" textAlign="center" gutterBottom>
-          How to Start Investing
-        </Typography>
-
-        <Grid container spacing={4} mt={4}>
-          <Grid item xs={12} md={4}>
-            <Card>
-              <CardContent>
-                <Typography variant="h6">1. Register</Typography>
-                <Typography color="text.secondary">
-                  Create your account in just a few minutes.
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-
-          <Grid item xs={12} md={4}>
-            <Card>
-              <CardContent>
-                <Typography variant="h6">2. Explore</Typography>
-                <Typography color="text.secondary">
-                  Discover the available investment options.
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-
-          <Grid item xs={12} md={4}>
-            <Card>
-              <CardContent>
-                <Typography variant="h6">3. Invest</Typography>
-                <Typography color="text.secondary">
-                  Select a bond and start investing.
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-        </Grid>
-      </Box>
-
-      {/* CTA FINAL */}
-      <Box textAlign="center" mb={10}>
-        <Typography variant="h4" gutterBottom>
-          Ready to Start Investing?
-        </Typography>
-        <Button
-          variant="contained"
-          size="large"
-          component={Link}
-          href="/register"
+    <Box sx={{ minHeight: "100vh", bgcolor: "#ffffff" }}>
+      <Container
+        maxWidth="lg"
+        sx={{
+          pt: 10,
+          pb: 8,
+        }}
+      >
+        {/* HERO SECTION */}
+        <Box
+          sx={{
+            textAlign: "center",
+            mb: 10,
+            p: 4,
+          }}
         >
-          CREATE AN ACCOUNT NOW
-        </Button>
-      </Box>
-    </Container>
+          <Typography
+            variant="h2"
+            sx={{
+              fontWeight: 800,
+              color: "#0f172a",
+              mb: 2,
+              letterSpacing: "-1px",
+            }}
+          >
+            Invest in your future with{" "}
+            <span style={{ color: "#1e3a8a" }}>Bono App</span>
+          </Typography>
+          <Typography
+            variant="h6"
+            color="text.secondary"
+            sx={{ mb: 5, maxWidth: 700, mx: "auto" }}
+          >
+            The most professional and simple way to manage your government bonds
+            and CETES investments in Mexico.
+          </Typography>
+          <Stack direction="row" spacing={2} justifyContent="center">
+            <Link href="/login" passHref>
+              <Button
+                variant="contained"
+                size="large"
+                sx={{ borderRadius: 3, px: 4, py: 1.5, bgcolor: "#1e3a8a" }}
+              >
+                Get Started
+              </Button>
+            </Link>
+            <Link href="/about" passHref>
+              <Button
+                variant="outlined"
+                size="large"
+                sx={{
+                  borderRadius: 3,
+                  px: 4,
+                  py: 1.5,
+                  borderColor: "#1e3a8a",
+                  color: "#1e3a8a",
+                }}
+              >
+                Learn More
+              </Button>
+            </Link>
+          </Stack>
+        </Box>
+
+        {/* FEATURES GRID */}
+        <Grid container spacing={4}>
+          {[
+            {
+              icon: <TrendingUpIcon fontSize="large" />,
+              title: "Real-time Valuation",
+              color: "#10b981",
+              border: "#10b981",
+            },
+            {
+              icon: <SecurityIcon fontSize="large" />,
+              title: "Secure Platform",
+              color: "#3b82f6",
+              border: "#3b82f6",
+            },
+            {
+              icon: <AccountBalanceIcon fontSize="large" />,
+              title: "Bank Grade Analytics",
+              color: "#d946ef",
+              border: "#d946ef",
+            },
+          ].map((feature, index) => (
+            <Grid item xs={12} md={4} key={index}>
+              <Paper
+                sx={{
+                  p: 4,
+                  textAlign: "center",
+                  borderRadius: 5,
+                  bgcolor: "#f8fafc",
+                  border: `2px solid ${feature.border}`, // Bordes de colores según el feature
+                  boxShadow: 2,
+                  transition: "0.2s ease",
+                  "&:hover": { transform: "translateY(-4px)", boxShadow: 5 },
+                }}
+              >
+                <Box sx={{ color: feature.color, mb: 2 }}>{feature.icon}</Box>
+                <Typography
+                  variant="h6"
+                  sx={{ fontWeight: 700, color: "#0f172a", mb: 1 }}
+                >
+                  {feature.title}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Experience institutional quality tools designed for the modern
+                  retail investor.
+                </Typography>
+              </Paper>
+            </Grid>
+          ))}
+        </Grid>
+      </Container>
+    </Box>
   );
 }

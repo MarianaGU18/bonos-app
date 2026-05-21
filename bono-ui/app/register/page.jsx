@@ -67,7 +67,15 @@ export default function RegisterPage() {
     setLoading(true);
     setError(null);
     try {
-      await register(name, lastname, maternallast, birthdate, email, password); // Se pasa birthdate
+      // Pasamos un objeto con los nombres de campos que espera el backend
+      await register({
+        name,
+        lastname,
+        maternallast,
+        birthdate,
+        email,
+        password,
+      });
       handleNext();
     } catch (err) {
       setError(err.message);
@@ -166,15 +174,14 @@ export default function RegisterPage() {
         alignItems: "center",
       }}
     >
-      <Container maxWidth="lg">
+      <Container maxWidth="lg" sx={{ py: 4 }}>
         <Grid container spacing={4} alignItems="flex-start">
           {/* Left side - Benefits */}
           <Grid item xs={12} md={6}>
             <Box sx={{ mb: 4 }}>
-              <Typography variant="h3" fontWeight={700}>
+              <Typography variant="h3" fontWeight={700} color="#0f172a">
                 Why do you need an account?
               </Typography>
-
               <List sx={{ mt: 2 }}>
                 {benefits.map((benefit) => (
                   <ListItem key={benefit.title} disablePadding sx={{ mb: 3 }}>
@@ -200,7 +207,9 @@ export default function RegisterPage() {
 
           {/* Right side - Form */}
           <Grid item xs={12} md={6}>
-            <Card sx={{ p: 2 }}>
+            <Card
+              sx={{ p: 2, borderRadius: 4, boxShadow: 3, bgcolor: "#f8fafc" }}
+            >
               <CardContent>
                 <Stepper activeStep={activeStep} sx={{ mb: 4 }}>
                   {steps.map((label) => (

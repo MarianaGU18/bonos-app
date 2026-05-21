@@ -9,6 +9,7 @@ import com.bonos.backend.model.Role;
 import com.bonos.backend.repository.UserRepository;
 import com.bonos.backend.security.JwtService;
 import com.bonos.backend.service.UserService;
+import com.bonos.backend.service.PortafolioService;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -28,18 +29,21 @@ import java.util.Optional;
 public class AuthController {
 
     private final UserRepository userRepository;
-    private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
     private final UserService userService;
+    private final JwtService jwtService;
+    private final PortafolioService portafolioService;
 
-    public AuthController(UserRepository userRepository,
+    public AuthController(UserRepository userRepository, 
+                          PasswordEncoder passwordEncoder, 
+                          UserService userService,
                           JwtService jwtService,
-                          PasswordEncoder passwordEncoder,
-                          UserService userService) {
+                          PortafolioService portafolioService) {
         this.userRepository = userRepository;
         this.jwtService = jwtService;
         this.passwordEncoder = passwordEncoder;
         this.userService = userService;
+        this.portafolioService = portafolioService;
     }
 
     @PutMapping("/user/{id}")
@@ -64,12 +68,15 @@ public class AuthController {
         user.setName(request.getName());
         user.setLastname(request.getLastname()); // <-- CORRECCIÓN
         user.setMaternallast(request.getMaternallast()); // <-- CORRECCIÓN
+        user.setBirthdate(request.getBirthdate()); // <-- AÑADIR ESTA LÍNEA
         user.setEmail(request.getEmail().trim());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setRole(Role.USER);
         user.setCreatedAt(LocalDateTime.now());
 
-        userRepository.save(user);
+        // Save user and initialize their portfolio
+        User savedUser = userRepository.save(user);
+        portafolioService.crearPortafolio(savedUser);
 
         String token = jwtService.generateToken(user);
 

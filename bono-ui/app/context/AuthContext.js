@@ -4,7 +4,9 @@ import { createContext, useContext, useState, useCallback } from "react";
 
 const AuthContext = createContext();
 
-const API_URL = "http://localhost:8080/api/v1";
+// Definimos la URL base para las APIs de autenticación y transacciones
+const API_URL =
+  process.env.NEXT_PUBLIC_API_URL_V1 || "http://localhost:8080/api/v1";
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(() => {
@@ -125,9 +127,12 @@ export function AuthProvider({ children }) {
 
     // After login, fetch the portfolio to get the correct balance
     try {
-      const portfolioRes = await fetch(`${API_URL}/portafolio/${data.id}`, {
-        credentials: "include",
-      });
+      const portfolioRes = await fetch(
+        `${API_URL}/portafolio/user/${data.id}`,
+        {
+          credentials: "include",
+        },
+      );
       if (!portfolioRes.ok) {
         // If portfolio doesn't exist, default balance to 0
         console.warn(
@@ -165,28 +170,14 @@ export function AuthProvider({ children }) {
     }
   };
 
-  const register = async (
-    name,
-    lastname,
-    maternallast,
-    birthdate,
-    email,
-    password,
-  ) => {
+  const register = async (userData) => {
     const res = await fetch(`${API_URL}/auth/register`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       credentials: "include",
-      body: JSON.stringify({
-        name,
-        lastname,
-        maternallast,
-        birthdate,
-        email,
-        password,
-      }),
+      body: JSON.stringify(userData),
     });
 
     const data = await res.json();
@@ -195,7 +186,7 @@ export function AuthProvider({ children }) {
       throw new Error(data.message || "Registration failed");
     }
 
-    const userData = {
+    const authUser = {
       id: data.id,
       name: data.name,
       lastname: data.lastname,
@@ -205,12 +196,76 @@ export function AuthProvider({ children }) {
       role: data.role,
     };
 
-    setUser(userData);
+    setUser(authUser);
     if (typeof window !== "undefined") {
-      localStorage.setItem("user", JSON.stringify(userData));
+      localStorage.setItem("user", JSON.stringify(authUser));
     }
 
     return data;
+  };
+
+  const sellCetes = async (ceteId) => {
+    setLoading(true);
+    try {
+      const res = await authFetch(`/cetes/vender/${ceteId}`, {
+        method: "POST",
+      });
+
+      if (!res.ok) {
+        const errorText = await res.text();
+        throw new Error(errorText || "Failed to sell CETES.");
+      }
+
+      const updatedPortfolio = await res.json();
+      // Actualizar el balance del usuario en el estado global
+      const updatedUser = { ...user, balance: updatedPortfolio.cashBalance };
+      setUser(updatedUser);
+      if (typeof window !== "undefined") {
+        localStorage.setItem("user", JSON.stringify(updatedUser));
+      }
+      return updatedPortfolio;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const buyCetes = async (monto, dias) => {
+    if (!user) return;
+    setLoading(true);
+    try {
+      const res = await authFetch("/cetes/comprar", {
+        method: "POST",
+        body: JSON.stringify({ userId: user.id, monto, dias }),
+      });
+
+      if (!res.ok) throw new Error("Failed to process purchase");
+
+      const updatedPortfolio = await res.json();
+      const updatedUser = { ...user, balance: updatedPortfolio.cashBalance };
+      setUser(updatedUser);
+      if (typeof window !== "undefined") {
+        localStorage.setItem("user", JSON.stringify(updatedUser));
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const estimateCeteSale = async (ceteId) => {
+    setLoading(true); // Consider using a separate loading state for estimates if needed
+    try {
+      const res = await authFetch(`/cetes/estimar-venta/${ceteId}`, {
+        method: "GET",
+      });
+
+      if (!res.ok) {
+        const errorText = await res.text();
+        throw new Error(errorText || "Failed to estimate CETE sale.");
+      }
+      return await res.json();
+    } finally {
+      setLoading(false); // Reset loading state
+    }
   };
 
   return (
@@ -224,6 +279,9 @@ export function AuthProvider({ children }) {
         login,
         logout,
         authFetch,
+        sellCetes,
+        buyCetes,
+        estimateCeteSale,
         isAuthenticated: !!user,
       }}
     >

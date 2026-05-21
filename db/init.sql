@@ -15,7 +15,8 @@ CREATE TABLE portafolio (
   user_id BIGINT UNIQUE NOT NULL,
   cash_balance DECIMAL(10,2) DEFAULT 0,     -- Fondos libres
   cetes_balance DECIMAL(10,2) DEFAULT 0,    -- Total invertido en CETES
-  bonds_balance DECIMAL(10,2) DEFAULT 0,     -- Total invertido en otros bonos
+  bonds_balance DECIMAL(10,2) DEFAULT 0,   -- Total invertido en bonos
+  total_balance DECIMAL(10,2) DEFAULT 0,     -- Total invertido en otros bonos
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (user_id) REFERENCES users(id)
 );
@@ -27,7 +28,18 @@ CREATE TABLE bonos (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE posiciones (
+CREATE TABLE cetes (
+  id BIGINT PRIMARY KEY AUTO_INCREMENT,
+  fecha_vencimiento DATE NOT NULL,
+  plazo INT NOT NULL,
+  tasa_compra DECIMAL(5, 2) NOT NULL,
+  monto_invertido DECIMAL(10, 2) NOT NULL,
+  portafolio_id BIGINT NOT NULL,
+
+  FOREIGN KEY (portafolio_id) REFERENCES portafolio(id)
+);
+
+/*CREATE TABLE posiciones (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
   portafolio_id BIGINT NOT NULL,
   bono_id BIGINT NOT NULL,
@@ -39,16 +51,15 @@ CREATE TABLE posiciones (
   FOREIGN KEY (bono_id) REFERENCES bonos(id),
 
   UNIQUE KEY posiciones_unique (portafolio_id, bono_id)
-);
+);*/
 
 CREATE TABLE transacciones (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
   user_id BIGINT NOT NULL,
   bono_id BIGINT,
   tipo ENUM('DEPOSITO', 'RETIRO', 'COMPRA', 'VENTA') NOT NULL,
-  cantidad INT DEFAULT 0, -- Para compras/ventas
   monto DECIMAL(10,2) DEFAULT 0, -- Para depositos/retros
-  precio_unitario DECIMAL(10,2), -- Para compras/ventas
+  descripcion VARCHAR(255),
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
   FOREIGN KEY (user_id) REFERENCES users(id),
@@ -64,7 +75,7 @@ VALUES
 
 
 -- Creamos los portafolios con el diseño detallado
-INSERT INTO portafolio (user_id, cash_balance, cetes_balance, bonds_balance, created_at) VALUES
-(1, 0, 0, 0, NOW()),
-(2, 0, 0, 0, NOW()),
-(3, 0, 0, 0, NOW());
+INSERT INTO portafolio (user_id, cash_balance, cetes_balance, bonds_balance, total_balance, created_at) VALUES
+(1, 0, 0, 0, 0, NOW()),
+(2, 0, 0, 0, 0, NOW()),
+(3, 0, 0, 0, 0, NOW());

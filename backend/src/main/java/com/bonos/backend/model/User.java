@@ -1,12 +1,14 @@
 package com.bonos.backend.model;
 
 import jakarta.persistence.*;
+import com.bonos.backend.model.UserEntityListener;
 import lombok.Data;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "users")
+@EntityListeners(UserEntityListener.class)
 @Data
 public class User {
 

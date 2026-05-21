@@ -13,12 +13,17 @@ import {
   Container,
   Divider,
   Stack,
+  Alert,
 } from "@mui/material";
 import Link from "next/link";
 import { useAuth } from "../context/AuthContext";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState, useCallback } from "react";
 import dynamic from "next/dynamic";
+import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
+import InsightsIcon from "@mui/icons-material/Insights";
+import TrendingUpIcon from "@mui/icons-material/TrendingUp";
+import PersonIcon from "@mui/icons-material/Person";
 
 // ---------------- DYNAMIC CHART ----------------
 const BarChartComponent = dynamic(
@@ -79,20 +84,6 @@ const BarChartComponent = dynamic(
   },
 );
 
-// ---------------- MOCK DATA ----------------
-const kpiData = {
-  portfolioValue: 52345.67,
-};
-
-const portfolioHistory = [
-  { name: "Jan", value: 45000 },
-  { name: "Feb", value: 46500 },
-  { name: "Mar", value: 47200 },
-  { name: "Apr", value: 48500 },
-  { name: "May", value: 50100 },
-  { name: "Jun", value: 52345 },
-];
-
 // ---------------- CARD STYLE ----------------
 const dashboardCardStyle = {
   height: "100%",
@@ -101,8 +92,7 @@ const dashboardCardStyle = {
   borderRadius: 4,
   boxShadow: 2,
   transition: "0.2s ease",
-  //border: "2px solid #10b981", // 🟢 VERDE: Cards de Acción (Cetes/Bonds)
-
+  bgcolor: "#f8fafc",
   "&:hover": {
     transform: "translateY(-4px)",
     boxShadow: 5,
@@ -111,46 +101,188 @@ const dashboardCardStyle = {
 };
 
 // ---------------- DASHBOARD CONTENT ----------------
-function DashboardContent({ user }) {
+function DashboardContent({ user, isAuthenticated }) {
+  const { authFetch } = useAuth();
+  const [portfolio, setPortfolio] = useState({
+    cashBalance: 0,
+    cetesBalance: 0,
+    bondsBalance: 0,
+    total: 0,
+  });
+  const [chartData, setChartData] = useState([]);
+  const [loadingPortfolio, setLoadingPortfolio] = useState(true);
+  const [portfolioError, setPortfolioError] = useState(null);
+
+  const fmt = (val) =>
+    new Intl.NumberFormat("es-MX", {
+      style: "currency",
+      currency: "MXN",
+    }).format(val || 0);
+
+  const loadPortfolioData = useCallback(async () => {
+    if (!user?.id) return;
+    try {
+      setLoadingPortfolio(true);
+      setPortfolioError(null);
+      const portRes = await authFetch(`/portafolio/user/${user.id}`);
+      if (!portRes.ok) throw new Error("Could not retrieve portfolio data");
+      const portData = await portRes.json();
+
+      const currentPortfolio = {
+        cashBalance: portData.cashBalance,
+        cetesBalance: portData.cetesBalance,
+        bondsBalance: portData.bondsBalance,
+        total: portData.totalBalance,
+      };
+
+      setPortfolio(currentPortfolio);
+
+      // Build real chart data from transaction history
+      const transRes = await authFetch(`/portafolio/transacciones/${user.id}`);
+      if (transRes.ok) {
+        const transactions = await transRes.json();
+        const months = [
+          "Jan",
+          "Feb",
+          "Mar",
+          "Apr",
+          "May",
+          "Jun",
+          "Jul",
+          "Aug",
+          "Sep",
+          "Oct",
+          "Nov",
+          "Dec",
+        ];
+        const now = new Date();
+        const history = [];
+
+        let runningTotal = currentPortfolio.total;
+        const sortedTrans = [...transactions].sort(
+          (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
+        );
+        let transIdx = 0;
+
+        for (let i = 0; i < 6; i++) {
+          const targetMonthStart = new Date(
+            now.getFullYear(),
+            now.getMonth() - i,
+            1,
+          );
+          const monthLabel = months[targetMonthStart.getMonth()];
+
+          history.unshift({
+            name: monthLabel,
+            value: Number(Math.max(0, runningTotal).toFixed(2)),
+          });
+
+          // Reverse-calculate balance by subtracting transactions from the current month
+          while (transIdx < sortedTrans.length) {
+            const transDate = new Date(sortedTrans[transIdx].createdAt);
+            if (transDate >= targetMonthStart) {
+              const amount = sortedTrans[transIdx].monto;
+              const type = sortedTrans[transIdx].tipo;
+              // If it was an inflow (deposit/sale), subtract it. If outflow (purchase/withdrawal), add it back.
+              if (type === "DEPOSITO" || type === "VENTA") {
+                runningTotal -= amount;
+              } else {
+                runningTotal += amount;
+              }
+              transIdx++;
+            } else {
+              break;
+            }
+          }
+        }
+        setChartData(history);
+      }
+    } catch (error) {
+      console.error("Error loading portfolio data for dashboard:", error);
+      setPortfolioError("Failed to load portfolio summary.");
+    } finally {
+      setLoadingPortfolio(false);
+    }
+  }, [user?.id, authFetch]);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      loadPortfolioData();
+    }
+  }, [isAuthenticated, loadPortfolioData]);
+
+  if (loadingPortfolio) {
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "80vh",
+        }}
+      >
+        <CircularProgress />
+      </Box>
+    );
+  }
+
   return (
     <Box
       sx={{
         minHeight: "100vh",
-        bgcolor: "#eae8dff3", // Fondo crema general para consistencia
-        //border: "5px solid #eab308", // 🟡 AMARILLO: Wrapper principal del Dashboard
+        bgcolor: "#ffffff",
       }}
     >
       <Container
-        maxWidth={false}
+        maxWidth="lg"
         sx={{
           pt: 5,
           pb: 4,
-
-          px: {
-            xs: 2,
-            sm: 3,
-            md: 6,
-            lg: 8,
-          },
-          //border: "3px solid #ef4444", // 🔴 ROJO: Contenedor root del Layout
         }}
       >
         {/* HEADER */}
-        <Box sx={{ mb: 5 }}>
-          {/* 🔘 GRIS: Box del Header  border: "1px dashed #64748b" }}*/}
-          <Typography
-            variant="h4"
-            sx={{
-              fontWeight: 700,
-              mb: 1,
-            }}
-          >
-            Dashboard
-          </Typography>
-          <Typography variant="body1" color="text.secondary">
-            Welcome back, {user?.name}. Track your investments and portfolio
-            performance.
-          </Typography>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            mb: 4,
+          }}
+        >
+          <Stack direction="row" alignItems="center" spacing={2}>
+            <InsightsIcon color="primary" sx={{ fontSize: 40 }} />
+            <Box>
+              <Typography
+                variant="h4"
+                sx={{ fontWeight: 800, color: "#0f172a" }}
+              >
+                DASHBOARD
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Welcome back, {user?.name}. Track your performance.
+              </Typography>
+            </Box>
+          </Stack>
+          <Link href="/perfil" passHref>
+            <Button
+              variant="outlined"
+              startIcon={<PersonIcon />}
+              sx={{
+                borderRadius: 3,
+                textTransform: "none",
+                fontWeight: 600,
+                borderColor: "#003366",
+                color: "#003366",
+                px: 3,
+                "&:hover": {
+                  borderColor: "#002244",
+                  bgcolor: "rgba(0,51,102,0.04)",
+                },
+              }}
+            >
+              View Profile
+            </Button>
+          </Link>
         </Box>
 
         {/* ACTION CARDS */}
@@ -166,14 +298,10 @@ function DashboardContent({ user }) {
               >
                 <Typography
                   variant="h5"
-                  sx={{
-                    fontWeight: 600,
-                    mb: 1,
-                  }}
+                  sx={{ fontWeight: 700, mb: 1, color: "#0f172a" }}
                 >
                   CETES Valuation
                 </Typography>
-
                 <Typography variant="body2" color="text.secondary">
                   Calculate CETES prices using Banxico exchange rates and
                   financial market data.
@@ -211,14 +339,10 @@ function DashboardContent({ user }) {
               >
                 <Typography
                   variant="h5"
-                  sx={{
-                    fontWeight: 600,
-                    mb: 1,
-                  }}
+                  sx={{ fontWeight: 700, mb: 1, color: "#0f172a" }}
                 >
                   Bonds Valuation
                 </Typography>
-
                 <Typography variant="body2" color="text.secondary">
                   Soon: Bond M, Udibonos, Bondes and more fixed income products.
                 </Typography>
@@ -247,21 +371,139 @@ function DashboardContent({ user }) {
         <Divider sx={{ mb: 5 }} />
 
         {/* SUMMARY */}
-        <Box sx={{ mb: 3 }}>
-          {/* 🟠 NARANJA: Box de Título del Resumen , border: "1px dotted #f97316" */}
-          <Typography
-            variant="h5"
-            sx={{
-              fontWeight: 700,
-              mb: 1,
-            }}
-          >
+        <Box sx={{ mb: 4, display: "flex", alignItems: "center", gap: 2 }}>
+          <TrendingUpIcon color="action" />
+          <Typography variant="h6" sx={{ fontWeight: 700, color: "#0f172a" }}>
             Portfolio Summary
           </Typography>
-          <Typography color="text.secondary">
-            Overview of your current portfolio performance.
-          </Typography>
         </Box>
+
+        {portfolioError && (
+          <Alert severity="error" sx={{ mb: 3, borderRadius: 3 }}>
+            {portfolioError}
+          </Alert>
+        )}
+
+        {/* SUMMARY CARDS */}
+        <Grid container spacing={2} mb={4}>
+          <Grid item xs={12} md={4}>
+            <Paper
+              sx={{
+                p: 3,
+                borderRadius: 4,
+                boxShadow: 2,
+                bgcolor: "#f8fafc",
+                height: "100%",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "space-between",
+                transition: "0.2s ease",
+                "&:hover": { transform: "translateY(-4px)", boxShadow: 4 },
+              }}
+            >
+              <Stack direction="row" spacing={1} alignItems="center" mb={1}>
+                <AccountBalanceWalletIcon fontSize="small" color="primary" />
+                <Typography variant="overline" sx={{ fontWeight: 700 }}>
+                  Available Cash
+                </Typography>
+              </Stack>
+              <Typography
+                variant="h4"
+                sx={{ fontWeight: 700, fontFamily: "monospace" }}
+              >
+                {fmt(portfolio.cashBalance)}
+              </Typography>
+            </Paper>
+          </Grid>
+          <Grid item xs={12} md={2}>
+            <Paper
+              sx={{
+                p: 3,
+                borderRadius: 4,
+                boxShadow: 2,
+                bgcolor: "#f8fafc",
+                height: "100%",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "space-between",
+                transition: "0.2s ease",
+                "&:hover": { transform: "translateY(-4px)", boxShadow: 4 },
+              }}
+            >
+              <Stack direction="row" spacing={1} alignItems="center" mb={1}>
+                <InsightsIcon fontSize="small" sx={{ color: "#16a34a" }} />
+                <Typography variant="overline" sx={{ fontWeight: 700 }}>
+                  Bonddia
+                </Typography>
+              </Stack>
+              <Typography
+                variant="h5"
+                sx={{ fontWeight: 700, fontFamily: "monospace" }}
+              >
+                {fmt(portfolio.bondsBalance)}
+              </Typography>
+            </Paper>
+          </Grid>
+          <Grid item xs={12} md={2}>
+            <Paper
+              sx={{
+                p: 3,
+                borderRadius: 4,
+                boxShadow: 2,
+                bgcolor: "#f8fafc",
+                height: "100%",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "space-between",
+                transition: "0.2s ease",
+                "&:hover": { transform: "translateY(-4px)", boxShadow: 4 },
+              }}
+            >
+              <Stack direction="row" spacing={1} alignItems="center" mb={1}>
+                <TrendingUpIcon fontSize="small" color="secondary" />
+                <Typography variant="overline" sx={{ fontWeight: 700 }}>
+                  Invested in CETES
+                </Typography>
+              </Stack>
+              <Typography
+                variant="h4"
+                sx={{ fontWeight: 700, fontFamily: "monospace" }}
+              >
+                {fmt(portfolio.cetesBalance)}
+              </Typography>
+            </Paper>
+          </Grid>
+          <Grid item xs={12} md={4}>
+            <Paper
+              sx={{
+                p: 3,
+                borderRadius: 4,
+                boxShadow: 2,
+                bgcolor: "#0f172a",
+                color: "white",
+                height: "100%",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "space-between",
+                transition: "0.2s ease",
+                "&:hover": { transform: "translateY(-4px)", boxShadow: 6 },
+              }}
+            >
+              <Typography
+                variant="overline"
+                sx={{ fontWeight: 700, opacity: 0.8, display: "block", mb: 1 }}
+              >
+                Total Portfolio Value
+              </Typography>
+              <Typography
+                variant="h4"
+                sx={{ fontWeight: 700, fontFamily: "monospace" }}
+              >
+                {fmt(portfolio.total)}
+              </Typography>
+            </Paper>
+          </Grid>
+        </Grid>
 
         {/* CHART */}
         <Grid item xs={12} md={8}>
@@ -272,7 +514,9 @@ function DashboardContent({ user }) {
               height: 320,
               borderRadius: 4,
               boxShadow: 2,
-              //border: "2px solid #d946ef", // 💗 ROSA: Card del Historial/Gráfico
+              bgcolor: "#f8fafc",
+              transition: "0.2s ease",
+              "&:hover": { boxShadow: 4 },
             }}
           >
             <Stack
@@ -298,7 +542,7 @@ function DashboardContent({ user }) {
             </Stack>
 
             <Box sx={{ height: 220 }}>
-              <BarChartComponent data={portfolioHistory} />
+              <BarChartComponent data={chartData} />
             </Box>
           </Paper>
         </Grid>
@@ -334,7 +578,7 @@ function ProtectedDashboardPage() {
     );
   }
 
-  return <DashboardContent user={user} />;
+  return <DashboardContent user={user} isAuthenticated={isAuthenticated} />;
 }
 
 export default ProtectedDashboardPage;
