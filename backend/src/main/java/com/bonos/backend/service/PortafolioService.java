@@ -33,7 +33,6 @@ public class PortafolioService {
         nuevoPortafolio.setBondsBalance(BigDecimal.ZERO);
         // El total inicial es la suma de los balances (0 + 0 + 0)
         nuevoPortafolio.setTotalBalance(BigDecimal.ZERO); 
-        nuevoPortafolio.setCreatedAt(LocalDateTime.now());
 
         return portafolioRepository.save(nuevoPortafolio);
     }

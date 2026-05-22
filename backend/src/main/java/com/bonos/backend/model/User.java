@@ -1,14 +1,14 @@
 package com.bonos.backend.model;
 
 import jakarta.persistence.*;
-import com.bonos.backend.model.UserEntityListener;
 import lombok.Data;
+import org.hibernate.annotations.CreationTimestamp;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "users")
-@EntityListeners(UserEntityListener.class)
 @Data
 public class User {
 
@@ -32,5 +32,7 @@ public class User {
     @Enumerated(EnumType.STRING)
     private Role role;
 
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false, nullable = false)
     private LocalDateTime createdAt;
 }

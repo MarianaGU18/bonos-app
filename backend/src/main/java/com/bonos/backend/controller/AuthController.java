@@ -5,20 +5,13 @@ import com.bonos.backend.dto.LoginResponse;
 import com.bonos.backend.dto.RegisterRequest;
 import com.bonos.backend.dto.UpdateUserRequest;
 import com.bonos.backend.model.User;
-import com.bonos.backend.model.Role;
-import com.bonos.backend.repository.UserRepository;
 import com.bonos.backend.security.JwtService;
 import com.bonos.backend.service.UserService;
-import com.bonos.backend.service.PortafolioService;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-
-import java.time.LocalDateTime;
-import java.util.Optional;
 
 @CrossOrigin(
         origins = "http://localhost:3000",
@@ -28,22 +21,13 @@ import java.util.Optional;
 @RequestMapping("/api/v1/auth")
 public class AuthController {
 
-    private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
     private final UserService userService;
     private final JwtService jwtService;
-    private final PortafolioService portafolioService;
 
-    public AuthController(UserRepository userRepository, 
-                          PasswordEncoder passwordEncoder, 
-                          UserService userService,
-                          JwtService jwtService,
-                          PortafolioService portafolioService) {
-        this.userRepository = userRepository;
+    public AuthController(UserService userService,
+                          JwtService jwtService) {
         this.jwtService = jwtService;
-        this.passwordEncoder = passwordEncoder;
         this.userService = userService;
-        this.portafolioService = portafolioService;
     }
 
     @PutMapping("/user/{id}")
@@ -58,27 +42,19 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<LoginResponse> register(@RequestBody RegisterRequest request) {
-
-        if (userRepository.findByEmail(request.getEmail().trim()).isPresent()) {
-            return ResponseEntity.status(400)
-                    .body(new LoginResponse(null, null, null, null, "Email already exists", null, null));
-        }
-
         User user = new User();
         user.setName(request.getName());
-        user.setLastname(request.getLastname()); // <-- CORRECCIÓN
-        user.setMaternallast(request.getMaternallast()); // <-- CORRECCIÓN
-        user.setBirthdate(request.getBirthdate()); // <-- AÑADIR ESTA LÍNEA
+        user.setLastname(request.getLastname());
+        user.setMaternallast(request.getMaternallast());
+        user.setBirthdate(request.getBirthdate());
         user.setEmail(request.getEmail().trim());
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setRole(Role.USER);
-        user.setCreatedAt(LocalDateTime.now());
+        user.setPassword(request.getPassword());
 
-        // Save user and initialize their portfolio
-        User savedUser = userRepository.save(user);
-        portafolioService.crearPortafolio(savedUser);
+        // El servicio ahora maneja la verificación de email, encriptación,
+        // rol por defecto y creación de portafolio en una sola transacción.
+        User savedUser = userService.registrarUsuario(user);
 
-        String token = jwtService.generateToken(user);
+        String token = jwtService.generateToken(savedUser);
 
         ResponseCookie cookie = ResponseCookie.from("token", token)
                 .httpOnly(true)
@@ -91,33 +67,21 @@ public class AuthController {
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, cookie.toString())
                 .body(new LoginResponse(
-                        user.getId(),
-                        user.getName(),
-                        user.getLastname(),
-                        user.getMaternallast(),
+                        savedUser.getId(),
+                        savedUser.getName(),
+                        savedUser.getLastname(),
+                        savedUser.getMaternallast(),
                         "REGISTER OK",
-                        user.getRole().name(),
-                        user.getEmail()
+                        savedUser.getRole().name(),
+                        savedUser.getEmail()
                 ));
     }
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
-
-        Optional<User> userOpt = userRepository.findByEmail(request.getEmail().trim());
-
-        if (userOpt.isEmpty()) {
-            return ResponseEntity.status(401)
-                    .body(new LoginResponse(null, null, null, null, "Invalid credentials", null, null));
-        }
-
-        User user = userOpt.get();
-        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            return ResponseEntity.status(401)
-                    .body(new LoginResponse(null, null, null, null, "Invalid credentials", null, null));
-        }
-
-        String token = jwtService.generateToken(user);
+        // Usamos la lógica de validación centralizada en el servicio
+        User authenticatedUser = userService.login(request.getEmail().trim(), request.getPassword());
+        String token = jwtService.generateToken(authenticatedUser);
 
         ResponseCookie cookie = ResponseCookie.from("token", token)
                 .httpOnly(true)
@@ -130,13 +94,13 @@ public class AuthController {
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, cookie.toString())
                 .body(new LoginResponse(
-                        user.getId(),
-                        user.getName(),
-                        user.getLastname(),
-                        user.getMaternallast(),
+                        authenticatedUser.getId(),
+                        authenticatedUser.getName(),
+                        authenticatedUser.getLastname(),
+                        authenticatedUser.getMaternallast(),
                         "LOGIN OK",
-                        user.getRole().name(),
-                        user.getEmail()
+                        authenticatedUser.getRole().name(),
+                        authenticatedUser.getEmail()
                 ));
     }
 

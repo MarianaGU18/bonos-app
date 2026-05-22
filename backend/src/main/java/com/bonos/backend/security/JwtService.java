@@ -4,10 +4,8 @@ import com.bonos.backend.model.User;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.stereotype.Service;
-import com.bonos.backend.security.JwtService;
 import java.security.Key;
 import java.util.Date;
-import com.bonos.backend.security.JwtService;
 
 @Service
 public class JwtService {

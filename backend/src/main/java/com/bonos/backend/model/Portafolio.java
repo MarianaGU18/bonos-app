@@ -2,6 +2,8 @@ package com.bonos.backend.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import org.hibernate.annotations.CreationTimestamp;
+
 import java.math.BigDecimal;
 
 @Entity
@@ -28,7 +30,7 @@ public class Portafolio {
     @Column(name = "total_balance")
     private BigDecimal totalBalance;
 
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false, nullable = false)
     private java.time.LocalDateTime createdAt;
-
-
 }
