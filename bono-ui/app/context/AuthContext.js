@@ -9,10 +9,20 @@ const API_URL =
   process.env.NEXT_PUBLIC_API_URL_V1 || "http://localhost:8080/api/v1";
 
 export function AuthProvider({ children }) {
+  // Función de limpieza para asegurar consistencia en los nombres de campos
+  const normalizeUser = (data) => {
+    if (!data) return null;
+    console.log("AuthContext: Datos recibidos para normalizar:", data);
+    const normalized = { ...data };
+    // Aseguramos que siempre exista la propiedad en minúsculas para el resto de la app
+    normalized.birthdate = data.birthdate || data.birthDate || "";
+    return normalized;
+  };
+
   const [user, setUser] = useState(() => {
     if (typeof window !== "undefined") {
       const storedUser = localStorage.getItem("user");
-      return storedUser ? JSON.parse(storedUser) : null;
+      return storedUser ? normalizeUser(JSON.parse(storedUser)) : null;
     }
     return null;
   });
@@ -38,16 +48,49 @@ export function AuthProvider({ children }) {
   }, []);
 
   const handleResponse = async (res) => {
-    const contentType = res.headers.get("content-type");
-    let data;
-    if (contentType && contentType.includes("application/json")) {
-      data = await res.json();
-    } else {
-      data = { message: await res.text() };
+    const text = await res.text();
+    let data = {};
+
+    try {
+      data = text ? JSON.parse(text) : {};
+    } catch (e) {
+      data = { message: text };
     }
 
     if (!res.ok) {
-      throw new Error(data.message || data.error || "Request failed");
+      const statusMessages = {
+        400: "The information provided is incorrect. Please check the fields.",
+        401: "Your session has expired. Please log in again.",
+        403: "Access denied. This is likely a security configuration issue on the server.",
+        404: "The requested resource was not found.",
+        409: "This email address is already registered. Please use another one.",
+        500: "Our servers are having trouble. Please try again in a few minutes.",
+      };
+
+      // Si el mensaje del servidor es genérico (como "Forbidden" o "Conflict"),
+      // usamos nuestra traducción amigable. Si es específico, usamos el del servidor.
+      const serverMsg = data.message || data.error || "";
+      const isGeneric =
+        !serverMsg ||
+        [
+          "Conflict",
+          "Forbidden",
+          "Bad Request",
+          "Unauthorized",
+          "No message available",
+          "Access Denied",
+        ].includes(serverMsg);
+
+      const errorMessage = isGeneric
+        ? statusMessages[res.status] ||
+          serverMsg ||
+          res.statusText ||
+          "An unexpected error occurred"
+        : serverMsg;
+
+      const error = new Error(errorMessage);
+      error.status = res.status;
+      throw error;
     }
     return data;
   };
@@ -59,19 +102,32 @@ export function AuthProvider({ children }) {
     }
 
     setLoading(true);
-    const updatedData = { ...user, ...newUserData };
+
+    // Creamos el payload asegurando compatibilidad de nombres para Java (CamelCase)
+    const payload = {
+      ...user,
+      ...newUserData,
+      birthDate: newUserData.birthdate, // Duplicamos para asegurar que el backend lo reciba
+    };
 
     try {
       const response = await authFetch(`/auth/user/${user.id}`, {
         method: "PUT",
-        body: JSON.stringify(updatedData),
+        body: JSON.stringify(payload),
       });
 
       const updatedUserFromServer = await handleResponse(response);
+      // Mezclamos con cuidado: si el servidor no devuelve la fecha, mantenemos la local
+      const mergedData = { ...user, ...updatedUserFromServer };
+      if (
+        !updatedUserFromServer.birthdate &&
+        !updatedUserFromServer.birthDate &&
+        newUserData.birthdate
+      ) {
+        mergedData.birthdate = newUserData.birthdate;
+      }
 
-      // Combine server response with existing balance to keep UI consistent
-      const finalUser = { ...updatedUserFromServer, balance: user.balance };
-
+      const finalUser = normalizeUser(mergedData);
       setUser(finalUser);
       if (typeof window !== "undefined") {
         localStorage.setItem("user", JSON.stringify(finalUser));
@@ -124,6 +180,7 @@ export function AuthProvider({ children }) {
     });
 
     const data = await handleResponse(response);
+    console.log("AuthContext: Respuesta cruda del login:", data);
     if (data.message !== "LOGIN OK") {
       throw new Error(data.message || "Login failed");
     }
@@ -151,11 +208,12 @@ export function AuthProvider({ children }) {
       data.balance = 0;
     }
 
-    setUser(data);
+    const finalUser = normalizeUser(data);
+    setUser(finalUser);
     if (typeof window !== "undefined") {
-      localStorage.setItem("user", JSON.stringify(data));
+      localStorage.setItem("user", JSON.stringify(finalUser));
     }
-    return data;
+    return finalUser;
   };
 
   const logout = async () => {
@@ -174,24 +232,37 @@ export function AuthProvider({ children }) {
   };
 
   const register = async (userData) => {
+    // Aseguramos que el objeto que enviamos tenga ambos nombres de campo
+    const payload = {
+      ...userData,
+      birthDate: userData.birthdate,
+    };
+
     const response = await fetch(`${API_URL}/auth/register`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       credentials: "include",
-      body: JSON.stringify(userData),
+      body: JSON.stringify(payload),
     });
 
     const data = await handleResponse(response);
-    const authUser = { ...data, balance: 0 };
 
-    setUser(authUser);
-    if (typeof window !== "undefined") {
-      localStorage.setItem("user", JSON.stringify(authUser));
+    // Combinamos datos del formulario con la respuesta del servidor
+    const mergedData = { ...userData, ...data, balance: 0 };
+
+    // Si el servidor devuelve la fecha nula/vacía pero nosotros la tenemos en el form, la preservamos
+    if (!data.birthdate && !data.birthDate && userData.birthdate) {
+      mergedData.birthdate = userData.birthdate;
     }
 
-    return data;
+    const finalUser = normalizeUser(mergedData);
+    setUser(finalUser);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("user", JSON.stringify(finalUser));
+    }
+    return finalUser;
   };
 
   const sellCetes = async (ceteId) => {
@@ -235,14 +306,13 @@ export function AuthProvider({ children }) {
   };
 
   const estimateCeteSale = async (ceteId) => {
-    setLoading(true); // Consider using a separate loading state for estimates if needed
     try {
       const response = await authFetch(`/cetes/estimar-venta/${ceteId}`, {
         method: "GET",
       });
       return await handleResponse(response);
     } finally {
-      setLoading(false); // Reset loading state
+      // No activamos el loading global para evitar que la UI principal se oculte al pedir estimaciones
     }
   };
 

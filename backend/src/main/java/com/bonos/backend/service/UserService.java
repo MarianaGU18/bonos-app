@@ -5,6 +5,8 @@ import com.bonos.backend.model.User;
 import com.bonos.backend.model.Role;
 import com.bonos.backend.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,7 +28,7 @@ public class UserService {
     public User registrarUsuario(User user) {
         // Verificar si el email ya existe
         if (userRepository.findByEmail(user.getEmail()).isPresent()) {
-            throw new RuntimeException("El correo electrónico ya está registrado");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Email address already registered");
         }
 
         // Asignar rol por defecto si no tiene uno
@@ -66,10 +68,10 @@ public class UserService {
      */
     public User login(String email, String rawPassword) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Usuario o contraseña incorrectos"));
+                .orElseThrow(() -> new RuntimeException("Invalid email or password"));
 
         if (!passwordEncoder.matches(rawPassword, user.getPassword())) {
-            throw new RuntimeException("Usuario o contraseña incorrectos");
+            throw new RuntimeException("Invalid email or password");
         }
         return user;
     }

@@ -100,11 +100,19 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (user) {
+      // Intentar obtener de cualquier variante y asegurar formato YYYY-MM-DD
+      let rawDate = user.birthdate || user.birthDate || "";
+
+      // Si viene con formato ISO completo (T...), cortamos solo la fecha
+      if (typeof rawDate === "string" && rawDate.includes("T")) {
+        rawDate = rawDate.split("T")[0];
+      }
+
       setFormData({
         name: user.name || "",
         lastname: user.lastname || "",
         maternallast: user.maternallast || "",
-        birthdate: user.birthdate ? user.birthdate.split("T")[0] : "",
+        birthdate: rawDate,
       });
     }
   }, [user]);
@@ -161,11 +169,15 @@ export default function ProfilePage() {
     setIsEditing(false);
 
     if (user) {
+      let bdate = user.birthdate || user.birthDate || "";
+      if (typeof bdate === "string" && bdate.includes("T"))
+        bdate = bdate.split("T")[0];
+
       setFormData({
         name: user.name,
         lastname: user.lastname,
         maternallast: user.maternallast,
-        birthdate: user.birthdate ? user.birthdate.split("T")[0] : "",
+        birthdate: bdate,
       });
     }
   };
@@ -361,7 +373,9 @@ export default function ProfilePage() {
                     </Typography>
 
                     <Typography sx={{ mt: 0.5 }}>
-                      {formData.birthdate || "Not specified"}
+                      {formData.birthdate && formData.birthdate !== ""
+                        ? formData.birthdate
+                        : user.birthdate || user.birthDate || "Not specified"}
                     </Typography>
                   </Box>
 

@@ -41,7 +41,7 @@ export default function AddFundsModal({ open, onClose, onAddFunds }) {
           autoFocus
           margin="dense"
           id="amount"
-          label="Amount (USD)"
+          label="Amount (MXN)"
           type="number"
           fullWidth
           variant="outlined"

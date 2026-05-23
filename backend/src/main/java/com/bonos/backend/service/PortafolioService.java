@@ -41,11 +41,11 @@ public class PortafolioService {
     public Portafolio realizarDeposito(Long userId, double monto) {
         // 1. Verify user exists
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con id: " + userId));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
 
         // 2. Find the corresponding portfolio
         Portafolio portafolio = portafolioRepository.findByUser(user)
-                .orElseThrow(() -> new ResourceNotFoundException("Portafolio no encontrado para el usuario con id: " + userId));
+                .orElseThrow(() -> new ResourceNotFoundException("Portfolio not found for user with id: " + userId));
 
         // 3. Update cash balance in the portfolio
         BigDecimal montoDecimal = BigDecimal.valueOf(monto);
@@ -62,10 +62,10 @@ public class PortafolioService {
 
     public Portafolio findPortafolioByUserId(Long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con id: " + userId));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
 
         return portafolioRepository.findByUser(user)
-                .orElseThrow(() -> new ResourceNotFoundException("Portafolio no encontrado para el usuario con id: " + userId));
+                .orElseThrow(() -> new ResourceNotFoundException("Portfolio not found for user with id: " + userId));
     }
 
     public List<Transaccion> obtenerTransaccionesPorUsuario(Long userId) {

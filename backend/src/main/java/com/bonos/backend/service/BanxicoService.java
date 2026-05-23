@@ -100,7 +100,7 @@ public class BanxicoService {
 
         } catch (Exception e) {
             throw new RuntimeException(
-                    "Error al leer respuesta de Banxico"
+                    "Error reading Banxico response"
             );
         }
     }

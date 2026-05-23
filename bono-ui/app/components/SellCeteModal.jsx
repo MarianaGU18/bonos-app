@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -13,43 +13,15 @@ import {
   CircularProgress,
   Box,
   Divider,
+  Stack,
 } from "@mui/material";
+import { useAuth } from "../context/AuthContext";
 
-export default function SellCeteModal({
-  open,
-  onClose,
-  onConfirm,
-  ceteId,
-  authFetch,
-}) {
-  const [estimate, setEstimate] = useState(null);
+export default function SellCeteModal({ open, onClose, onConfirm, ceteId }) {
+  const { estimateCeteSale } = useAuth();
+  const [estimation, setEstimation] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [sellBonddia, setSellBonddia] = useState(false);
-
-  useEffect(() => {
-    if (open && ceteId) {
-      const fetchEstimate = async () => {
-        setLoading(true);
-        try {
-          const res = await authFetch(`/cetes/estimar-venta/${ceteId}`);
-          if (res.ok) {
-            const data = await res.json();
-            setEstimate(data);
-          }
-        } catch (err) {
-          console.error("Error fetching estimate", err);
-        } finally {
-          setLoading(false);
-        }
-      };
-      fetchEstimate();
-    }
-  }, [open, ceteId, authFetch]);
-
-  const handleConfirm = () => {
-    onConfirm(ceteId, sellBonddia);
-    setSellBonddia(false); // Reset para la próxima vez
-  };
+  const [includeBonddia, setIncludeBonddia] = useState(false);
 
   const fmt = (val) =>
     new Intl.NumberFormat("es-MX", {
@@ -57,64 +29,122 @@ export default function SellCeteModal({
       currency: "MXN",
     }).format(val || 0);
 
+  const loadEstimation = useCallback(async () => {
+    setLoading(true);
+    try {
+      const data = await estimateCeteSale(ceteId);
+      console.log("Backend Estimate Response:", data);
+      setEstimation(data);
+    } catch (error) {
+      console.error("Error loading estimation:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, [ceteId, estimateCeteSale]);
+
+  useEffect(() => {
+    if (open && ceteId) {
+      loadEstimation();
+    } else {
+      setEstimation(null);
+      setIncludeBonddia(false);
+    }
+  }, [open, ceteId, loadEstimation]);
+
+  const handleConfirm = () => {
+    onConfirm(ceteId, includeBonddia);
+  };
+
+  const totalValue = estimation?.estimatedSaleAmount || 0;
+  const profit = estimation?.estimatedProfit || 0;
+
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="xs">
-      <DialogTitle sx={{ fontWeight: "bold" }}>Confirmar Venta</DialogTitle>
+      <DialogTitle sx={{ fontWeight: "bold" }}>Confirm Sale</DialogTitle>
       <DialogContent>
         {loading ? (
           <Box sx={{ display: "flex", justifyContent: "center", p: 3 }}>
             <CircularProgress />
           </Box>
-        ) : estimate ? (
+        ) : estimation ? (
           <Box sx={{ mt: 1 }}>
-            <Typography variant="body1" gutterBottom>
-              ¿Estás seguro de que deseas vender este activo?
+            <Typography variant="body2" color="text.secondary" gutterBottom>
+              Are you sure you want to sell this CETE investment? Below is the
+              breakdown of your estimated return:
             </Typography>
-            <Box sx={{ bgcolor: "grey.100", p: 2, borderRadius: 2, my: 2 }}>
-              <Typography variant="subtitle2" color="text.secondary">
-                Obtendrás aproximadamente:
-              </Typography>
-              <Typography
-                variant="h5"
-                color="primary.main"
-                sx={{ fontWeight: 800 }}
-              >
-                {fmt(estimate.expectedAmount)}
-              </Typography>
-              <Typography variant="caption" color="success.main">
-                Ganancia devengada: {fmt(estimate.profit)}
-              </Typography>
-            </Box>
+
+            <Stack spacing={1.5} sx={{ mt: 3, mb: 3 }}>
+              <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+                <Typography variant="body1">Original Investment:</Typography>
+                <Typography variant="body1" sx={{ fontWeight: "medium" }}>
+                  {fmt(totalValue - profit)}
+                </Typography>
+              </Box>
+
+              <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+                <Typography variant="body1" color="success.main">
+                  Accrued Profit (+):
+                </Typography>
+                <Typography
+                  variant="body1"
+                  color="success.main"
+                  sx={{ fontWeight: "bold" }}
+                >
+                  {fmt(profit)}
+                </Typography>
+              </Box>
+
+              <Divider />
+
+              <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+                <Typography variant="h6">Total to Receive:</Typography>
+                <Typography
+                  variant="h6"
+                  color="primary"
+                  sx={{ fontWeight: "bold" }}
+                >
+                  {fmt(totalValue)}
+                </Typography>
+              </Box>
+            </Stack>
 
             <Divider sx={{ my: 2 }} />
 
             <FormControlLabel
               control={
                 <Checkbox
-                  checked={sellBonddia}
-                  onChange={(e) => setSellBonddia(e.target.checked)}
+                  checked={includeBonddia}
+                  onChange={(e) => setIncludeBonddia(e.target.checked)}
+                  color="primary"
                 />
               }
-              label="¿Vender también el remanente de Bonddia?"
+              label={
+                <Typography variant="body2">
+                  Include Bonddia liquidity in this sale
+                </Typography>
+              }
             />
           </Box>
         ) : (
-          <Typography color="error">
-            No se pudo cargar la estimación.
-          </Typography>
+          <Typography color="error">Could not load estimation data.</Typography>
         )}
       </DialogContent>
-      <DialogActions sx={{ p: 3 }}>
-        <Button onClick={onClose} color="inherit">
-          Cancelar
+      <DialogActions sx={{ p: 2, pt: 0 }}>
+        <Button
+          onClick={onClose}
+          color="inherit"
+          sx={{ textTransform: "none" }}
+        >
+          Cancel
         </Button>
         <Button
           onClick={handleConfirm}
           variant="contained"
           color="error"
-          disabled={loading || !estimate}
+          disabled={loading || !estimation}
+          sx={{ textTransform: "none", borderRadius: 2 }}
         >
-          Confirmar Venta
+          Confirm Sale
         </Button>
       </DialogActions>
     </Dialog>

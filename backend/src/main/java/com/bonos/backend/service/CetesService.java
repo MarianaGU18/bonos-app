@@ -238,7 +238,7 @@ public class CetesService {
      */
     public CeteSaleEstimateResponse estimarVentaCetes(Long ceteId) {
         Cete cete = ceteRepository.findById(ceteId)
-                .orElseThrow(() -> new RuntimeException("Inversión CETE no encontrada"));
+                .orElseThrow(() -> new RuntimeException("CETE investment not found"));
 
         // --- LÓGICA DE VALUACIÓN REALISTA ---
         LocalDate fechaCompra = cete.getFechaVencimiento().minusDays(cete.getPlazo());
@@ -266,7 +266,7 @@ public class CetesService {
     @Transactional
     public Portafolio venderCetes(Long ceteId, boolean includeBonddia) {
         Cete cete = ceteRepository.findById(ceteId)
-                .orElseThrow(() -> new RuntimeException("Inversión CETE no encontrada"));
+                .orElseThrow(() -> new RuntimeException("CETE investment not found"));
 
         Portafolio portafolio = cete.getPortafolio();
         

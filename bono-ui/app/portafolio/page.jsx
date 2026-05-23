@@ -29,7 +29,6 @@ import {
 import NextLink from "next/link";
 import HistoryIcon from "@mui/icons-material/History";
 import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
-import InsightsIcon from "@mui/icons-material/Insights";
 import AddIcon from "@mui/icons-material/Add";
 import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
@@ -59,6 +58,13 @@ const AppCard = ({ children, sx = {} }) => (
   </Paper>
 );
 
+const TRANSACTION_TYPE_LABELS = {
+  DEPOSITO: "DEPOSIT",
+  RETIRO: "WITHDRAWAL",
+  COMPRA: "PURCHASE",
+  VENTA: "SALE",
+};
+
 export default function PortfolioPage() {
   const { user, makeDeposit, authFetch, loading: authLoading } = useAuth();
 
@@ -74,6 +80,7 @@ export default function PortfolioPage() {
 
   const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
   const [depositAmount, setDepositAmount] = useState("");
+  const [isConfirmingDeposit, setIsConfirmingDeposit] = useState(false);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -83,7 +90,7 @@ export default function PortfolioPage() {
   const [selectedCeteId, setSelectedCeteId] = useState(null);
 
   const fmt = (val) =>
-    new Intl.NumberFormat("es-MX", {
+    new Intl.NumberFormat("en-US", {
       style: "currency",
       currency: "MXN",
     }).format(val || 0);
@@ -127,8 +134,14 @@ export default function PortfolioPage() {
   }, [user, authLoading, loadAllData]);
 
   /* ----------------- ACTIONS ----------------- */
+  const handleCloseDepositModal = () => {
+    setIsDepositModalOpen(false);
+    setIsConfirmingDeposit(false);
+    setDepositAmount("");
+  };
+
   const handleDeposit = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
 
     const amount = parseFloat(depositAmount);
     if (!amount || amount <= 0) return;
@@ -137,8 +150,7 @@ export default function PortfolioPage() {
       await makeDeposit(user.id, amount);
       await loadAllData();
 
-      setIsDepositModalOpen(false);
-      setDepositAmount("");
+      handleCloseDepositModal();
       setSuccessMessage(`Deposit completed: ${fmt(amount)}`);
     } catch {
       setError("Could not process deposit.");
@@ -259,15 +271,28 @@ export default function PortfolioPage() {
           <Typography variant="h6">Active Holdings</Typography>
         </Stack>
 
-        <TableContainer>
-          <Table>
-            <TableHead>
+        <TableContainer
+          sx={{
+            borderRadius: 2,
+            border: "1px solid rgba(0, 0, 0, 0.15)",
+            overflow: "hidden",
+          }}
+        >
+          <Table
+            sx={{
+              borderCollapse: "collapse",
+              "& .MuiTableCell-root": {
+                border: "1px solid rgba(0, 0, 0, 0.15)",
+              },
+            }}
+          >
+            <TableHead sx={{ bgcolor: "rgba(0, 0, 0, 0.04)" }}>
               <TableRow>
-                <TableCell>Asset</TableCell>
-                <TableCell>Term</TableCell>
-                <TableCell>Rate</TableCell>
-                <TableCell>Amount</TableCell>
-                <TableCell>Actions</TableCell>
+                <TableCell sx={{ fontWeight: "bold" }}>Asset</TableCell>
+                <TableCell sx={{ fontWeight: "bold" }}>Term</TableCell>
+                <TableCell sx={{ fontWeight: "bold" }}>Rate</TableCell>
+                <TableCell sx={{ fontWeight: "bold" }}>Amount</TableCell>
+                <TableCell sx={{ fontWeight: "bold" }}>Actions</TableCell>
               </TableRow>
             </TableHead>
 
@@ -287,7 +312,14 @@ export default function PortfolioPage() {
 
                   <TableCell>
                     <Button
-                      color="error"
+                      variant="contained"
+                      size="small"
+                      sx={{
+                        bgcolor: "#d32f2f",
+                        "&:hover": { bgcolor: "#b71c1c" },
+                        borderRadius: 2,
+                        textTransform: "none",
+                      }}
                       onClick={() => handleOpenSellModal(cete.id)}
                     >
                       Sell
@@ -307,29 +339,51 @@ export default function PortfolioPage() {
           <Typography variant="h6">Recent History</Typography>
         </Stack>
 
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>Date</TableCell>
-              <TableCell>Type</TableCell>
-              <TableCell align="right">Amount</TableCell>
-            </TableRow>
-          </TableHead>
-
-          <TableBody>
-            {transactions.slice(0, 8).map((t) => (
-              <TableRow key={t.id}>
-                <TableCell>{new Date(t.createdAt).toLocaleString()}</TableCell>
-                <TableCell>
-                  <Chip label={t.tipo} size="small" />
-                </TableCell>
-                <TableCell align="right" sx={{ fontFamily: "monospace" }}>
-                  {fmt(t.monto)}
+        <TableContainer
+          sx={{
+            borderRadius: 2,
+            border: "1px solid rgba(0, 0, 0, 0.15)",
+            overflow: "hidden",
+          }}
+        >
+          <Table
+            sx={{
+              borderCollapse: "collapse",
+              "& .MuiTableCell-root": {
+                border: "1px solid rgba(0, 0, 0, 0.15)",
+              },
+            }}
+          >
+            <TableHead sx={{ bgcolor: "rgba(0, 0, 0, 0.04)" }}>
+              <TableRow>
+                <TableCell sx={{ fontWeight: "bold" }}>Date</TableCell>
+                <TableCell sx={{ fontWeight: "bold" }}>Type</TableCell>
+                <TableCell align="right" sx={{ fontWeight: "bold" }}>
+                  Amount
                 </TableCell>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHead>
+
+            <TableBody>
+              {transactions.slice(0, 8).map((t) => (
+                <TableRow key={t.id}>
+                  <TableCell>
+                    {new Date(t.createdAt).toLocaleString("en-US")}
+                  </TableCell>
+                  <TableCell>
+                    <Chip
+                      label={TRANSACTION_TYPE_LABELS[t.tipo] || t.tipo}
+                      size="small"
+                    />
+                  </TableCell>
+                  <TableCell align="right" sx={{ fontFamily: "monospace" }}>
+                    {fmt(t.monto)}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
       </AppCard>
 
       {/* MODALS */}
@@ -338,29 +392,49 @@ export default function PortfolioPage() {
         onClose={() => setSellModalOpen(false)}
         onConfirm={handleConfirmSell}
         ceteId={selectedCeteId}
-        authFetch={authFetch}
       />
 
-      <Dialog
-        open={isDepositModalOpen}
-        onClose={() => setIsDepositModalOpen(false)}
-      >
-        <DialogTitle>Add Funds</DialogTitle>
+      <Dialog open={isDepositModalOpen} onClose={handleCloseDepositModal}>
+        <DialogTitle>
+          {isConfirmingDeposit ? "Confirm Deposit" : "Add Funds"}
+        </DialogTitle>
 
         <DialogContent>
-          <TextField
-            fullWidth
-            type="number"
-            value={depositAmount}
-            onChange={(e) => setDepositAmount(e.target.value)}
-          />
+          {isConfirmingDeposit ? (
+            <Typography sx={{ mt: 1 }}>
+              Are you sure you want to deposit{" "}
+              <strong>{fmt(parseFloat(depositAmount))}</strong> into your
+              account?
+            </Typography>
+          ) : (
+            <TextField
+              autoFocus
+              fullWidth
+              label="Amount"
+              type="number"
+              value={depositAmount}
+              onChange={(e) => setDepositAmount(e.target.value)}
+              variant="outlined"
+              sx={{ mt: 1 }}
+            />
+          )}
         </DialogContent>
 
-        <DialogActions>
-          <Button onClick={() => setIsDepositModalOpen(false)}>Cancel</Button>
-          <Button onClick={handleDeposit} variant="contained">
-            Confirm
-          </Button>
+        <DialogActions sx={{ p: 2 }}>
+          <Button onClick={handleCloseDepositModal}>Cancel</Button>
+          {isConfirmingDeposit ? (
+            <Button onClick={handleDeposit} variant="contained" color="primary">
+              Confirm Deposit
+            </Button>
+          ) : (
+            <Button
+              onClick={() => setIsConfirmingDeposit(true)}
+              variant="contained"
+              disabled={!depositAmount || parseFloat(depositAmount) <= 0}
+            >
+              Continue
+            </Button>
+          )}
         </DialogActions>
       </Dialog>
 

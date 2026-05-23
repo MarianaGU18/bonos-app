@@ -16,12 +16,16 @@ import {
   Container,
   Grid,
   Stack,
+  Alert,
+  Snackbar,
+  IconButton,
   Divider,
 } from "@mui/material";
 
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import ShieldOutlinedIcon from "@mui/icons-material/ShieldOutlined";
+import CloseIcon from "@mui/icons-material/Close";
 import InsightsOutlinedIcon from "@mui/icons-material/InsightsOutlined";
 
 import { StyledTextField, PrimaryButton } from "../components/FormComponents";
@@ -53,6 +57,8 @@ export default function RegisterPage() {
   const [activeStep, setActiveStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
 
   const [name, setName] = useState("");
   const [lastname, setLastname] = useState("");
@@ -62,6 +68,11 @@ export default function RegisterPage() {
   const [password, setPassword] = useState("");
 
   const handleNext = () => setActiveStep((p) => p + 1);
+
+  const handleCloseSnackbar = (event, reason) => {
+    if (reason === "clickaway") return;
+    setSnackbarOpen(false);
+  };
 
   const handleRegister = async (e) => {
     e.preventDefault();
@@ -80,7 +91,10 @@ export default function RegisterPage() {
 
       handleNext();
     } catch (err) {
-      setError(err.message);
+      console.error("Registration failed:", err);
+      // Ahora confiamos plenamente en el mensaje que viene del AuthContext
+      setSnackbarMessage(err.message);
+      setSnackbarOpen(true);
     } finally {
       setLoading(false);
     }
@@ -229,16 +243,6 @@ export default function RegisterPage() {
                 {/* NO TOCO FORM NI LÓGICA */}
                 {activeStep === 0 ? (
                   <form onSubmit={handleRegister}>
-                    {error && (
-                      <Box
-                        sx={{
-                          mb: 3,
-                        }}
-                      >
-                        <Typography color="error.main">{error}</Typography>
-                      </Box>
-                    )}
-
                     <StyledTextField
                       label="Name"
                       value={name}
@@ -311,6 +315,23 @@ export default function RegisterPage() {
                 )}
               </CardContent>
             </Card>
+
+            {/* Snackbar para mensajes emergentes */}
+            <Snackbar
+              open={snackbarOpen}
+              autoHideDuration={6000}
+              onClose={handleCloseSnackbar}
+              anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+            >
+              <Alert
+                onClose={handleCloseSnackbar}
+                severity="error"
+                variant="filled"
+                sx={{ width: "100%" }}
+              >
+                {snackbarMessage}
+              </Alert>
+            </Snackbar>
           </Grid>
         </Grid>
       </Container>
