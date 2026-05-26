@@ -1,63 +1,63 @@
 "use client";
 
-import * as React from "react";
+import React, { useState } from "react";
 import {
-  Button,
   Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
   DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
   TextField,
+  Typography,
+  Box,
 } from "@mui/material";
 
-// ======================================================================
-// COMPONENT: AddFundsModal
-// ======================================================================
-
 export default function AddFundsModal({ open, onClose, onAddFunds }) {
-  const [amount, setAmount] = React.useState("");
+  const [amount, setAmount] = useState("");
 
   const handleAdd = () => {
-    // We'll add validation and the actual API call here later.
-    onAddFunds(amount);
-    handleClose();
+    const val = parseFloat(amount);
+    if (val > 0) {
+      onAddFunds(val);
+      handleClose();
+    }
   };
 
   const handleClose = () => {
-    setAmount(""); // Reset amount on close
+    setAmount("");
     onClose();
   };
 
   return (
-    <Dialog open={open} onClose={handleClose}>
-      <DialogTitle>Add Funds to Your Account</DialogTitle>
+    <Dialog open={open} onClose={handleClose} fullWidth maxWidth="xs">
+      <DialogTitle sx={{ fontWeight: "bold" }}>Add Funds</DialogTitle>
       <DialogContent>
-        <DialogContentText sx={{ mb: 2 }}>
-          Please enter the amount you would like to add. The funds will be
-          available in your account immediately after processing.
-        </DialogContentText>
-        <TextField
-          autoFocus
-          margin="dense"
-          id="amount"
-          label="Amount (MXN)"
-          type="number"
-          fullWidth
-          variant="outlined"
-          value={amount}
-          onChange={(e) => setAmount(e.target.value)}
-          InputProps={{
-            startAdornment: <span style={{ marginRight: "5px" }}>$</span>,
-          }}
-        />
+        <Box sx={{ mt: 1 }}>
+          <Typography variant="body2" color="text.secondary" gutterBottom>
+            Enter the amount you would like to deposit into your account.
+          </Typography>
+          <TextField
+            autoFocus
+            fullWidth
+            label="Amount (MXN)"
+            type="number"
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+            variant="outlined"
+            sx={{ mt: 2 }}
+          />
+        </Box>
       </DialogContent>
-      <DialogActions sx={{ p: 3, pt: 1 }}>
-        <Button onClick={handleClose} color="secondary">
+      <DialogActions sx={{ p: 2, pt: 0 }}>
+        <Button onClick={handleClose} color="inherit">
           Cancel
         </Button>
-        <Button onClick={handleAdd} variant="contained">
-          Add Funds
+        <Button
+          onClick={handleAdd}
+          variant="contained"
+          disabled={!amount || parseFloat(amount) <= 0}
+        >
+          Deposit
         </Button>
       </DialogActions>
     </Dialog>

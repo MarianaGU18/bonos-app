@@ -39,7 +39,7 @@ services:
 
     environment:
       DATABASE_URL: mysql://root:root@mysql:3306/bonos_db
-      BANXICO_TOKEN: ${BANXICO_TOKEN}
+
     networks:
       - bonos-net
 

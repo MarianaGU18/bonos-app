@@ -106,7 +106,6 @@ function DashboardContent({ user, isAuthenticated }) {
   const [portfolio, setPortfolio] = useState({
     cashBalance: 0,
     cetesBalance: 0,
-    bondsBalance: 0,
     total: 0,
   });
   const [chartData, setChartData] = useState([]);
@@ -131,7 +130,6 @@ function DashboardContent({ user, isAuthenticated }) {
       const currentPortfolio = {
         cashBalance: portData.cashBalance,
         cetesBalance: portData.cetesBalance,
-        bondsBalance: portData.bondsBalance,
         total: portData.totalBalance,
       };
 
@@ -393,6 +391,7 @@ function DashboardContent({ user, isAuthenticated }) {
                 borderRadius: 4,
                 boxShadow: 2,
                 bgcolor: "#f8fafc",
+                border: "2px solid #1976d2",
                 height: "100%",
                 display: "flex",
                 flexDirection: "column",
@@ -415,42 +414,14 @@ function DashboardContent({ user, isAuthenticated }) {
               </Typography>
             </Paper>
           </Grid>
-          <Grid item xs={12} md={2}>
+          <Grid item xs={12} md={4}>
             <Paper
               sx={{
                 p: 3,
                 borderRadius: 4,
                 boxShadow: 2,
                 bgcolor: "#f8fafc",
-                height: "100%",
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "space-between",
-                transition: "0.2s ease",
-                "&:hover": { transform: "translateY(-4px)", boxShadow: 4 },
-              }}
-            >
-              <Stack direction="row" spacing={1} alignItems="center" mb={1}>
-                <InsightsIcon fontSize="small" sx={{ color: "#16a34a" }} />
-                <Typography variant="overline" sx={{ fontWeight: 700 }}>
-                  Bonddia
-                </Typography>
-              </Stack>
-              <Typography
-                variant="h5"
-                sx={{ fontWeight: 700, fontFamily: "monospace" }}
-              >
-                {fmt(portfolio.bondsBalance)}
-              </Typography>
-            </Paper>
-          </Grid>
-          <Grid item xs={12} md={2}>
-            <Paper
-              sx={{
-                p: 3,
-                borderRadius: 4,
-                boxShadow: 2,
-                bgcolor: "#f8fafc",
+                border: "2px solid #10b981",
                 height: "100%",
                 display: "flex",
                 flexDirection: "column",
@@ -480,6 +451,7 @@ function DashboardContent({ user, isAuthenticated }) {
                 borderRadius: 4,
                 boxShadow: 2,
                 bgcolor: "#0f172a",
+                border: "2px solid #8b5cf6",
                 color: "white",
                 height: "100%",
                 display: "flex",
@@ -514,6 +486,7 @@ function DashboardContent({ user, isAuthenticated }) {
               height: 320,
               borderRadius: 4,
               boxShadow: 2,
+              border: "2px solid #1976d2",
               bgcolor: "#f8fafc",
               transition: "0.2s ease",
               "&:hover": { boxShadow: 4 },

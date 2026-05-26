@@ -71,7 +71,6 @@ export default function PortfolioPage() {
   const [portfolio, setPortfolio] = useState({
     cashBalance: 0,
     cetesBalance: 0,
-    bondsBalance: 0,
     total: 0,
   });
 
@@ -111,7 +110,6 @@ export default function PortfolioPage() {
       setPortfolio({
         cashBalance: portData.cashBalance,
         cetesBalance: portData.cetesBalance,
-        bondsBalance: portData.bondsBalance,
         total: portData.totalBalance,
       });
 
@@ -162,12 +160,9 @@ export default function PortfolioPage() {
     setSellModalOpen(true);
   };
 
-  const handleConfirmSell = async (id, includeBonddia) => {
+  const handleConfirmSell = async (id) => {
     try {
-      const res = await authFetch(
-        `/cetes/vender/${id}?includeBonddia=${includeBonddia}`,
-        { method: "POST" },
-      );
+      const res = await authFetch(`/cetes/vender/${id}`, { method: "POST" });
 
       if (!res.ok) throw new Error();
 
@@ -236,28 +231,29 @@ export default function PortfolioPage() {
       {/* SUMMARY */}
       <Grid container spacing={2} mb={4}>
         <Grid item xs={12} md={4}>
-          <AppCard>
+          <AppCard sx={{ border: "2px solid #1976d2" }}>
             <Typography variant="overline">Available Cash</Typography>
             <Typography variant="h4">{fmt(portfolio.cashBalance)}</Typography>
           </AppCard>
         </Grid>
 
-        <Grid item xs={12} md={2}>
-          <AppCard>
-            <Typography variant="overline">Bonddia</Typography>
-            <Typography variant="h5">{fmt(portfolio.bondsBalance)}</Typography>
-          </AppCard>
-        </Grid>
-
-        <Grid item xs={12} md={2}>
-          <AppCard>
+        <Grid item xs={12} md={4}>
+          <AppCard sx={{ border: "2px solid #10b981" }}>
             <Typography variant="overline">CETES</Typography>
-            <Typography variant="h4">{fmt(portfolio.cetesBalance)}</Typography>
+            <Typography variant="h4" color="primary">
+              {fmt(portfolio.cetesBalance)}
+            </Typography>
           </AppCard>
         </Grid>
 
         <Grid item xs={12} md={4}>
-          <AppCard sx={{ bgcolor: "primary.main", color: "white" }}>
+          <AppCard
+            sx={{
+              bgcolor: "primary.main",
+              color: "white",
+              border: "2px solid #8b5cf6",
+            }}
+          >
             <Typography variant="overline">Total</Typography>
             <Typography variant="h4">{fmt(portfolio.total)}</Typography>
           </AppCard>
@@ -265,7 +261,7 @@ export default function PortfolioPage() {
       </Grid>
 
       {/* TABLE: INVESTMENTS */}
-      <AppCard sx={{ mb: 4 }}>
+      <AppCard sx={{ mb: 4, border: "2px solid #8b5cf6" }}>
         <Stack direction="row" spacing={1} mb={2}>
           <ReceiptLongIcon />
           <Typography variant="h6">Active Holdings</Typography>
@@ -333,7 +329,7 @@ export default function PortfolioPage() {
       </AppCard>
 
       {/* HISTORY */}
-      <AppCard>
+      <AppCard sx={{ border: "2px solid #1976d2" }}>
         <Stack direction="row" spacing={1} mb={2}>
           <HistoryIcon />
           <Typography variant="h6">Recent History</Typography>

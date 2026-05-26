@@ -6,7 +6,6 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import org.springframework.scheduling.annotation.Scheduled;
 import java.time.temporal.ChronoUnit;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -39,16 +38,6 @@ public class CetesService {
     private static final int SCALE = 12;
     private static final int MONEY = 2;
 
-    // =========================
-    // BONDDIA CONFIGURABLE
-    // =========================
-
-    @Value("${finanzas.bonddia.tasa}")
-    private BigDecimal tasaBonddia;
-
-    @Value("${finanzas.bonddia.precio}")
-    private BigDecimal precioBonddia;
-
     @Autowired
     private TransaccionService transaccionService;
 
@@ -57,9 +46,6 @@ public class CetesService {
 
     @Autowired
     private PortafolioRepository portafolioRepository;
-
-    @Autowired
-    private BanxicoService banxicoService;
 
     // Cache para almacenar las tasas actuales (Plazo -> Tasa)
     private final Map<Integer, BigDecimal> currentRates = new ConcurrentHashMap<>();
@@ -90,30 +76,11 @@ public class CetesService {
         BigDecimal interesCetes = valorFinalCetes.subtract(inversionCetes);
 
         // =========================
-        // BONDDIA
-        // =========================
-
-        int titulosBonddia =
-                remanente.divide(precioBonddia, 0, RoundingMode.DOWN).intValue();
-
-        BigDecimal inversionBonddia =
-                precioBonddia.multiply(bd(titulosBonddia));
-
-        BigDecimal remanenteFinal =
-                remanente.subtract(inversionBonddia);
-
-        BigDecimal interesBonddia =
-                inversionBonddia
-                        .multiply(tasaBonddia.divide(bd(100), SCALE, RoundingMode.HALF_UP))
-                        .multiply(bd(plazo))
-                        .divide(DIAS, SCALE, RoundingMode.HALF_UP);
-
-        // =========================
         // ISR (AJUSTE MÁS REALISTA)
         // =========================
         
-        // El ISR se calcula sobre el capital invertido (Cetes + Bonddia)
-        BigDecimal baseIsr = inversionCetes.add(inversionBonddia);
+        // El ISR se calcula solo sobre el capital invertido en Cetes
+        BigDecimal baseIsr = inversionCetes;
 
         BigDecimal isr =
                 baseIsr
@@ -126,9 +93,9 @@ public class CetesService {
         // =========================
 
         BigDecimal totalFinal =
-                baseIsr
+                valorFinalCetes
                         .subtract(isr)
-                        .add(remanenteFinal);
+                        .add(remanente);
 
         // =========================
         // RESPONSE
@@ -144,38 +111,19 @@ public class CetesService {
                 inversionCetes.setScale(MONEY, RoundingMode.HALF_UP),
                 interesCetes.setScale(MONEY, RoundingMode.HALF_UP),
 
-                remanenteFinal.setScale(MONEY, RoundingMode.HALF_UP),
-
-                titulosBonddia,
-                tasaBonddia.setScale(MONEY, RoundingMode.HALF_UP),
-                inversionBonddia.setScale(MONEY, RoundingMode.HALF_UP),
-                interesBonddia.setScale(MONEY, RoundingMode.HALF_UP),
+                remanente.setScale(MONEY, RoundingMode.HALF_UP),
 
                 isr.setScale(MONEY, RoundingMode.HALF_UP)
         );
     }
 
-    /**
-     * Tarea programada para actualizar tasas desde Banxico.
-     * Se ejecuta cada día a las 9:00 AM.
-     */
-    @Scheduled(cron = "0 0 9 * * MON-FRI")
-    public void updateRatesFromBanxico() {
-        try {
-            currentRates.put(28, bd(banxicoService.getCetes28dias()));
-            currentRates.put(91, bd(banxicoService.getCetes91dias()));
-            currentRates.put(182, bd(banxicoService.getCetes182dias()));
-            currentRates.put(364, bd(banxicoService.getCetes364dias()));
-            System.out.println("Tasas CETES actualizadas exitosamente desde Banxico.");
-        } catch (Exception e) {
-            System.err.println("Error al actualizar tasas: " + e.getMessage());
-        }
-    }
-
     public Map<Integer, BigDecimal> getCurrentRates() {
-        // Si el cache está vacío (ej. inicio de app), forzar actualización
         if (currentRates.isEmpty()) {
-            updateRatesFromBanxico();
+            // Inicializamos con nuestras propias estimaciones manuales por defecto
+            currentRates.put(28, bd(6.45));
+            currentRates.put(91, bd(11.15));
+            currentRates.put(182, bd(11.30));
+            currentRates.put(364, bd(11.50));
         }
         return currentRates;
     }
@@ -203,16 +151,11 @@ public class CetesService {
         CetesResponse calc = calcularInversion(monto, plazo, tasaFinal.doubleValue());
 
         // 2. Actualizar Balances del Portafolio
-        // Se descuenta el monto total invertido del efectivo disponible ($1,000.00)
-        portafolio.setCashBalance(portafolio.getCashBalance().subtract(totalAmountToCharge));
+        // Se descuenta SOLO la inversión real. El remanente se queda en cashBalance.
+        portafolio.setCashBalance(portafolio.getCashBalance().subtract(calc.getInversionCetes()));
         
         // Se suma el valor de los títulos de CETES al balance de CETES
         portafolio.setCetesBalance(portafolio.getCetesBalance().add(calc.getInversionCetes()));
-        
-        // Se suma la inversión de Bonddia y el remanente líquido al balance de bonos.
-        // Esto asegura que el efectivo disponible quede en 0 tras la compra,
-        // ya que los centavos sobrantes se consideran parte del fondo Bonddia.
-        portafolio.setBondsBalance(portafolio.getBondsBalance().add(calc.getInversionBonddia()).add(calc.getRemanente()));
         
         Portafolio updated = portafolioRepository.save(portafolio);
 
@@ -227,7 +170,7 @@ public class CetesService {
 
         // 4. Registrar Transacción
         String description = String.format("CETES Purchase - %d days (Rate: %.2f%%)", plazo, tasaFinal);
-        transaccionService.registrarTransaccion(user, TipoTransaccion.COMPRA, totalAmountToCharge, description);
+        transaccionService.registrarTransaccion(user, TipoTransaccion.COMPRA, calc.getInversionCetes(), description);
 
         return updated;
     }
@@ -264,7 +207,7 @@ public class CetesService {
      * Devuelve el capital invertido al balance de efectivo.
      */
     @Transactional
-    public Portafolio venderCetes(Long ceteId, boolean includeBonddia) {
+    public Portafolio venderCetes(Long ceteId) {
         Cete cete = ceteRepository.findById(ceteId)
                 .orElseThrow(() -> new RuntimeException("CETE investment not found"));
 
@@ -296,13 +239,6 @@ public class CetesService {
         portafolio.setCashBalance(portafolio.getCashBalance().add(montoVentaFinal));
         portafolio.setTotalBalance(portafolio.getTotalBalance().add(gananciaGenerada));
 
-        if (includeBonddia) {
-            BigDecimal bondsAmount = portafolio.getBondsBalance();
-            portafolio.setCashBalance(portafolio.getCashBalance().add(bondsAmount));
-            portafolio.setBondsBalance(BigDecimal.ZERO);
-            transaccionService.registrarTransaccion(portafolio.getUser(), TipoTransaccion.VENTA, bondsAmount, "Bonddia Liquidation (included in CETE sale)");
-        }
-
         Portafolio updated = portafolioRepository.save(portafolio);
 
         // 2. Registrar Transacción de Venta
@@ -315,8 +251,10 @@ public class CetesService {
         return updated;
     }
 
-    public List<Cete> obtenerInversiones(Long portfolioId) {
-        return ceteRepository.findByPortafolioId(portfolioId);
+    public List<Cete> obtenerInversiones(Long userId) {
+        Portafolio p = portafolioRepository.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException("Portfolio not found"));
+        return ceteRepository.findByPortafolioId(p.getId());
     }
 
     // =========================

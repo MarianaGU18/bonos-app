@@ -1,12 +1,66 @@
 "use client";
 
-import { createContext, useContext, useState, useCallback } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  useMemo,
+} from "react";
 
 const AuthContext = createContext();
 
 // Definimos la URL base para las APIs de autenticación y transacciones
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL_V1 || "http://localhost:8080/api/v1";
+
+// Función auxiliar para manejar respuestas de la API
+// Definida fuera del componente para que sea una referencia estática estable
+const handleResponse = async (res) => {
+  const text = await res.text();
+  let data = {};
+
+  try {
+    data = text ? JSON.parse(text) : {};
+  } catch (e) {
+    data = { message: text };
+  }
+
+  if (!res.ok) {
+    const statusMessages = {
+      400: "The information provided is incorrect. Please check the fields.",
+      401: "Your session has expired. Please log in again.",
+      403: "Access denied. This is likely a security configuration issue on the server.",
+      404: "The requested resource was not found.",
+      409: "This email address is already registered. Please use another one.",
+      500: "Our servers are having trouble. Please try again in a few minutes.",
+    };
+
+    const serverMsg = data.message || data.error || "";
+    const isGeneric =
+      !serverMsg ||
+      [
+        "Conflict",
+        "Forbidden",
+        "Bad Request",
+        "Unauthorized",
+        "No message available",
+        "Access Denied",
+      ].includes(serverMsg);
+
+    const errorMessage = isGeneric
+      ? statusMessages[res.status] ||
+        serverMsg ||
+        res.statusText ||
+        "An unexpected error occurred"
+      : serverMsg;
+
+    const error = new Error(errorMessage);
+    error.status = res.status;
+    throw error;
+  }
+  return data;
+};
 
 export function AuthProvider({ children }) {
   // Función de limpieza para asegurar consistencia en los nombres de campos
@@ -46,54 +100,6 @@ export function AuthProvider({ children }) {
 
     return res;
   }, []);
-
-  const handleResponse = async (res) => {
-    const text = await res.text();
-    let data = {};
-
-    try {
-      data = text ? JSON.parse(text) : {};
-    } catch (e) {
-      data = { message: text };
-    }
-
-    if (!res.ok) {
-      const statusMessages = {
-        400: "The information provided is incorrect. Please check the fields.",
-        401: "Your session has expired. Please log in again.",
-        403: "Access denied. This is likely a security configuration issue on the server.",
-        404: "The requested resource was not found.",
-        409: "This email address is already registered. Please use another one.",
-        500: "Our servers are having trouble. Please try again in a few minutes.",
-      };
-
-      // Si el mensaje del servidor es genérico (como "Forbidden" o "Conflict"),
-      // usamos nuestra traducción amigable. Si es específico, usamos el del servidor.
-      const serverMsg = data.message || data.error || "";
-      const isGeneric =
-        !serverMsg ||
-        [
-          "Conflict",
-          "Forbidden",
-          "Bad Request",
-          "Unauthorized",
-          "No message available",
-          "Access Denied",
-        ].includes(serverMsg);
-
-      const errorMessage = isGeneric
-        ? statusMessages[res.status] ||
-          serverMsg ||
-          res.statusText ||
-          "An unexpected error occurred"
-        : serverMsg;
-
-      const error = new Error(errorMessage);
-      error.status = res.status;
-      throw error;
-    }
-    return data;
-  };
 
   // This function remains for profile text updates (name, etc.)
   const updateUser = async (newUserData) => {
@@ -285,13 +291,33 @@ export function AuthProvider({ children }) {
     }
   };
 
-  const buyCetes = async (monto, dias) => {
+  const getCetesRates = useCallback(async () => {
+    const response = await authFetch("/cetes/rates");
+    return await handleResponse(response);
+  }, [authFetch]);
+
+  const calculateInversion = useCallback(
+    async (monto, plazo, tasa) => {
+      // Aseguramos que los valores sean numéricos antes de enviarlos
+      const m = parseFloat(monto) || 0;
+      const p = parseInt(plazo) || 28;
+      const t = parseFloat(tasa) || 0;
+
+      const response = await authFetch(
+        `/cetes/calcular?monto=${m}&plazo=${p}&tasa=${t}`,
+      );
+      return await handleResponse(response);
+    },
+    [authFetch],
+  );
+
+  const buyCetes = async (monto, plazo, tasa) => {
     if (!user) return;
     setLoading(true);
     try {
       const response = await authFetch("/cetes/comprar", {
         method: "POST",
-        body: JSON.stringify({ userId: user.id, monto, dias }),
+        body: JSON.stringify({ userId: user.id, monto, plazo, tasa }),
       });
 
       const updatedPortfolio = await handleResponse(response);
@@ -329,6 +355,8 @@ export function AuthProvider({ children }) {
         authFetch,
         sellCetes,
         buyCetes,
+        calculateInversion,
+        getCetesRates,
         estimateCeteSale,
         isAuthenticated: !!user,
       }}
