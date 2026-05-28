@@ -1,31 +1,40 @@
 "use client";
 
-import * as React from "react";
 import {
-  Box,
-  Typography,
-  Grid,
-  Card,
-  CardContent,
-  Paper,
-  CircularProgress,
-  Button,
-  Container,
-  Divider,
-  Stack,
   Alert,
+  Box,
+  Button,
+  Chip,
+  CircularProgress,
+  Container,
+  Paper,
+  Stack,
+  Typography,
 } from "@mui/material";
 import Link from "next/link";
-import { useAuth } from "../context/AuthContext";
 import { useRouter } from "next/navigation";
-import { useEffect, useState, useCallback } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
-import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
-import InsightsIcon from "@mui/icons-material/Insights";
-import TrendingUpIcon from "@mui/icons-material/TrendingUp";
-import PersonIcon from "@mui/icons-material/Person";
+import AccountBalanceWalletOutlinedIcon from "@mui/icons-material/AccountBalanceWalletOutlined";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import AutoGraphOutlinedIcon from "@mui/icons-material/AutoGraphOutlined";
+import DonutLargeOutlinedIcon from "@mui/icons-material/DonutLargeOutlined";
+import InsightsOutlinedIcon from "@mui/icons-material/InsightsOutlined";
+import PersonOutlineOutlinedIcon from "@mui/icons-material/PersonOutlineOutlined";
+import SavingsOutlinedIcon from "@mui/icons-material/SavingsOutlined";
+import ShieldOutlinedIcon from "@mui/icons-material/ShieldOutlined";
+import TrendingUpOutlinedIcon from "@mui/icons-material/TrendingUpOutlined";
+import { useAuth } from "../context/AuthContext";
 
-// ---------------- DYNAMIC CHART ----------------
+const chartColors = {
+  cash: "#3877D6",
+  cetes: "#27B58A",
+  bonds: "#C98922",
+  yield: "#7C5CFC",
+  grid: "rgba(16,24,32,0.08)",
+  text: "#667382",
+};
+
 const BarChartComponent = dynamic(
   () =>
     import("recharts").then((mod) => {
@@ -39,29 +48,41 @@ const BarChartComponent = dynamic(
         ResponsiveContainer,
       } = mod;
 
-      return function ChartWrapper(props) {
+      return function ChartWrapper({ data }) {
         return (
-          <ResponsiveContainer width="99%" height={220}>
-            <BarChart
-              data={props.data}
-              margin={{ top: 10, right: 20, left: -10, bottom: 0 }}
-            >
-              <CartesianGrid strokeDasharray="3 3" />
-
-              <XAxis dataKey="name" />
-
-              <YAxis tickFormatter={(value) => `$${value / 1000}k`} />
-
+          <ResponsiveContainer width="100%" height={290}>
+            <BarChart data={data} margin={{ top: 12, right: 10, left: -12, bottom: 0 }} barCategoryGap="28%">
+              <defs>
+                <linearGradient id="portfolioBar" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#27B58A" stopOpacity={0.98} />
+                  <stop offset="100%" stopColor="#3877D6" stopOpacity={0.88} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid vertical={false} stroke={chartColors.grid} strokeDasharray="4 6" />
+              <XAxis
+                dataKey="name"
+                axisLine={false}
+                tickLine={false}
+                tick={{ fill: chartColors.text, fontSize: 12, fontWeight: 700 }}
+                dy={8}
+              />
+              <YAxis
+                axisLine={false}
+                tickLine={false}
+                tick={{ fill: chartColors.text, fontSize: 12 }}
+                width={64}
+                tickFormatter={(value) => `$${Math.round(value / 1000)}k`}
+              />
               <Tooltip
-                formatter={(value) => `$${value.toLocaleString("es-MX")}`}
+                cursor={{ fill: "rgba(39,181,138,0.08)" }}
+                contentStyle={{
+                  borderRadius: 12,
+                  border: "1px solid rgba(16,24,32,0.10)",
+                  boxShadow: "0 18px 38px rgba(16,24,32,0.14)",
+                }}
+                formatter={(value) => [`$${Number(value).toLocaleString("es-MX")}`, "Valor"]}
               />
-
-              <Bar
-                dataKey="value"
-                name="Portfolio Value"
-                fill="#1976d2"
-                radius={[8, 8, 0, 0]}
-              />
+              <Bar dataKey="value" name="Valor de cartera" fill="url(#portfolioBar)" radius={[8, 8, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         );
@@ -70,37 +91,105 @@ const BarChartComponent = dynamic(
   {
     ssr: false,
     loading: () => (
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          height: "100%",
-        }}
-      >
+      <Box sx={{ display: "grid", placeItems: "center", height: 290 }}>
         <CircularProgress />
       </Box>
     ),
   },
 );
 
-// ---------------- CARD STYLE ----------------
-const dashboardCardStyle = {
-  height: "100%",
-  display: "flex",
-  flexDirection: "column",
-  borderRadius: 4,
-  boxShadow: 2,
-  transition: "0.2s ease",
-  bgcolor: "#f8fafc",
-  "&:hover": {
-    transform: "translateY(-4px)",
-    boxShadow: 5,
-    //borderColor: "#8b1fac",
-  },
-};
+const DonutChartComponent = dynamic(
+  () =>
+    import("recharts").then((mod) => {
+      const { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } = mod;
 
-// ---------------- DASHBOARD CONTENT ----------------
+      return function DonutWrapper({ data }) {
+        return (
+          <ResponsiveContainer width="100%" height={250}>
+            <PieChart>
+              <Pie
+                data={data}
+                dataKey="value"
+                nameKey="name"
+                innerRadius={72}
+                outerRadius={105}
+                paddingAngle={3}
+                stroke="none"
+              >
+                {data.map((entry) => (
+                  <Cell key={entry.name} fill={entry.color} />
+                ))}
+              </Pie>
+              <Tooltip
+                contentStyle={{
+                  borderRadius: 12,
+                  border: "1px solid rgba(16,24,32,0.10)",
+                  boxShadow: "0 18px 38px rgba(16,24,32,0.14)",
+                }}
+                formatter={(value, name) => [`$${Number(value).toLocaleString("es-MX")}`, name]}
+              />
+            </PieChart>
+          </ResponsiveContainer>
+        );
+      };
+    }),
+  {
+    ssr: false,
+    loading: () => (
+      <Box sx={{ display: "grid", placeItems: "center", height: 250 }}>
+        <CircularProgress />
+      </Box>
+    ),
+  },
+);
+
+function MetricCard({ icon, label, value, helper, tone = "light" }) {
+  const dark = tone === "dark";
+  return (
+    <Paper
+      sx={{
+        p: 2.5,
+        minHeight: 156,
+        bgcolor: dark ? "#101820" : "#FFFFFF",
+        color: dark ? "#fff" : "#101820",
+        borderRadius: "18px",
+        border: dark ? "1px solid rgba(255,255,255,0.10)" : "1px solid rgba(16,24,32,0.10)",
+        boxShadow: dark ? "0 24px 58px rgba(16,24,32,0.18)" : "0 14px 34px rgba(16,24,32,0.06)",
+      }}
+    >
+      <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
+        <Box
+          sx={{
+            width: 42,
+            height: 42,
+            borderRadius: "12px",
+            display: "grid",
+            placeItems: "center",
+            bgcolor: dark ? "rgba(255,255,255,0.08)" : "rgba(39,181,138,0.10)",
+            color: dark ? "#DDF7EE" : "#27B58A",
+          }}
+        >
+          {icon}
+        </Box>
+        <Chip
+          label={helper}
+          size="small"
+          sx={{
+            bgcolor: dark ? "rgba(39,181,138,0.16)" : "#F5F7FA",
+            color: dark ? "#DDF7EE" : "#667382",
+          }}
+        />
+      </Stack>
+      <Typography sx={{ mt: 2.4, color: dark ? "rgba(255,255,255,0.58)" : "#667382", fontSize: 13, fontWeight: 800 }}>
+        {label}
+      </Typography>
+      <Typography sx={{ mt: 0.8, fontSize: { xs: 27, md: 31 }, lineHeight: 1, fontWeight: 950 }}>
+        {value}
+      </Typography>
+    </Paper>
+  );
+}
+
 function DashboardContent({ user, isAuthenticated }) {
   const { authFetch } = useAuth();
   const [portfolio, setPortfolio] = useState({
@@ -135,39 +224,19 @@ function DashboardContent({ user, isAuthenticated }) {
 
       setPortfolio(currentPortfolio);
 
-      // Build real chart data from transaction history
       const transRes = await authFetch(`/portafolio/transacciones/${user.id}`);
       if (transRes.ok) {
         const transactions = await transRes.json();
-        const months = [
-          "Jan",
-          "Feb",
-          "Mar",
-          "Apr",
-          "May",
-          "Jun",
-          "Jul",
-          "Aug",
-          "Sep",
-          "Oct",
-          "Nov",
-          "Dec",
-        ];
+        const months = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
         const now = new Date();
         const history = [];
 
         let runningTotal = currentPortfolio.total;
-        const sortedTrans = [...transactions].sort(
-          (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
-        );
+        const sortedTrans = [...transactions].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
         let transIdx = 0;
 
         for (let i = 0; i < 6; i++) {
-          const targetMonthStart = new Date(
-            now.getFullYear(),
-            now.getMonth() - i,
-            1,
-          );
+          const targetMonthStart = new Date(now.getFullYear(), now.getMonth() - i, 1);
           const monthLabel = months[targetMonthStart.getMonth()];
 
           history.unshift({
@@ -175,13 +244,11 @@ function DashboardContent({ user, isAuthenticated }) {
             value: Number(Math.max(0, runningTotal).toFixed(2)),
           });
 
-          // Reverse-calculate balance by subtracting transactions from the current month
           while (transIdx < sortedTrans.length) {
             const transDate = new Date(sortedTrans[transIdx].createdAt);
             if (transDate >= targetMonthStart) {
               const amount = sortedTrans[transIdx].monto;
               const type = sortedTrans[transIdx].tipo;
-              // If it was an inflow (deposit/sale), subtract it. If outflow (purchase/withdrawal), add it back.
               if (type === "DEPOSITO" || type === "VENTA") {
                 runningTotal -= amount;
               } else {
@@ -197,7 +264,7 @@ function DashboardContent({ user, isAuthenticated }) {
       }
     } catch (error) {
       console.error("Error loading portfolio data for dashboard:", error);
-      setPortfolioError("Failed to load portfolio summary.");
+      setPortfolioError("No se pudo cargar el resumen del portafolio.");
     } finally {
       setLoadingPortfolio(false);
     }
@@ -209,16 +276,23 @@ function DashboardContent({ user, isAuthenticated }) {
     }
   }, [isAuthenticated, loadPortfolioData]);
 
+  const allocationData = useMemo(() => {
+    const items = [
+      { name: "Efectivo", value: Number(portfolio.cashBalance || 0), color: chartColors.cash },
+      { name: "CETES", value: Number(portfolio.cetesBalance || 0), color: chartColors.cetes },
+      { name: "Bonos", value: 0, color: chartColors.bonds },
+      { name: "Rendimiento", value: 0, color: chartColors.yield },
+    ].filter((item) => item.value > 0);
+
+    return items.length ? items : [{ name: "Sin capital", value: 1, color: "#D9E1EA" }];
+  }, [portfolio.cashBalance, portfolio.cetesBalance]);
+
+  const activeRatio = portfolio.total > 0 ? Math.round((portfolio.cetesBalance / portfolio.total) * 100) : 0;
+  const liquidityRatio = portfolio.total > 0 ? Math.round((portfolio.cashBalance / portfolio.total) * 100) : 0;
+
   if (loadingPortfolio) {
     return (
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          height: "80vh",
-        }}
-      >
+      <Box sx={{ display: "grid", placeItems: "center", minHeight: "80vh" }}>
         <CircularProgress />
       </Box>
     );
@@ -228,303 +302,255 @@ function DashboardContent({ user, isAuthenticated }) {
     <Box
       sx={{
         minHeight: "100vh",
-        bgcolor: "#ffffff",
+        background: `
+          radial-gradient(circle at 9% 8%, rgba(39,181,138,0.12), transparent 25%),
+          radial-gradient(circle at 86% 6%, rgba(56,119,214,0.10), transparent 24%),
+          linear-gradient(180deg, #FFFFFF 0%, #F5F7FA 44%, #EEF2F6 100%)
+        `,
       }}
     >
-      <Container
-        maxWidth="lg"
-        sx={{
-          pt: 5,
-          pb: 4,
-        }}
-      >
-        {/* HEADER */}
-        <Box
+      <Container maxWidth="xl" sx={{ py: { xs: 4, md: 5 } }}>
+        <Paper
           sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            mb: 4,
+            p: { xs: 3, md: 4 },
+            mb: 3,
+            borderRadius: "20px",
+            color: "#fff",
+            overflow: "hidden",
+            border: "1px solid rgba(255,255,255,0.12)",
+            background: `
+              radial-gradient(circle at 83% 10%, rgba(39,181,138,0.26), transparent 28%),
+              linear-gradient(145deg, #2F3B48 0%, #101820 100%)
+            `,
+            boxShadow: "0 30px 76px rgba(16,24,32,0.18)",
           }}
         >
-          <Stack direction="row" alignItems="center" spacing={2}>
-            <InsightsIcon color="primary" sx={{ fontSize: 40 }} />
+          <Stack direction={{ xs: "column", md: "row" }} justifyContent="space-between" spacing={3}>
             <Box>
-              <Typography
-                variant="h4"
-                sx={{ fontWeight: 800, color: "#0f172a" }}
-              >
-                DASHBOARD
+              <Chip
+                label="Dashboard financiero"
+                sx={{
+                  mb: 2,
+                  bgcolor: "rgba(39,181,138,0.16)",
+                  color: "#DDF7EE",
+                  border: "1px solid rgba(39,181,138,0.28)",
+                }}
+              />
+              <Typography sx={{ fontSize: { xs: 38, md: 54 }, lineHeight: 1, fontWeight: 950 }}>
+                Hola, {user?.name}.
               </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Welcome back, {user?.name}. Track your performance.
+              <Typography sx={{ mt: 1.6, maxWidth: 680, color: "rgba(255,255,255,0.66)", fontSize: 17 }}>
+                Tu posicion, liquidez y rendimiento se organizan para decidir rapido sin perder control.
               </Typography>
             </Box>
+            <Stack direction={{ xs: "column", sm: "row" }} spacing={1.2} alignItems={{ sm: "center" }}>
+              <Button
+                component={Link}
+                href="/cetes"
+                variant="contained"
+                endIcon={<ArrowForwardIcon />}
+                sx={{ bgcolor: "#fff", color: "#101820", "&:hover": { bgcolor: "#EEF2F6" } }}
+              >
+                Operar CETES
+              </Button>
+              <Button
+                component={Link}
+                href="/perfil"
+                variant="outlined"
+                startIcon={<PersonOutlineOutlinedIcon />}
+                sx={{ color: "#fff", borderColor: "rgba(255,255,255,0.28)" }}
+              >
+                Perfil
+              </Button>
+            </Stack>
           </Stack>
-          <Link href="/perfil" passHref>
-            <Button
-              variant="outlined"
-              startIcon={<PersonIcon />}
-              sx={{
-                borderRadius: 3,
-                textTransform: "none",
-                fontWeight: 600,
-                borderColor: "#003366",
-                color: "#003366",
-                px: 3,
-                "&:hover": {
-                  borderColor: "#002244",
-                  bgcolor: "rgba(0,51,102,0.04)",
-                },
-              }}
-            >
-              View Profile
-            </Button>
-          </Link>
-        </Box>
-
-        {/* ACTION CARDS */}
-        <Grid container spacing={3} sx={{ mb: 5 }}>
-          <Grid item xs={12} md={6} lg={4}>
-            {/* 🔵 AZUL: Grid Item (Acción) sx={{ border: "3px solid #3b82f6" }}*/}
-            <Card sx={dashboardCardStyle}>
-              <CardContent
-                sx={{
-                  flexGrow: 1,
-                  p: 3,
-                }}
-              >
-                <Typography
-                  variant="h5"
-                  sx={{ fontWeight: 700, mb: 1, color: "#0f172a" }}
-                >
-                  CETES Valuation
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Calculate CETES prices using Banxico exchange rates and
-                  financial market data.
-                </Typography>
-              </CardContent>
-
-              <Box sx={{ p: 3, pt: 0 }}>
-                <Link href="/cetes" passHref>
-                  <Button
-                    variant="contained"
-                    fullWidth
-                    size="large"
-                    sx={{
-                      borderRadius: 3,
-                      py: 1.2,
-                      textTransform: "none",
-                      fontWeight: 600,
-                    }}
-                  >
-                    Open Calculator
-                  </Button>
-                </Link>
-              </Box>
-            </Card>
-          </Grid>
-
-          <Grid item xs={12} md={6} lg={4}>
-            {/* 🔵 AZUL: Grid Item (Próximamente) sx={{ border: "3px solid #3b82f6" }}*/}
-            <Card sx={dashboardCardStyle}>
-              <CardContent
-                sx={{
-                  flexGrow: 1,
-                  p: 3,
-                }}
-              >
-                <Typography
-                  variant="h5"
-                  sx={{ fontWeight: 700, mb: 1, color: "#0f172a" }}
-                >
-                  Bonds Valuation
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Soon: Bond M, Udibonos, Bondes and more fixed income products.
-                </Typography>
-              </CardContent>
-
-              <Box sx={{ p: 3, pt: 0 }}>
-                <Button
-                  variant="contained"
-                  disabled
-                  fullWidth
-                  size="large"
-                  sx={{
-                    borderRadius: 3,
-                    py: 1.2,
-                    textTransform: "none",
-                    fontWeight: 600,
-                  }}
-                >
-                  Coming Soon
-                </Button>
-              </Box>
-            </Card>
-          </Grid>
-        </Grid>
-
-        <Divider sx={{ mb: 5 }} />
-
-        {/* SUMMARY */}
-        <Box sx={{ mb: 4, display: "flex", alignItems: "center", gap: 2 }}>
-          <TrendingUpIcon color="action" />
-          <Typography variant="h6" sx={{ fontWeight: 700, color: "#0f172a" }}>
-            Portfolio Summary
-          </Typography>
-        </Box>
+        </Paper>
 
         {portfolioError && (
-          <Alert severity="error" sx={{ mb: 3, borderRadius: 3 }}>
+          <Alert severity="error" sx={{ mb: 3 }}>
             {portfolioError}
           </Alert>
         )}
 
-        {/* SUMMARY CARDS */}
-        <Grid container spacing={2} mb={4}>
-          <Grid item xs={12} md={4}>
-            <Paper
-              sx={{
-                p: 3,
-                borderRadius: 4,
-                boxShadow: 2,
-                bgcolor: "#f8fafc",
-                border: "2px solid #1976d2",
-                height: "100%",
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "space-between",
-                transition: "0.2s ease",
-                "&:hover": { transform: "translateY(-4px)", boxShadow: 4 },
-              }}
-            >
-              <Stack direction="row" spacing={1} alignItems="center" mb={1}>
-                <AccountBalanceWalletIcon fontSize="small" color="primary" />
-                <Typography variant="overline" sx={{ fontWeight: 700 }}>
-                  Available Cash
-                </Typography>
-              </Stack>
-              <Typography
-                variant="h4"
-                sx={{ fontWeight: 700, fontFamily: "monospace" }}
-              >
-                {fmt(portfolio.cashBalance)}
-              </Typography>
-            </Paper>
-          </Grid>
-          <Grid item xs={12} md={4}>
-            <Paper
-              sx={{
-                p: 3,
-                borderRadius: 4,
-                boxShadow: 2,
-                bgcolor: "#f8fafc",
-                border: "2px solid #10b981",
-                height: "100%",
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "space-between",
-                transition: "0.2s ease",
-                "&:hover": { transform: "translateY(-4px)", boxShadow: 4 },
-              }}
-            >
-              <Stack direction="row" spacing={1} alignItems="center" mb={1}>
-                <TrendingUpIcon fontSize="small" color="secondary" />
-                <Typography variant="overline" sx={{ fontWeight: 700 }}>
-                  Invested in CETES
-                </Typography>
-              </Stack>
-              <Typography
-                variant="h4"
-                sx={{ fontWeight: 700, fontFamily: "monospace" }}
-              >
-                {fmt(portfolio.cetesBalance)}
-              </Typography>
-            </Paper>
-          </Grid>
-          <Grid item xs={12} md={4}>
-            <Paper
-              sx={{
-                p: 3,
-                borderRadius: 4,
-                boxShadow: 2,
-                bgcolor: "#0f172a",
-                border: "2px solid #8b5cf6",
-                color: "white",
-                height: "100%",
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "space-between",
-                transition: "0.2s ease",
-                "&:hover": { transform: "translateY(-4px)", boxShadow: 6 },
-              }}
-            >
-              <Typography
-                variant="overline"
-                sx={{ fontWeight: 700, opacity: 0.8, display: "block", mb: 1 }}
-              >
-                Total Portfolio Value
-              </Typography>
-              <Typography
-                variant="h4"
-                sx={{ fontWeight: 700, fontFamily: "monospace" }}
-              >
-                {fmt(portfolio.total)}
-              </Typography>
-            </Paper>
-          </Grid>
-        </Grid>
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: { xs: "1fr", md: "repeat(3, 1fr)" },
+            gap: 2,
+            mb: 3,
+          }}
+        >
+          <MetricCard
+            icon={<AccountBalanceWalletOutlinedIcon />}
+            label="Efectivo disponible"
+            value={fmt(portfolio.cashBalance)}
+            helper={`${liquidityRatio}% liquido`}
+          />
+          <MetricCard
+            icon={<SavingsOutlinedIcon />}
+            label="Invertido en CETES"
+            value={fmt(portfolio.cetesBalance)}
+            helper={`${activeRatio}% activo`}
+          />
+          <MetricCard
+            icon={<TrendingUpOutlinedIcon />}
+            label="Valor total"
+            value={fmt(portfolio.total)}
+            helper="MXN"
+            tone="dark"
+          />
+        </Box>
 
-        {/* CHART */}
-        <Grid item xs={12} md={8}>
-          {/* 🔵 AZUL: Grid Item del Gráfico sx={{ border: "3px solid #3b82f6" }}*/}
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: { xs: "1fr", lg: "1.55fr 0.95fr" },
+            gap: 2,
+            alignItems: "stretch",
+          }}
+        >
           <Paper
             sx={{
-              p: 3,
-              height: 320,
-              borderRadius: 4,
-              boxShadow: 2,
-              border: "2px solid #1976d2",
-              bgcolor: "#f8fafc",
-              transition: "0.2s ease",
-              "&:hover": { boxShadow: 4 },
+              p: { xs: 2.5, md: 3 },
+              borderRadius: "18px",
+              bgcolor: "rgba(255,255,255,0.92)",
+              boxShadow: "0 18px 44px rgba(16,24,32,0.07)",
             }}
           >
-            <Stack
-              direction="row"
-              justifyContent="space-between"
-              alignItems="center"
-              sx={{ mb: 3 }}
-            >
+            <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" spacing={2} sx={{ mb: 2 }}>
               <Box>
-                <Typography
-                  variant="h6"
-                  sx={{
-                    fontWeight: 600,
-                  }}
-                >
-                  Portfolio Performance
-                </Typography>
-
-                <Typography variant="body2" color="text.secondary">
-                  Last 6 months
+                <Stack direction="row" spacing={1} alignItems="center">
+                  <InsightsOutlinedIcon sx={{ color: "#27B58A" }} />
+                  <Typography sx={{ fontSize: 20, fontWeight: 900 }}>
+                    Evolucion del portafolio
+                  </Typography>
+                </Stack>
+                <Typography sx={{ mt: 0.7, color: "#667382", fontSize: 14 }}>
+                  Ultimos 6 meses calculados desde movimientos registrados.
                 </Typography>
               </Box>
+              <Chip label="Valor mensual" sx={{ alignSelf: "flex-start", bgcolor: "#F5F7FA" }} />
             </Stack>
-
-            <Box sx={{ height: 220 }}>
-              <BarChartComponent data={chartData} />
-            </Box>
+            <BarChartComponent data={chartData} />
           </Paper>
-        </Grid>
+
+          <Paper
+            sx={{
+              p: { xs: 2.5, md: 3 },
+              borderRadius: "18px",
+              bgcolor: "rgba(255,255,255,0.92)",
+              boxShadow: "0 18px 44px rgba(16,24,32,0.07)",
+            }}
+          >
+            <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
+              <DonutLargeOutlinedIcon sx={{ color: "#3877D6" }} />
+              <Typography sx={{ fontSize: 20, fontWeight: 900 }}>
+                Distribucion
+              </Typography>
+            </Stack>
+            <Typography sx={{ color: "#667382", fontSize: 14 }}>
+              Porcentaje del dinero por tipo de posicion.
+            </Typography>
+
+            <Box sx={{ position: "relative", mt: 1 }}>
+              <DonutChartComponent data={allocationData} />
+              <Box
+                sx={{
+                  position: "absolute",
+                  inset: "72px 0 auto 0",
+                  textAlign: "center",
+                  pointerEvents: "none",
+                }}
+              >
+                <Typography sx={{ color: "#667382", fontSize: 12, fontWeight: 800 }}>Total</Typography>
+                <Typography sx={{ color: "#101820", fontSize: 23, fontWeight: 950 }}>{fmt(portfolio.total)}</Typography>
+              </Box>
+            </Box>
+
+            <Stack spacing={1.2}>
+              {allocationData.map((item) => {
+                const percent = portfolio.total > 0 ? Math.round((item.value / portfolio.total) * 100) : 0;
+                return (
+                  <Stack key={item.name} direction="row" justifyContent="space-between" alignItems="center">
+                    <Stack direction="row" spacing={1} alignItems="center">
+                      <Box sx={{ width: 10, height: 10, borderRadius: "50%", bgcolor: item.color }} />
+                      <Typography sx={{ color: "#101820", fontWeight: 800 }}>{item.name}</Typography>
+                    </Stack>
+                    <Typography sx={{ color: "#667382", fontWeight: 800 }}>{percent}%</Typography>
+                  </Stack>
+                );
+              })}
+            </Stack>
+          </Paper>
+        </Box>
+
+        <Box
+          sx={{
+            mt: 2,
+            display: "grid",
+            gridTemplateColumns: { xs: "1fr", md: "repeat(2, 1fr)" },
+            gap: 2,
+          }}
+        >
+          {[
+            {
+              icon: <AutoGraphOutlinedIcon />,
+              title: "Valuacion CETES",
+              body: "Calcula precios, plazo, tasa y remanente antes de operar.",
+              href: "/cetes",
+              action: "Abrir calculadora",
+            },
+            {
+              icon: <ShieldOutlinedIcon />,
+              title: "Cartera y movimientos",
+              body: "Revisa posiciones activas, efectivo y actividad reciente.",
+              href: "/portafolio",
+              action: "Ver cartera",
+            },
+          ].map((item) => (
+            <Paper
+              key={item.title}
+              sx={{
+                p: 2.5,
+                borderRadius: "18px",
+                bgcolor: "#fff",
+                display: "flex",
+                justifyContent: "space-between",
+                gap: 2,
+                alignItems: { xs: "flex-start", sm: "center" },
+                flexDirection: { xs: "column", sm: "row" },
+              }}
+            >
+              <Stack direction="row" spacing={1.5} alignItems="flex-start">
+                <Box
+                  sx={{
+                    width: 42,
+                    height: 42,
+                    borderRadius: "12px",
+                    display: "grid",
+                    placeItems: "center",
+                    bgcolor: "rgba(39,181,138,0.10)",
+                    color: "#27B58A",
+                  }}
+                >
+                  {item.icon}
+                </Box>
+                <Box>
+                  <Typography sx={{ fontWeight: 900 }}>{item.title}</Typography>
+                  <Typography sx={{ mt: 0.4, color: "#667382", fontSize: 14 }}>{item.body}</Typography>
+                </Box>
+              </Stack>
+              <Button component={Link} href={item.href} variant="outlined" endIcon={<ArrowForwardIcon />}>
+                {item.action}
+              </Button>
+            </Paper>
+          ))}
+        </Box>
       </Container>
     </Box>
   );
 }
 
-// ---------------- PROTECTED WRAPPER ----------------
 function ProtectedDashboardPage() {
   const { user, isAuthenticated } = useAuth();
   const router = useRouter();
@@ -537,15 +563,7 @@ function ProtectedDashboardPage() {
 
   if (!isAuthenticated) {
     return (
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          height: "100vh",
-          bgcolor: "grey.100",
-        }}
-      >
+      <Box sx={{ display: "grid", placeItems: "center", height: "100vh", bgcolor: "background.default" }}>
         <CircularProgress />
       </Box>
     );

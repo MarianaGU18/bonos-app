@@ -145,7 +145,7 @@ export default function RegisterPage() {
                   key={b.title}
                   elevation={0}
                   sx={(theme) => ({
-                    borderRadius: 4,
+                    borderRadius: 1.2,
                     border: `1px solid ${theme.palette.divider}`,
                     bgcolor: "background.subtle",
                     transition: "all 0.2s ease",
@@ -162,7 +162,7 @@ export default function RegisterPage() {
                         sx={{
                           width: 44,
                           height: 44,
-                          borderRadius: 3,
+                          borderRadius: 1,
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "center",
@@ -201,7 +201,7 @@ export default function RegisterPage() {
             <Card
               elevation={0}
               sx={(theme) => ({
-                borderRadius: 5,
+                borderRadius: 1.4,
                 border: `1px solid ${theme.palette.divider}`,
                 bgcolor: "background.paper",
                 backdropFilter: "blur(10px)",

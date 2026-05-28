@@ -10,9 +10,12 @@ import {
   TextField,
   Typography,
   Box,
+  CircularProgress,
+  Stack,
 } from "@mui/material";
+import AccountBalanceWalletOutlinedIcon from "@mui/icons-material/AccountBalanceWalletOutlined";
 
-export default function AddFundsModal({ open, onClose, onAddFunds }) {
+export default function AddFundsModal({ open, onClose, onAddFunds, loading = false }) {
   const [amount, setAmount] = useState("");
 
   const handleAdd = () => {
@@ -30,16 +33,21 @@ export default function AddFundsModal({ open, onClose, onAddFunds }) {
 
   return (
     <Dialog open={open} onClose={handleClose} fullWidth maxWidth="xs">
-      <DialogTitle sx={{ fontWeight: "bold" }}>Add Funds</DialogTitle>
+      <DialogTitle sx={{ fontWeight: 900 }}>
+        <Stack direction="row" spacing={1.2} alignItems="center">
+          <AccountBalanceWalletOutlinedIcon sx={{ color: "#27B58A" }} />
+          <span>Agregar fondos</span>
+        </Stack>
+      </DialogTitle>
       <DialogContent>
         <Box sx={{ mt: 1 }}>
           <Typography variant="body2" color="text.secondary" gutterBottom>
-            Enter the amount you would like to deposit into your account.
+            Indica el monto que quieres depositar en tu cuenta.
           </Typography>
           <TextField
             autoFocus
             fullWidth
-            label="Amount (MXN)"
+            label="Monto (MXN)"
             type="number"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
@@ -50,14 +58,15 @@ export default function AddFundsModal({ open, onClose, onAddFunds }) {
       </DialogContent>
       <DialogActions sx={{ p: 2, pt: 0 }}>
         <Button onClick={handleClose} color="inherit">
-          Cancel
+          Cancelar
         </Button>
         <Button
           onClick={handleAdd}
           variant="contained"
-          disabled={!amount || parseFloat(amount) <= 0}
+          disabled={loading || !amount || parseFloat(amount) <= 0}
+          startIcon={loading ? <CircularProgress size={18} color="inherit" /> : null}
         >
-          Deposit
+          Depositar
         </Button>
       </DialogActions>
     </Dialog>
