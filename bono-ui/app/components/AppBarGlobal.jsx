@@ -9,7 +9,6 @@ import {
   Divider,
   Drawer,
   IconButton,
-  InputBase,
   Menu,
   MenuItem,
   Stack,
@@ -23,8 +22,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import LogoutIcon from "@mui/icons-material/Logout";
 import MenuIcon from "@mui/icons-material/Menu";
 import NotificationsNoneIcon from "@mui/icons-material/NotificationsNone";
-import SearchIcon from "@mui/icons-material/Search";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 
 const publicNav = [
@@ -52,19 +50,19 @@ function Brand({ href, compact = false }) {
           borderRadius: "12px",
           display: "grid",
           placeItems: "center",
-          color: "#101820",
-          bgcolor: "#DDF7EE",
-          boxShadow: "0 10px 22px rgba(39,181,138,0.22)",
+          color: "#1F2937",
+          bgcolor: "#EEF3F8",
+          boxShadow: "0 10px 22px rgba(127,179,213,0.22)",
         }}
       >
         <AccountBalanceIcon fontSize={compact ? "small" : "medium"} />
       </Box>
       <Box sx={{ lineHeight: 1 }}>
-        <Typography sx={{ color: "#101820", fontSize: compact ? 15 : 17, fontWeight: 900, letterSpacing: 0 }}>
+        <Typography sx={{ color: "#1F2937", fontSize: compact ? 15 : 17, fontWeight: 900, letterSpacing: 0 }}>
           Acero Inteligente
         </Typography>
         {!compact && (
-          <Typography sx={{ display: { xs: "none", sm: "block" }, mt: 0.3, color: "#667382", fontSize: 11, fontWeight: 750 }}>
+          <Typography sx={{ display: { xs: "none", sm: "block" }, mt: 0.3, color: "#1F2937", fontSize: 11, fontWeight: 750 }}>
             Inversion en bonos
           </Typography>
         )}
@@ -90,15 +88,15 @@ function NavLinks({ items, isActive, onNavigate, mobile = false }) {
               px: mobile ? 1.5 : 1.35,
               py: mobile ? 1.1 : 0.85,
               borderRadius: "10px",
-              color: active ? "#101820" : "#667382",
-              bgcolor: active ? "rgba(39,181,138,0.14)" : "transparent",
+              color: active ? "#1F2937" : "#1F2937",
+              bgcolor: active ? "rgba(127,179,213,0.14)" : "transparent",
               boxShadow: "none",
               fontSize: 13,
               fontWeight: 800,
               "&:hover": {
                 transform: "none",
                 boxShadow: "none",
-                bgcolor: active ? "rgba(39,181,138,0.18)" : "rgba(16,24,32,0.05)",
+                bgcolor: active ? "rgba(127,179,213,0.18)" : "rgba(16,24,32,0.05)",
               },
             }}
           >
@@ -116,9 +114,28 @@ export default function AppBarGlobal() {
   const [anchorEl, setAnchorEl] = useState(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [hidden, setHidden] = useState(false);
+  const lastScrollY = useRef(0);
 
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 18);
+    const handleScroll = () => {
+      const currentY = window.scrollY;
+      const delta = currentY - lastScrollY.current;
+
+      setScrolled(currentY > 18);
+
+      if (currentY < 40) {
+        setHidden(false);
+      } else if (currentY > 120 && delta > 10) {
+        setHidden(true);
+      } else if (delta < -10) {
+        setHidden(false);
+      }
+
+      lastScrollY.current = currentY;
+    };
+
+    lastScrollY.current = window.scrollY;
     handleScroll();
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
@@ -149,19 +166,31 @@ export default function AppBarGlobal() {
         top: { xs: 10, md: 14 },
         left: "50%",
         width: "min(1180px, calc(100% - 28px))",
-        transform: "translateX(-50%)",
+        transform: hidden ? "translate(-50%, -92px)" : "translate(-50%, 0)",
         zIndex: (theme) => theme.zIndex.appBar,
         borderRadius: "16px",
-        color: "#101820",
-        border: scrolled || user ? "1px solid rgba(16,24,32,0.12)" : "1px solid rgba(255,255,255,0.34)",
-        bgcolor: scrolled || user ? "rgba(255,255,255,0.82)" : "rgba(255,255,255,0.42)",
-        boxShadow: scrolled || user ? "0 18px 42px rgba(16,24,32,0.10)" : "0 10px 28px rgba(16,24,32,0.04)",
-        backdropFilter: "blur(22px)",
-        transition: "background-color 220ms ease, box-shadow 220ms ease, border-color 220ms ease, transform 220ms ease",
-        "&:hover": { transform: "translateX(-50%)" },
+        color: "#1F2937",
+        border: "1px solid #D8E3EC",
+        bgcolor: "#EEF3F8",
+        boxShadow: scrolled ? "0 12px 28px rgba(11,31,58,0.08)" : "0 6px 18px rgba(11,31,58,0.04)",
+        backdropFilter: "none",
+        transition: "transform 260ms ease, opacity 220ms ease, min-height 220ms ease, background-color 220ms ease, box-shadow 220ms ease, border-color 220ms ease",
+        opacity: hidden ? 0 : 1,
+        pointerEvents: hidden ? "none" : "auto",
+        "&:hover": {
+          transform: "translate(-50%, 0)",
+          opacity: 1,
+        },
       }}
     >
-      <Toolbar sx={{ minHeight: compact ? 58 : 64, px: { xs: 1.4, md: 1.8 }, gap: 1.5 }}>
+      <Toolbar
+        sx={{
+          minHeight: scrolled ? 54 : compact ? 58 : 64,
+          px: { xs: 1.4, md: 1.8 },
+          gap: 1.5,
+          transition: "min-height 220ms ease",
+        }}
+      >
         <Brand href={homePath} compact={compact} />
 
         <Box sx={{ display: { xs: "none", md: "block" }, ml: { md: 2, lg: 4 } }}>
@@ -170,39 +199,16 @@ export default function AppBarGlobal() {
 
         <Stack direction="row" spacing={1} alignItems="center" sx={{ ml: "auto" }}>
           {user && (
-            <Box
-              sx={{
-                display: { xs: "none", lg: "flex" },
-                alignItems: "center",
-                width: 250,
-                px: 1.4,
-                py: 0.65,
-                borderRadius: "12px",
-                bgcolor: "#F5F7FA",
-                border: "1px solid rgba(16,24,32,0.10)",
-                color: "#667382",
-              }}
-            >
-              <SearchIcon sx={{ fontSize: 18, mr: 0.8 }} />
-              <InputBase
-                placeholder="Buscar bono o emisor"
-                inputProps={{ "aria-label": "Buscar bonos" }}
-                sx={{ flex: 1, color: "#101820", fontSize: 13 }}
-              />
-            </Box>
-          )}
-
-          {user && (
             <IconButton
               aria-label="Notificaciones"
               sx={{
                 width: 38,
                 height: 38,
                 borderRadius: "12px",
-                bgcolor: "#F5F7FA",
-                border: "1px solid rgba(16,24,32,0.10)",
-                color: "#17212B",
-                "&:hover": { bgcolor: "rgba(39,181,138,0.12)" },
+                bgcolor: "#EEF3F8",
+                border: "1px solid #D8E3EC",
+                color: "#0B1F3A",
+                "&:hover": { bgcolor: "rgba(127,179,213,0.12)" },
               }}
             >
               <Badge color="info" variant="dot">
@@ -214,7 +220,7 @@ export default function AppBarGlobal() {
           {user ? (
             <>
               <IconButton onClick={(event) => setAnchorEl(event.currentTarget)} aria-label="Abrir menu de usuario" sx={{ p: 0.25 }}>
-                <Avatar sx={{ width: 38, height: 38, borderRadius: "12px", bgcolor: "#17212B", color: "#fff", fontWeight: 900 }}>
+                <Avatar sx={{ width: 38, height: 38, borderRadius: "12px", bgcolor: "#0B1F3A", color: "#fff", fontWeight: 900 }}>
                   {user.name?.charAt(0).toUpperCase() || "U"}
                 </Avatar>
               </IconButton>
@@ -222,7 +228,7 @@ export default function AppBarGlobal() {
                 anchorEl={anchorEl}
                 open={Boolean(anchorEl)}
                 onClose={() => setAnchorEl(null)}
-                PaperProps={{ sx: { mt: 1.3, minWidth: 210, borderRadius: "14px", border: "1px solid rgba(16,24,32,0.12)", boxShadow: "0 22px 56px rgba(16,24,32,0.16)" } }}
+                PaperProps={{ sx: { mt: 1.3, minWidth: 210, borderRadius: "14px", border: "1px solid #D8E3EC", boxShadow: "0 22px 56px rgba(11,31,58,0.14)" } }}
                 anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
                 transformOrigin={{ vertical: "top", horizontal: "right" }}
               >
@@ -238,14 +244,14 @@ export default function AppBarGlobal() {
             </>
           ) : (
             <Stack direction="row" spacing={0.8} sx={{ display: { xs: "none", sm: "flex" } }}>
-              <Button component={Link} href="/login" sx={{ color: "#17212B", px: 1.5, boxShadow: "none" }}>
+              <Button component={Link} href="/login" sx={{ color: "#0B1F3A", px: 1.5, boxShadow: "none" }}>
                 Entrar
               </Button>
               <Button
                 component={Link}
                 href="/register"
                 variant="contained"
-                sx={{ borderRadius: "10px", bgcolor: "#17212B", color: "#fff", px: 2, "&:hover": { bgcolor: "#0B1117" } }}
+                sx={{ borderRadius: "10px", bgcolor: "#0B1F3A", color: "#fff", px: 2, "&:hover": { bgcolor: "#0B1F3A" } }}
               >
                 Crear cuenta
               </Button>
@@ -255,7 +261,7 @@ export default function AppBarGlobal() {
           <IconButton
             onClick={() => setDrawerOpen(true)}
             aria-label="Abrir navegacion"
-            sx={{ display: { xs: "inline-flex", md: "none" }, color: "#17212B" }}
+            sx={{ display: { xs: "inline-flex", md: "none" }, color: "#0B1F3A" }}
           >
             <MenuIcon />
           </IconButton>
@@ -263,7 +269,7 @@ export default function AppBarGlobal() {
       </Toolbar>
 
       <Drawer anchor="right" open={drawerOpen} onClose={() => setDrawerOpen(false)}>
-        <Box sx={{ width: 310, p: 2.5, bgcolor: "#F8FAFC", minHeight: "100%" }}>
+        <Box sx={{ width: 310, p: 2.5, bgcolor: "#EEF3F8", minHeight: "100%" }}>
           <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 3 }}>
             <Brand href={homePath} />
             <IconButton onClick={() => setDrawerOpen(false)} aria-label="Cerrar navegacion">
@@ -286,3 +292,5 @@ export default function AppBarGlobal() {
     </AppBar>
   );
 }
+
+

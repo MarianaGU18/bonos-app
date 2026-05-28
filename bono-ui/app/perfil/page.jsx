@@ -43,15 +43,15 @@ function InfoTile({ icon, label, value }) {
       sx={{
         p: 2,
         borderRadius: "16px",
-        bgcolor: "#F8FAFC",
-        border: "1px solid rgba(16,24,32,0.10)",
+        bgcolor: "#EEF3F8",
+        border: "1px solid #D8E3EC",
       }}
     >
       <Stack direction="row" spacing={1.2} alignItems="center">
-        <Box sx={{ color: "#27B58A", display: "grid", placeItems: "center" }}>{icon}</Box>
+        <Box sx={{ color: "#7FB3D5", display: "grid", placeItems: "center" }}>{icon}</Box>
         <Box sx={{ minWidth: 0 }}>
-          <Typography sx={{ color: "#667382", fontSize: 12, fontWeight: 850 }}>{label}</Typography>
-          <Typography sx={{ color: "#101820", fontWeight: 900, overflowWrap: "anywhere" }}>{value}</Typography>
+          <Typography sx={{ color: "#1F2937", fontSize: 12, fontWeight: 850 }}>{label}</Typography>
+          <Typography sx={{ color: "#1F2937", fontWeight: 900, overflowWrap: "anywhere" }}>{value}</Typography>
         </Box>
       </Stack>
     </Box>
@@ -202,9 +202,9 @@ export default function ProfilePage() {
       sx={{
         minHeight: "100vh",
         background: `
-          radial-gradient(circle at 8% 8%, rgba(39,181,138,0.12), transparent 25%),
-          radial-gradient(circle at 88% 7%, rgba(56,119,214,0.10), transparent 24%),
-          linear-gradient(180deg, #FFFFFF 0%, #F5F7FA 48%, #EEF2F6 100%)
+          radial-gradient(circle at 8% 8%, rgba(127,179,213,0.12), transparent 25%),
+          radial-gradient(circle at 88% 7%, rgba(29,78,137,0.10), transparent 24%),
+          linear-gradient(180deg, #FFFFFF 0%, #EEF3F8 48%, #EEF3F8 100%)
         `,
       }}
     >
@@ -224,7 +224,7 @@ export default function ProfilePage() {
               overflow: "hidden",
               borderRadius: "20px",
               bgcolor: "#fff",
-              boxShadow: "0 24px 58px rgba(16,24,32,0.10)",
+              boxShadow: "0 24px 58px #D8E3EC",
             }}
           >
             <Box
@@ -232,8 +232,8 @@ export default function ProfilePage() {
                 p: 3,
                 color: "#fff",
                 background: `
-                  radial-gradient(circle at 80% 10%, rgba(39,181,138,0.28), transparent 32%),
-                  linear-gradient(145deg, #2F3B48 0%, #101820 100%)
+                  radial-gradient(circle at 80% 10%, rgba(127,179,213,0.28), transparent 32%),
+                  linear-gradient(145deg, #1D4E89 0%, #0B1F3A 100%)
                 `,
               }}
             >
@@ -242,8 +242,8 @@ export default function ProfilePage() {
                   width: 86,
                   height: 86,
                   borderRadius: "22px",
-                  bgcolor: "#DDF7EE",
-                  color: "#101820",
+                  bgcolor: "#EEF3F8",
+                  color: "#1F2937",
                   fontSize: 29,
                   fontWeight: 950,
                   mb: 2.2,
@@ -261,9 +261,9 @@ export default function ProfilePage() {
                 label={user.role}
                 sx={{
                   mt: 2,
-                  bgcolor: "rgba(39,181,138,0.16)",
-                  color: "#DDF7EE",
-                  border: "1px solid rgba(39,181,138,0.28)",
+                  bgcolor: "rgba(127,179,213,0.16)",
+                  color: "#EEF3F8",
+                  border: "1px solid rgba(127,179,213,0.28)",
                 }}
               />
             </Box>
@@ -294,16 +294,16 @@ export default function ProfilePage() {
             >
               <Stack direction={{ xs: "column", md: "row" }} justifyContent="space-between" spacing={2}>
                 <Box>
-                  <Chip label="Configuracion de cuenta" sx={{ mb: 1.5, bgcolor: "rgba(39,181,138,0.12)", color: "#17212B" }} />
+                  <Chip label="Configuracion de cuenta" sx={{ mb: 1.5, bgcolor: "rgba(127,179,213,0.12)", color: "#0B1F3A" }} />
                   <Typography component="h1" sx={{ fontSize: { xs: 34, md: 48 }, lineHeight: 1, fontWeight: 950 }}>
                     Perfil y seguridad
                   </Typography>
-                  <Typography sx={{ mt: 1.4, color: "#667382", maxWidth: 680 }}>
+                  <Typography sx={{ mt: 1.4, color: "#1F2937", maxWidth: 680 }}>
                     Administra datos personales, seguridad de acceso y preferencias basicas de tu cuenta financiera.
                   </Typography>
                 </Box>
                 <Stack direction="row" spacing={1} alignItems="center">
-                  <SecurityOutlinedIcon sx={{ color: "#27B58A" }} />
+                  <SecurityOutlinedIcon sx={{ color: "#7FB3D5" }} />
                   <Typography sx={{ fontWeight: 900 }}>Cuenta protegida</Typography>
                 </Stack>
               </Stack>
@@ -322,7 +322,7 @@ export default function ProfilePage() {
                 onChange={(e, v) => setTabValue(v)}
                 variant="scrollable"
                 scrollButtons="auto"
-                sx={{ borderBottom: "1px solid rgba(16,24,32,0.10)" }}
+                sx={{ borderBottom: "1px solid #D8E3EC" }}
               >
                 <Tab icon={<BadgeOutlinedIcon fontSize="small" />} iconPosition="start" label="Datos personales" />
                 <Tab icon={<LockOutlinedIcon fontSize="small" />} iconPosition="start" label="Seguridad" />
@@ -339,7 +339,7 @@ export default function ProfilePage() {
                 <Stack direction={{ xs: "column", md: "row" }} justifyContent="space-between" spacing={2} sx={{ mb: 3 }}>
                   <Box>
                     <Typography sx={{ fontSize: 22, fontWeight: 950 }}>Informacion personal</Typography>
-                    <Typography sx={{ color: "#667382", mt: 0.5 }}>Mantén tus datos de identificacion actualizados.</Typography>
+                    <Typography sx={{ color: "#1F2937", mt: 0.5 }}>Mantén tus datos de identificacion actualizados.</Typography>
                   </Box>
                   {!isEditing && (
                     <Button variant="contained" startIcon={<EditOutlinedIcon />} onClick={() => setIsEditing(true)}>
@@ -389,7 +389,7 @@ export default function ProfilePage() {
               <TabPanel value={tabValue} index={1}>
                 <Box sx={{ mb: 3 }}>
                   <Typography sx={{ fontSize: 22, fontWeight: 950 }}>Seguridad de acceso</Typography>
-                  <Typography sx={{ color: "#667382", mt: 0.5 }}>Actualiza tu contraseña y revisa el estado de proteccion.</Typography>
+                  <Typography sx={{ color: "#1F2937", mt: 0.5 }}>Actualiza tu contraseña y revisa el estado de proteccion.</Typography>
                 </Box>
 
                 <Box
@@ -428,10 +428,10 @@ export default function ProfilePage() {
                 <Divider sx={{ my: 3 }} />
                 <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" spacing={2}>
                   <Stack direction="row" spacing={1.2} alignItems="center">
-                    <SecurityOutlinedIcon sx={{ color: "#27B58A" }} />
+                    <SecurityOutlinedIcon sx={{ color: "#7FB3D5" }} />
                     <Box>
                       <Typography sx={{ fontWeight: 900 }}>Estado de cuenta</Typography>
-                      <Typography sx={{ color: "#667382", fontSize: 14 }}>Acceso protegido por sesion autenticada.</Typography>
+                      <Typography sx={{ color: "#1F2937", fontSize: 14 }}>Acceso protegido por sesion autenticada.</Typography>
                     </Box>
                   </Stack>
                   <Button
@@ -448,7 +448,7 @@ export default function ProfilePage() {
               <TabPanel value={tabValue} index={2}>
                 <Box sx={{ mb: 3 }}>
                   <Typography sx={{ fontSize: 22, fontWeight: 950 }}>Preferencias financieras</Typography>
-                  <Typography sx={{ color: "#667382", mt: 0.5 }}>Configuracion preparada para futuras preferencias del producto.</Typography>
+                  <Typography sx={{ color: "#1F2937", mt: 0.5 }}>Configuracion preparada para futuras preferencias del producto.</Typography>
                 </Box>
 
                 <Box
@@ -481,3 +481,5 @@ export default function ProfilePage() {
     </Box>
   );
 }
+
+

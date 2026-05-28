@@ -14,8 +14,8 @@ export default function Footer() {
       component="footer"
       sx={{
         py: 3.5,
-        bgcolor: "#F5F7FA",
-        borderTop: "1px solid rgba(16,24,32,0.10)",
+        bgcolor: "#EEF3F8",
+        borderTop: "1px solid #D8E3EC",
       }}
     >
       <Container maxWidth="xl">
@@ -33,8 +33,8 @@ export default function Footer() {
                 borderRadius: "12px",
                 display: "grid",
                 placeItems: "center",
-                bgcolor: "#17212B",
-                color: "#DDF7EE",
+                bgcolor: "#0B1F3A",
+                color: "#EEF3F8",
               }}
             >
               <AccountBalanceIcon fontSize="small" />
@@ -45,13 +45,13 @@ export default function Footer() {
               >
                 Acero Inteligente
               </Typography>
-              <Typography sx={{ color: "#667382", fontSize: 12, mt: 0.3 }}>
+              <Typography sx={{ color: "#1F2937", fontSize: 12, mt: 0.3 }}>
                 Plataforma de inversion en bonos
               </Typography>
             </Box>
           </Stack>
           <Divider flexItem sx={{ display: { sm: "none" } }} />
-          <Typography variant="body2" sx={{ color: "#667382" }}>
+          <Typography variant="body2" sx={{ color: "#1F2937" }}>
             Copyright (c) {new Date().getFullYear()} Acero Inteligente.
           </Typography>
         </Stack>
@@ -59,3 +59,4 @@ export default function Footer() {
     </Box>
   );
 }
+

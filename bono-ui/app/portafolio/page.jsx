@@ -50,7 +50,7 @@ function AppPanel({ children, sx = {} }) {
         p: { xs: 2.4, md: 3 },
         borderRadius: "18px",
         bgcolor: "rgba(255,255,255,0.92)",
-        border: "1px solid rgba(16,24,32,0.10)",
+        border: "1px solid #D8E3EC",
         boxShadow: "0 18px 44px rgba(16,24,32,0.07)",
         ...sx,
       }}
@@ -65,8 +65,8 @@ function SummaryCard({ label, value, helper, icon, dark = false }) {
     <AppPanel
       sx={{
         minHeight: 150,
-        bgcolor: dark ? "#101820" : "#fff",
-        color: dark ? "#fff" : "#101820",
+        bgcolor: dark ? "#0B1F3A" : "#fff",
+        color: dark ? "#fff" : "#1F2937",
         boxShadow: dark ? "0 24px 58px rgba(16,24,32,0.18)" : "0 14px 34px rgba(16,24,32,0.06)",
       }}
     >
@@ -78,17 +78,17 @@ function SummaryCard({ label, value, helper, icon, dark = false }) {
             borderRadius: "12px",
             display: "grid",
             placeItems: "center",
-            bgcolor: dark ? "rgba(255,255,255,0.08)" : "rgba(39,181,138,0.10)",
-            color: dark ? "#DDF7EE" : "#27B58A",
+            bgcolor: dark ? "rgba(255,255,255,0.08)" : "rgba(127,179,213,0.10)",
+            color: dark ? "#EEF3F8" : "#7FB3D5",
           }}
         >
           {icon}
         </Box>
-        <Typography sx={{ color: dark ? "rgba(255,255,255,0.56)" : "#667382", fontSize: 12, fontWeight: 800 }}>
+        <Typography sx={{ color: dark ? "rgba(255,255,255,0.56)" : "#1F2937", fontSize: 12, fontWeight: 800 }}>
           {helper}
         </Typography>
       </Stack>
-      <Typography sx={{ mt: 2.2, color: dark ? "rgba(255,255,255,0.58)" : "#667382", fontSize: 13, fontWeight: 800 }}>
+      <Typography sx={{ mt: 2.2, color: dark ? "rgba(255,255,255,0.58)" : "#1F2937", fontSize: 13, fontWeight: 800 }}>
         {label}
       </Typography>
       <Typography sx={{ mt: 0.6, fontSize: { xs: 27, md: 31 }, fontWeight: 950, lineHeight: 1 }}>
@@ -227,9 +227,9 @@ export default function PortfolioPage() {
       sx={{
         minHeight: "100vh",
         background: `
-          radial-gradient(circle at 8% 8%, rgba(39,181,138,0.12), transparent 25%),
-          radial-gradient(circle at 88% 7%, rgba(56,119,214,0.10), transparent 24%),
-          linear-gradient(180deg, #FFFFFF 0%, #F5F7FA 48%, #EEF2F6 100%)
+          radial-gradient(circle at 8% 8%, rgba(127,179,213,0.12), transparent 25%),
+          radial-gradient(circle at 88% 7%, rgba(29,78,137,0.10), transparent 24%),
+          linear-gradient(180deg, #FFFFFF 0%, #EEF3F8 48%, #EEF3F8 100%)
         `,
       }}
     >
@@ -241,8 +241,8 @@ export default function PortfolioPage() {
             borderRadius: "20px",
             color: "#fff",
             background: `
-              radial-gradient(circle at 84% 10%, rgba(39,181,138,0.25), transparent 28%),
-              linear-gradient(145deg, #2F3B48 0%, #101820 100%)
+              radial-gradient(circle at 84% 10%, rgba(127,179,213,0.25), transparent 28%),
+              linear-gradient(145deg, #1D4E89 0%, #0B1F3A 100%)
             `,
             boxShadow: "0 30px 76px rgba(16,24,32,0.18)",
             border: "1px solid rgba(255,255,255,0.12)",
@@ -254,9 +254,9 @@ export default function PortfolioPage() {
                 label="Cartera consolidada"
                 sx={{
                   mb: 2,
-                  bgcolor: "rgba(39,181,138,0.16)",
-                  color: "#DDF7EE",
-                  border: "1px solid rgba(39,181,138,0.28)",
+                  bgcolor: "rgba(127,179,213,0.16)",
+                  color: "#EEF3F8",
+                  border: "1px solid rgba(127,179,213,0.28)",
                 }}
               />
               <Typography component="h1" sx={{ fontSize: { xs: 38, md: 56 }, lineHeight: 1, fontWeight: 950 }}>
@@ -273,7 +273,7 @@ export default function PortfolioPage() {
                 href="/cetes"
                 variant="contained"
                 endIcon={<ArrowForwardIcon />}
-                sx={{ bgcolor: "#fff", color: "#101820", "&:hover": { bgcolor: "#EEF2F6" } }}
+                sx={{ bgcolor: "#fff", color: "#1F2937", "&:hover": { bgcolor: "#EEF3F8" } }}
               >
                 Comprar CETES
               </Button>
@@ -336,31 +336,31 @@ export default function PortfolioPage() {
             <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2.5 }}>
               <Box>
                 <Typography sx={{ fontSize: 20, fontWeight: 900 }}>Distribucion</Typography>
-                <Typography sx={{ color: "#667382", fontSize: 14 }}>Estructura actual del dinero.</Typography>
+                <Typography sx={{ color: "#1F2937", fontSize: 14 }}>Estructura actual del dinero.</Typography>
               </Box>
-              <Chip label="MXN" sx={{ bgcolor: "#F5F7FA" }} />
+              <Chip label="MXN" sx={{ bgcolor: "#EEF3F8" }} />
             </Stack>
             <Stack spacing={2.2}>
               <Box>
                 <Stack direction="row" justifyContent="space-between" sx={{ mb: 0.8 }}>
                   <Typography sx={{ fontWeight: 850 }}>CETES</Typography>
-                  <Typography sx={{ color: "#667382", fontWeight: 850 }}>{allocation.cetes}%</Typography>
+                  <Typography sx={{ color: "#1F2937", fontWeight: 850 }}>{allocation.cetes}%</Typography>
                 </Stack>
                 <LinearProgress
                   variant="determinate"
                   value={allocation.cetes}
-                  sx={{ height: 10, borderRadius: 999, bgcolor: "#EEF2F6", "& .MuiLinearProgress-bar": { bgcolor: "#27B58A" } }}
+                  sx={{ height: 10, borderRadius: 999, bgcolor: "#EEF3F8", "& .MuiLinearProgress-bar": { bgcolor: "#7FB3D5" } }}
                 />
               </Box>
               <Box>
                 <Stack direction="row" justifyContent="space-between" sx={{ mb: 0.8 }}>
                   <Typography sx={{ fontWeight: 850 }}>Efectivo</Typography>
-                  <Typography sx={{ color: "#667382", fontWeight: 850 }}>{allocation.cash}%</Typography>
+                  <Typography sx={{ color: "#1F2937", fontWeight: 850 }}>{allocation.cash}%</Typography>
                 </Stack>
                 <LinearProgress
                   variant="determinate"
                   value={allocation.cash}
-                  sx={{ height: 10, borderRadius: 999, bgcolor: "#EEF2F6", "& .MuiLinearProgress-bar": { bgcolor: "#3877D6" } }}
+                  sx={{ height: 10, borderRadius: 999, bgcolor: "#EEF3F8", "& .MuiLinearProgress-bar": { bgcolor: "#1D4E89" } }}
                 />
               </Box>
             </Stack>
@@ -368,7 +368,7 @@ export default function PortfolioPage() {
 
           <AppPanel>
             <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 2 }}>
-              <ReceiptLongOutlinedIcon sx={{ color: "#27B58A" }} />
+              <ReceiptLongOutlinedIcon sx={{ color: "#7FB3D5" }} />
               <Typography sx={{ fontSize: 20, fontWeight: 900 }}>Activos principales</Typography>
             </Stack>
             <Box
@@ -385,24 +385,24 @@ export default function PortfolioPage() {
                     sx={{
                       p: 2,
                       borderRadius: "16px",
-                      border: "1px solid rgba(16,24,32,0.10)",
-                      bgcolor: "#F8FAFC",
+                      border: "1px solid #D8E3EC",
+                      bgcolor: "#EEF3F8",
                     }}
                   >
                     <Stack direction="row" justifyContent="space-between" alignItems="center">
-                      <Chip label="CETE" size="small" sx={{ bgcolor: "rgba(39,181,138,0.12)", color: "#17212B" }} />
-                      <Typography sx={{ color: "#667382", fontSize: 13 }}>{cete.plazo} dias</Typography>
+                      <Chip label="CETE" size="small" sx={{ bgcolor: "rgba(127,179,213,0.12)", color: "#0B1F3A" }} />
+                      <Typography sx={{ color: "#1F2937", fontSize: 13 }}>{cete.plazo} dias</Typography>
                     </Stack>
                     <Typography sx={{ mt: 2, fontSize: 24, lineHeight: 1, fontWeight: 950 }}>
                       {fmt(cete.montoInvertido)}
                     </Typography>
-                    <Typography sx={{ mt: 0.8, color: "#667382", fontSize: 14 }}>
+                    <Typography sx={{ mt: 0.8, color: "#1F2937", fontSize: 14 }}>
                       Tasa de compra {cete.tasaCompra}%
                     </Typography>
                   </Box>
                 ))
               ) : (
-                <Typography sx={{ color: "#667382" }}>Aun no hay inversiones activas.</Typography>
+                <Typography sx={{ color: "#1F2937" }}>Aun no hay inversiones activas.</Typography>
               )}
             </Box>
           </AppPanel>
@@ -412,16 +412,16 @@ export default function PortfolioPage() {
           <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" spacing={2} sx={{ mb: 2.5 }}>
             <Box>
               <Stack direction="row" spacing={1} alignItems="center">
-                <ReceiptLongOutlinedIcon sx={{ color: "#27B58A" }} />
+                <ReceiptLongOutlinedIcon sx={{ color: "#7FB3D5" }} />
                 <Typography sx={{ fontSize: 20, fontWeight: 900 }}>Instrumentos activos</Typography>
               </Stack>
-              <Typography sx={{ mt: 0.5, color: "#667382", fontSize: 14 }}>
+              <Typography sx={{ mt: 0.5, color: "#1F2937", fontSize: 14 }}>
                 Posiciones disponibles para seguimiento o venta.
               </Typography>
             </Box>
           </Stack>
 
-          <TableContainer sx={{ borderRadius: "14px", border: "1px solid rgba(16,24,32,0.10)", overflowX: "auto" }}>
+          <TableContainer sx={{ borderRadius: "14px", border: "1px solid #D8E3EC", overflowX: "auto" }}>
             <Table>
               <TableHead>
                 <TableRow>
@@ -437,7 +437,7 @@ export default function PortfolioPage() {
                   investments.map((cete) => (
                     <TableRow key={cete.id} hover>
                       <TableCell>
-                        <Chip label="CETE" size="small" sx={{ bgcolor: "rgba(39,181,138,0.12)", color: "#17212B" }} />
+                        <Chip label="CETE" size="small" sx={{ bgcolor: "rgba(127,179,213,0.12)", color: "#0B1F3A" }} />
                       </TableCell>
                       <TableCell>{cete.plazo} dias</TableCell>
                       <TableCell>{cete.tasaCompra}%</TableCell>
@@ -459,7 +459,7 @@ export default function PortfolioPage() {
                 ) : (
                   <TableRow>
                     <TableCell colSpan={5}>
-                      <Typography sx={{ color: "#667382", py: 2 }}>No hay instrumentos activos.</Typography>
+                      <Typography sx={{ color: "#1F2937", py: 2 }}>No hay instrumentos activos.</Typography>
                     </TableCell>
                   </TableRow>
                 )}
@@ -470,11 +470,11 @@ export default function PortfolioPage() {
 
         <AppPanel>
           <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 2 }}>
-            <HistoryOutlinedIcon sx={{ color: "#3877D6" }} />
+            <HistoryOutlinedIcon sx={{ color: "#1D4E89" }} />
             <Typography sx={{ fontSize: 20, fontWeight: 900 }}>Actividad reciente</Typography>
           </Stack>
 
-          <TableContainer sx={{ borderRadius: "14px", border: "1px solid rgba(16,24,32,0.10)", overflowX: "auto" }}>
+          <TableContainer sx={{ borderRadius: "14px", border: "1px solid #D8E3EC", overflowX: "auto" }}>
             <Table>
               <TableHead>
                 <TableRow>
@@ -499,7 +499,7 @@ export default function PortfolioPage() {
                 ) : (
                   <TableRow>
                     <TableCell colSpan={3}>
-                      <Typography sx={{ color: "#667382", py: 2 }}>No hay movimientos recientes.</Typography>
+                      <Typography sx={{ color: "#1F2937", py: 2 }}>No hay movimientos recientes.</Typography>
                     </TableCell>
                   </TableRow>
                 )}
@@ -521,7 +521,7 @@ export default function PortfolioPage() {
           </DialogTitle>
           <DialogContent>
             {isConfirmingDeposit ? (
-              <Typography sx={{ mt: 1, color: "#667382" }}>
+              <Typography sx={{ mt: 1, color: "#1F2937" }}>
                 Confirma el deposito de <strong>{fmt(parseFloat(depositAmount))}</strong> a tu cuenta.
               </Typography>
             ) : (
@@ -562,3 +562,5 @@ export default function PortfolioPage() {
     </Box>
   );
 }
+
+

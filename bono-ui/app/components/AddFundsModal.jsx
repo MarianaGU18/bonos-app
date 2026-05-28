@@ -35,7 +35,7 @@ export default function AddFundsModal({ open, onClose, onAddFunds, loading = fal
     <Dialog open={open} onClose={handleClose} fullWidth maxWidth="xs">
       <DialogTitle sx={{ fontWeight: 900 }}>
         <Stack direction="row" spacing={1.2} alignItems="center">
-          <AccountBalanceWalletOutlinedIcon sx={{ color: "#27B58A" }} />
+          <AccountBalanceWalletOutlinedIcon sx={{ color: "#7FB3D5" }} />
           <span>Agregar fondos</span>
         </Stack>
       </DialogTitle>
@@ -72,3 +72,4 @@ export default function AddFundsModal({ open, onClose, onAddFunds, loading = fal
     </Dialog>
   );
 }
+

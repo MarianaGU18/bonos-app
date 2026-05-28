@@ -81,18 +81,18 @@ function StyledField(props) {
       sx={{
         "& .MuiOutlinedInput-root": {
           borderRadius: "10px",
-          bgcolor: "#F8FAFC",
+          bgcolor: "#EEF3F8",
           minHeight: 58,
           "& fieldset": { borderColor: "rgba(100,116,143,0.20)" },
           "&:hover fieldset": { borderColor: "rgba(49,65,85,0.35)" },
           "&.Mui-focused": {
             bgcolor: "#fff",
-            boxShadow: "0 0 0 4px rgba(147,197,253,0.18)",
+            boxShadow: "0 0 0 4px rgba(127,179,213,0.18)",
           },
-          "&.Mui-focused fieldset": { borderColor: "#27B58A" },
+          "&.Mui-focused fieldset": { borderColor: "#7FB3D5" },
         },
-        "& .MuiInputLabel-root": { color: "#667382", fontWeight: 700 },
-        "& .MuiInputLabel-root.Mui-focused": { color: "#17212B" },
+        "& .MuiInputLabel-root": { color: "#1F2937", fontWeight: 700 },
+        "& .MuiInputLabel-root.Mui-focused": { color: "#0B1F3A" },
         ...props.sx,
       }}
     />
@@ -268,27 +268,27 @@ export default function CetesCalculator() {
               p: { xs: 2.5, md: 3.5 },
               height: "100%",
               borderRadius: "18px",
-              border: "1px solid rgba(16,24,32,0.10)",
+              border: "1px solid #D8E3EC",
               boxShadow: "0 18px 44px rgba(16,24,32,0.07)",
               bgcolor: "rgba(255,255,255,0.92)",
             }}
           >
             <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" spacing={2} sx={{ mb: 3 }}>
               <Box>
-                <Typography sx={{ color: "#27B58A", fontSize: 12, fontWeight: 900, textTransform: "uppercase" }}>
+                <Typography sx={{ color: "#7FB3D5", fontSize: 12, fontWeight: 900, textTransform: "uppercase" }}>
                   Define tu operacion
                 </Typography>
-                <Typography variant="h4" sx={{ mt: 0.5, color: "#101820", fontWeight: 950 }}>
+                <Typography variant="h4" sx={{ mt: 0.5, color: "#1F2937", fontWeight: 950 }}>
                   Configura la inversion
                 </Typography>
-                <Typography sx={{ mt: 0.8, color: "#667382", fontSize: 14 }}>
+                <Typography sx={{ mt: 0.8, color: "#1F2937", fontSize: 14 }}>
                   Ajusta monto, titulos, plazo y tasa. El resumen se actualiza automaticamente.
                 </Typography>
               </Box>
               <Chip
                 icon={<SavingsIcon />}
                 label={`Precio estimado $${precioActual.toFixed(4)}`}
-                sx={{ bgcolor: "rgba(39,181,138,0.12)", color: "#17212B", fontWeight: 900 }}
+                sx={{ bgcolor: "rgba(127,179,213,0.12)", color: "#0B1F3A", fontWeight: 900 }}
               />
             </Stack>
 
@@ -341,8 +341,8 @@ export default function CetesCalculator() {
                 mt: 3,
                 p: 2,
                 borderRadius: "10px",
-                bgcolor: "#F8FAFC",
-                border: "1px solid rgba(16,24,32,0.10)",
+                bgcolor: "#EEF3F8",
+                border: "1px solid #D8E3EC",
               }}
             >
               <Grid container spacing={1.5}>
@@ -358,11 +358,11 @@ export default function CetesCalculator() {
                           borderRadius: "10px",
                           display: "block",
                           textAlign: "left",
-                          bgcolor: selected ? "#17212B" : "#FFFFFF",
-                          color: selected ? "#FFFFFF" : "#17212B",
-                          border: "1px solid rgba(16,24,32,0.12)",
+                          bgcolor: selected ? "#0B1F3A" : "#FFFFFF",
+                          color: selected ? "#FFFFFF" : "#0B1F3A",
+                          border: "1px solid #D8E3EC",
                           boxShadow: selected ? "0 14px 28px rgba(16,24,32,0.18)" : "none",
-                          "&:hover": { bgcolor: selected ? "#0B1117" : "#FFFFFF" },
+                          "&:hover": { bgcolor: selected ? "#0B1F3A" : "#FFFFFF" },
                         }}
                       >
                         <Typography sx={{ fontWeight: 900, fontSize: 14 }}>{term.label}</Typography>
@@ -381,7 +381,7 @@ export default function CetesCalculator() {
                 startIcon={loading ? <CircularProgress size={18} color="inherit" /> : <RequestQuoteIcon />}
                 disabled={!canBuy}
                 onClick={handleBuy}
-                sx={{ py: 1.6, bgcolor: "#17212B", "&:hover": { bgcolor: "#0B1117" } }}
+                sx={{ py: 1.6, bgcolor: "#0B1F3A", "&:hover": { bgcolor: "#0B1F3A" } }}
               >
                 Confirmar inversion
               </Button>
@@ -390,7 +390,7 @@ export default function CetesCalculator() {
                 variant="outlined"
                 startIcon={<RestartAltIcon />}
                 onClick={handleReset}
-                sx={{ py: 1.6, color: "#17212B", borderColor: "rgba(16,24,32,0.16)" }}
+                sx={{ py: 1.6, color: "#0B1F3A", borderColor: "#D8E3EC" }}
               >
                 Limpiar
               </Button>
@@ -409,8 +409,8 @@ export default function CetesCalculator() {
               overflow: "hidden",
               border: "1px solid rgba(255,255,255,0.12)",
               background: `
-                radial-gradient(circle at 88% 8%, rgba(39,181,138,0.28), transparent 30%),
-                linear-gradient(145deg, #2F3B48 0%, #101820 100%)
+                radial-gradient(circle at 88% 8%, rgba(127,179,213,0.28), transparent 30%),
+                linear-gradient(145deg, #1D4E89 0%, #0B1F3A 100%)
               `,
               boxShadow: "0 30px 76px rgba(16,24,32,0.22)",
             }}
@@ -428,7 +428,7 @@ export default function CetesCalculator() {
               </Box>
               <Chip
                 label={`${getRendimientoReal()}% esperado`}
-                sx={{ bgcolor: "rgba(39,181,138,0.16)", color: "#DDF7EE", fontWeight: 900 }}
+                sx={{ bgcolor: "rgba(127,179,213,0.16)", color: "#EEF3F8", fontWeight: 900 }}
               />
             </Stack>
 
@@ -451,13 +451,13 @@ export default function CetesCalculator() {
 
             {loading ? (
               <Box sx={{ display: "grid", placeItems: "center", minHeight: 210 }}>
-                <CircularProgress sx={{ color: "#DDF7EE" }} />
+                <CircularProgress sx={{ color: "#EEF3F8" }} />
               </Box>
             ) : (
               <Stack spacing={2}>
                 <ResumenRow label="Precio actual CETE" value={`$${precioActual.toFixed(4)}`} />
                 <ResumenRow label="Inversion real" value={`$${Number(calculo?.inversionCetes || 0).toLocaleString("es-MX")}`} />
-                <ResumenRow label="ISR estimado" value={`$${Number(calculo?.isr || 0).toFixed(2)}`} color="#DDF7EE" />
+                <ResumenRow label="ISR estimado" value={`$${Number(calculo?.isr || 0).toFixed(2)}`} color="#EEF3F8" />
                 <Divider sx={{ borderColor: "rgba(255,255,255,0.12)" }} />
                 <ResumenRow
                   label="Total al vencimiento"
@@ -476,3 +476,6 @@ export default function CetesCalculator() {
     </Box>
   );
 }
+
+
+

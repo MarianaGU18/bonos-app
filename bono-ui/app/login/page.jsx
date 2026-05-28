@@ -54,7 +54,7 @@ function MarketLine() {
             width: 14,
             height,
             borderRadius: "5px 5px 0 0",
-            bgcolor: index % 2 === 0 ? "#27B58A" : "#71A6F8",
+            bgcolor: index % 2 === 0 ? "#7FB3D5" : "#7FB3D5",
           }}
         />
       ))}
@@ -103,7 +103,7 @@ export default function LoginPage() {
     <Box
       sx={{
         minHeight: "100vh",
-        bgcolor: "#F5F7FA",
+        bgcolor: "#EEF3F8",
         display: "flex",
         alignItems: "stretch",
       }}
@@ -124,9 +124,9 @@ export default function LoginPage() {
               overflow: "hidden",
               color: "#fff",
               background: `
-                radial-gradient(circle at 24% 18%, rgba(39,181,138,0.28), transparent 28%),
-                radial-gradient(circle at 78% 12%, rgba(56,119,214,0.26), transparent 24%),
-                linear-gradient(145deg, #2F3B48 0%, #101820 58%, #080D12 100%)
+                radial-gradient(circle at 24% 18%, rgba(127,179,213,0.28), transparent 28%),
+                radial-gradient(circle at 78% 12%, rgba(29,78,137,0.26), transparent 24%),
+                linear-gradient(145deg, #1D4E89 0%, #0B1F3A 58%, #0B1F3A 100%)
               `,
             }}
           >
@@ -139,8 +139,8 @@ export default function LoginPage() {
                     borderRadius: "12px",
                     display: "grid",
                     placeItems: "center",
-                    bgcolor: "#DDF7EE",
-                    color: "#101820",
+                    bgcolor: "#EEF3F8",
+                    color: "#1F2937",
                   }}
                 >
                   <AutoGraphOutlinedIcon />
@@ -162,9 +162,9 @@ export default function LoginPage() {
                   sx={{
                     mb: 3,
                     borderRadius: "10px",
-                    color: "#DDF7EE",
-                    bgcolor: "rgba(39,181,138,0.14)",
-                    border: "1px solid rgba(39,181,138,0.28)",
+                    color: "#EEF3F8",
+                    bgcolor: "rgba(127,179,213,0.14)",
+                    border: "1px solid rgba(127,179,213,0.28)",
                   }}
                 />
                 <Typography sx={{ fontSize: { lg: 58, xl: 68 }, lineHeight: 0.98, fontWeight: 950 }}>
@@ -197,7 +197,7 @@ export default function LoginPage() {
                       Portafolio balanceado
                     </Typography>
                   </Box>
-                  <TrendingUpOutlinedIcon sx={{ color: "#DDF7EE" }} />
+                  <TrendingUpOutlinedIcon sx={{ color: "#EEF3F8" }} />
                 </Stack>
                 <MarketLine />
                 <Box sx={{ mt: 1.2, display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 1 }}>
@@ -233,8 +233,8 @@ export default function LoginPage() {
               px: { xs: 2, sm: 4, md: 7 },
               py: { xs: 5, md: 7 },
               background: `
-                radial-gradient(circle at 84% 12%, rgba(39,181,138,0.11), transparent 24%),
-                linear-gradient(180deg, #FFFFFF 0%, #F5F7FA 100%)
+                radial-gradient(circle at 84% 12%, rgba(127,179,213,0.11), transparent 24%),
+                linear-gradient(180deg, #FFFFFF 0%, #EEF3F8 100%)
               `,
             }}
           >
@@ -247,8 +247,8 @@ export default function LoginPage() {
                     borderRadius: "12px",
                     display: { xs: "grid", lg: "none" },
                     placeItems: "center",
-                    bgcolor: "#17212B",
-                    color: "#DDF7EE",
+                    bgcolor: "#0B1F3A",
+                    color: "#EEF3F8",
                   }}
                 >
                   <AutoGraphOutlinedIcon fontSize="small" />
@@ -259,10 +259,10 @@ export default function LoginPage() {
               </Stack>
 
               <Box sx={{ mb: 4 }}>
-                <Typography component="h1" sx={{ color: "#101820", fontSize: { xs: 36, sm: 44 }, lineHeight: 1.04, fontWeight: 950 }}>
+                <Typography component="h1" sx={{ color: "#1F2937", fontSize: { xs: 36, sm: 44 }, lineHeight: 1.04, fontWeight: 950 }}>
                   Bienvenido de vuelta
                 </Typography>
-                <Typography sx={{ mt: 1.4, color: "#667382", lineHeight: 1.7 }}>
+                <Typography sx={{ mt: 1.4, color: "#1F2937", lineHeight: 1.7 }}>
                   Accede para revisar tu dashboard, cartera y oportunidades de CETES.
                 </Typography>
               </Box>
@@ -272,12 +272,12 @@ export default function LoginPage() {
                   p: { xs: 2.5, sm: 3.5 },
                   borderRadius: "18px",
                   bgcolor: "rgba(255,255,255,0.88)",
-                  border: "1px solid rgba(16,24,32,0.10)",
-                  boxShadow: "0 24px 60px rgba(16,24,32,0.10)",
+                  border: "1px solid #D8E3EC",
+                  boxShadow: "0 24px 60px rgba(11,31,58,0.10)",
                 }}
               >
                 <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 2.5 }}>
-                  <LockOutlinedIcon sx={{ color: "#27B58A" }} />
+                  <LockOutlinedIcon sx={{ color: "#7FB3D5" }} />
                   <Typography sx={{ fontWeight: 900 }}>Acceso a plataforma</Typography>
                 </Stack>
                 <Divider sx={{ mb: 3 }} />
@@ -305,12 +305,12 @@ export default function LoginPage() {
                     <Typography variant="body2" color="text.secondary">
                       No tienes cuenta?{" "}
                       <NextLink href="/register" style={{ textDecoration: "none" }}>
-                        <Typography component="span" sx={{ fontWeight: 900, color: "#17212B" }}>
+                        <Typography component="span" sx={{ fontWeight: 900, color: "#0B1F3A" }}>
                           Crear cuenta
                         </Typography>
                       </NextLink>
                     </Typography>
-                    <Button size="small" sx={{ alignSelf: { xs: "flex-start", sm: "center" }, color: "#667382", p: 0, minWidth: 0 }}>
+                    <Button size="small" sx={{ alignSelf: { xs: "flex-start", sm: "center" }, color: "#1F2937", p: 0, minWidth: 0 }}>
                       Recuperar acceso
                     </Button>
                   </Stack>
@@ -323,3 +323,6 @@ export default function LoginPage() {
     </Box>
   );
 }
+
+
+

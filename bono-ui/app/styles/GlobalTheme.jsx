@@ -8,47 +8,47 @@ const fontStack =
 let theme = createTheme({
   palette: {
     primary: {
-      main: "#17212B",
-      light: "#2F3B48",
-      dark: "#0B1117",
+      main: "#0B1F3A",
+      light: "#1D4E89",
+      dark: "#0B1F3A",
       contrastText: "#FFFFFF",
     },
     secondary: {
-      main: "#45606F",
-      light: "#6E8795",
-      dark: "#263A45",
+      main: "#1D4E89",
+      light: "#7FB3D5",
+      dark: "#0B1F3A",
       contrastText: "#FFFFFF",
     },
     accent: {
-      main: "#27B58A",
+      main: "#7FB3D5",
       contrastText: "#07100D",
     },
     success: {
-      main: "#22A06B",
+      main: "#2E8B57",
     },
     info: {
-      main: "#3877D6",
+      main: "#1D4E89",
     },
     warning: {
-      main: "#C98922",
+      main: "#7FB3D5",
     },
     error: {
       main: "#E5484D",
     },
     text: {
-      primary: "#101820",
-      secondary: "#667382",
+      primary: "#1F2937",
+      secondary: "#1F2937",
     },
     background: {
-      default: "#F5F7FA",
+      default: "#EEF3F8",
       paper: "#FFFFFF",
-      subtle: "#F8FAFC",
-      elevated: "#EEF2F6",
-      dark: "#101820",
+      subtle: "#EEF3F8",
+      elevated: "#EEF3F8",
+      dark: "#0B1F3A",
     },
-    divider: "rgba(16,24,32,0.10)",
+    divider: "#D8E3EC",
     border: {
-      light: "rgba(16,24,32,0.10)",
+      light: "#D8E3EC",
     },
   },
 
@@ -116,8 +116,8 @@ let theme = createTheme({
     "0 1px 2px rgba(16,24,32,0.04)",
     "0 2px 8px rgba(16,24,32,0.06)",
     "0 8px 22px rgba(16,24,32,0.08)",
-    "0 14px 36px rgba(16,24,32,0.10)",
-    ...Array(20).fill("0 18px 44px rgba(16,24,32,0.12)"),
+    "0 14px 36px rgba(11,31,58,0.10)",
+    ...Array(20).fill("0 18px 44px rgba(11,31,58,0.12)"),
   ],
 
   customShadows: {
@@ -125,14 +125,14 @@ let theme = createTheme({
     sm: "0 5px 16px rgba(16,24,32,0.06)",
     md: "0 14px 34px rgba(16,24,32,0.09)",
     lg: "0 24px 58px rgba(16,24,32,0.13)",
-    xl: "0 34px 84px rgba(16,24,32,0.16)",
-    primary: "0 16px 34px rgba(23,33,43,0.20)",
+    xl: "0 34px 84px rgba(11,31,58,0.16)",
+    primary: "0 16px 34px rgba(11,31,58,0.20)",
   },
 
   gradients: {
-    primary: "linear-gradient(145deg, #2F3B48 0%, #101820 100%)",
-    dashboard: "linear-gradient(180deg, #F8FAFC 0%, #EEF2F6 100%)",
-    mint: "linear-gradient(135deg, rgba(39,181,138,0.16), rgba(56,119,214,0.10))",
+    primary: "linear-gradient(145deg, #1D4E89 0%, #0B1F3A 100%)",
+    dashboard: "linear-gradient(180deg, #EEF3F8 0%, #EEF3F8 100%)",
+    mint: "linear-gradient(135deg, rgba(127,179,213,0.16), rgba(29,78,137,0.10))",
   },
 
   layout: {
@@ -153,18 +153,18 @@ let theme = createTheme({
       styleOverrides: {
         html: {
           scrollBehavior: "smooth",
-          backgroundColor: "#F5F7FA",
+          backgroundColor: "#EEF3F8",
         },
         body: {
-          backgroundColor: "#F5F7FA",
-          color: "#101820",
+          backgroundColor: "#EEF3F8",
+          color: "#1F2937",
           textRendering: "optimizeLegibility",
         },
         "*": {
           boxSizing: "border-box",
         },
         "::selection": {
-          backgroundColor: "rgba(39,181,138,0.24)",
+          backgroundColor: "rgba(127,179,213,0.24)",
         },
       },
     },
@@ -176,7 +176,7 @@ let theme = createTheme({
       styleOverrides: {
         root: {
           borderRadius: 16,
-          border: "1px solid rgba(16,24,32,0.10)",
+          border: "1px solid #D8E3EC",
           backgroundImage: "none",
           transition: "border-color 180ms ease, box-shadow 180ms ease, background-color 180ms ease",
         },
@@ -187,7 +187,7 @@ let theme = createTheme({
       styleOverrides: {
         root: {
           borderRadius: 16,
-          border: "1px solid rgba(16,24,32,0.10)",
+          border: "1px solid #D8E3EC",
           backgroundImage: "none",
           boxShadow: "0 14px 34px rgba(16,24,32,0.08)",
         },
@@ -205,17 +205,17 @@ let theme = createTheme({
           boxShadow: "none",
           transition: "background-color 180ms ease, border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease",
           "&:hover": {
-            boxShadow: "0 12px 28px rgba(16,24,32,0.10)",
+            boxShadow: "0 12px 28px rgba(11,31,58,0.10)",
           },
         },
         containedPrimary: {
-          backgroundColor: "#17212B",
+          backgroundColor: "#0B1F3A",
           "&:hover": {
-            backgroundColor: "#0B1117",
+            backgroundColor: "#0B1F3A",
           },
         },
         outlined: {
-          borderColor: "rgba(16,24,32,0.16)",
+          borderColor: "#D8E3EC",
         },
       },
     },
@@ -231,11 +231,11 @@ let theme = createTheme({
           },
           "&.Mui-focused": {
             backgroundColor: "#FFFFFF",
-            boxShadow: "0 0 0 4px rgba(39,181,138,0.14)",
+            boxShadow: "0 0 0 4px rgba(127,179,213,0.14)",
           },
         },
         notchedOutline: {
-          borderColor: "rgba(16,24,32,0.14)",
+          borderColor: "#D8E3EC",
         },
       },
     },
@@ -244,9 +244,9 @@ let theme = createTheme({
       styleOverrides: {
         root: {
           fontWeight: 700,
-          color: "#667382",
+          color: "#1F2937",
           "&.Mui-focused": {
-            color: "#17212B",
+            color: "#0B1F3A",
           },
         },
       },
@@ -258,12 +258,12 @@ let theme = createTheme({
           borderBottom: "1px solid rgba(16,24,32,0.08)",
         },
         head: {
-          color: "#667382",
+          color: "#1F2937",
           fontSize: 12,
           fontWeight: 850,
           textTransform: "uppercase",
           letterSpacing: 0,
-          backgroundColor: "#F8FAFC",
+          backgroundColor: "#EEF3F8",
         },
       },
     },
@@ -276,7 +276,7 @@ let theme = createTheme({
         indicator: {
           height: 3,
           borderRadius: 999,
-          backgroundColor: "#17212B",
+          backgroundColor: "#0B1F3A",
         },
       },
     },
@@ -288,10 +288,10 @@ let theme = createTheme({
           fontWeight: 800,
           borderRadius: 10,
           minHeight: 52,
-          color: "#667382",
+          color: "#1F2937",
           transition: "background-color 180ms ease, color 180ms ease",
           "&.Mui-selected": {
-            color: "#17212B",
+            color: "#0B1F3A",
             backgroundColor: "rgba(16,24,32,0.05)",
           },
         },
@@ -326,7 +326,7 @@ let theme = createTheme({
     MuiDivider: {
       styleOverrides: {
         root: {
-          borderColor: "rgba(16,24,32,0.10)",
+          borderColor: "#D8E3EC",
         },
       },
     },
@@ -336,3 +336,4 @@ let theme = createTheme({
 theme = responsiveFontSizes(theme);
 
 export { theme };
+

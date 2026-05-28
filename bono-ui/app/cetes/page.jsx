@@ -13,9 +13,9 @@ export default function CetesPage() {
       sx={{
         minHeight: "100vh",
         background: `
-          radial-gradient(circle at 8% 8%, rgba(39,181,138,0.13), transparent 25%),
-          radial-gradient(circle at 88% 9%, rgba(56,119,214,0.10), transparent 24%),
-          linear-gradient(180deg, #FFFFFF 0%, #F5F7FA 48%, #EEF2F6 100%)
+          radial-gradient(circle at 8% 8%, rgba(127,179,213,0.13), transparent 25%),
+          radial-gradient(circle at 88% 9%, rgba(29,78,137,0.10), transparent 24%),
+          linear-gradient(180deg, #FFFFFF 0%, #EEF3F8 48%, #EEF3F8 100%)
         `,
       }}
     >
@@ -28,8 +28,8 @@ export default function CetesPage() {
             color: "#fff",
             overflow: "hidden",
             background: `
-              radial-gradient(circle at 84% 12%, rgba(39,181,138,0.25), transparent 28%),
-              linear-gradient(145deg, #2F3B48 0%, #101820 100%)
+              radial-gradient(circle at 84% 12%, rgba(127,179,213,0.25), transparent 28%),
+              linear-gradient(145deg, #1D4E89 0%, #0B1F3A 100%)
             `,
             border: "1px solid rgba(255,255,255,0.12)",
             boxShadow: "0 30px 76px rgba(16,24,32,0.18)",
@@ -46,7 +46,7 @@ export default function CetesPage() {
                   border: "1px solid rgba(255,255,255,0.12)",
                   display: "grid",
                   placeItems: "center",
-                  color: "#DDF7EE",
+                  color: "#EEF3F8",
                 }}
               >
                 <SavingsOutlinedIcon sx={{ fontSize: 34 }} />
@@ -56,9 +56,9 @@ export default function CetesPage() {
                   label="Mercado gubernamental"
                   sx={{
                     mb: 1.2,
-                    bgcolor: "rgba(39,181,138,0.16)",
-                    color: "#DDF7EE",
-                    border: "1px solid rgba(39,181,138,0.28)",
+                    bgcolor: "rgba(127,179,213,0.16)",
+                    color: "#EEF3F8",
+                    border: "1px solid rgba(127,179,213,0.28)",
                   }}
                 />
                 <Typography component="h1" sx={{ fontSize: { xs: 36, md: 52 }, lineHeight: 1, fontWeight: 950 }}>
@@ -92,16 +92,16 @@ export default function CetesPage() {
                 p: 2,
                 borderRadius: "16px",
                 bgcolor: "rgba(255,255,255,0.88)",
-                border: "1px solid rgba(16,24,32,0.10)",
+                border: "1px solid #D8E3EC",
               }}
             >
               <Stack direction="row" spacing={1.2} alignItems="center">
-                <Box sx={{ color: "#27B58A", display: "grid", placeItems: "center" }}>{icon}</Box>
+                <Box sx={{ color: "#7FB3D5", display: "grid", placeItems: "center" }}>{icon}</Box>
                 <Box>
-                  <Typography sx={{ color: "#667382", fontSize: 13, fontWeight: 800 }}>
+                  <Typography sx={{ color: "#1F2937", fontSize: 13, fontWeight: 800 }}>
                     {label}
                   </Typography>
-                  <Typography sx={{ color: "#101820", fontSize: 20, fontWeight: 900, mt: 0.3 }}>
+                  <Typography sx={{ color: "#1F2937", fontSize: 20, fontWeight: 900, mt: 0.3 }}>
                     {value}
                   </Typography>
                 </Box>
@@ -115,3 +115,5 @@ export default function CetesPage() {
     </Box>
   );
 }
+
+

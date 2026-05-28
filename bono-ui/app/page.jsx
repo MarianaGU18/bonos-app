@@ -25,16 +25,16 @@ import ShieldOutlinedIcon from "@mui/icons-material/ShieldOutlined";
 import SpeedOutlinedIcon from "@mui/icons-material/SpeedOutlined";
 
 const colors = {
-  ink: "#111820",
-  graphite: "#25313F",
-  muted: "#667382",
-  soft: "#F6F7F9",
+  ink: "#0B1F3A",
+  graphite: "#1D4E89",
+  muted: "#1F2937",
+  soft: "#EEF3F8",
   panel: "#FFFFFF",
-  line: "rgba(37,49,63,0.12)",
-  green: "#24A06F",
-  teal: "#20A4A8",
-  amber: "#C88A21",
-  blue: "#3F7DD8",
+  line: "#D8E3EC",
+  green: "#2E8B57",
+  teal: "#7FB3D5",
+  amber: "#7FB3D5",
+  blue: "#1D4E89",
 };
 
 const heroMetrics = [
@@ -171,7 +171,7 @@ function DashboardPreview() {
         sx={{
           borderRadius: "12px",
           overflow: "hidden",
-          bgcolor: "#101820",
+          bgcolor: "#0B1F3A",
           border: "1px solid rgba(255,255,255,0.10)",
         }}
       >
@@ -308,7 +308,7 @@ function SignalStrip() {
             backdropFilter: "blur(16px)",
           }}
         >
-          <Box sx={{ p: { xs: 2.5, md: 3 }, bgcolor: "#101820", color: "#fff" }}>
+          <Box sx={{ p: { xs: 2.5, md: 3 }, bgcolor: "#0B1F3A", color: "#fff" }}>
             <Typography sx={{ fontSize: 13, color: "rgba(255,255,255,0.62)" }}>
               Senales para decidir
             </Typography>
@@ -399,7 +399,7 @@ export default function LandingPage() {
                   mb: 2.6,
                   height: 32,
                   borderRadius: "12px",
-                  color: "#DDF7EE",
+                  color: "#EEF3F8",
                   bgcolor: "rgba(36,160,111,0.18)",
                   border: "1px solid rgba(36,160,111,0.36)",
                   fontWeight: 850,
@@ -519,7 +519,7 @@ export default function LandingPage() {
                       display: "grid",
                       placeItems: "center",
                       flex: "0 0 auto",
-                      color: index === 0 ? "#DDF7EE" : colors.green,
+                      color: index === 0 ? "#EEF3F8" : colors.green,
                       bgcolor: index === 0 ? "rgba(255,255,255,0.08)" : "rgba(36,160,111,0.10)",
                     }}
                   >
@@ -657,7 +657,7 @@ export default function LandingPage() {
                 }}
               >
                 <Stack direction="row" spacing={1.4} alignItems="center">
-                  <SpeedOutlinedIcon sx={{ color: "#DDF7EE" }} />
+                  <SpeedOutlinedIcon sx={{ color: "#EEF3F8" }} />
                   <Typography sx={{ fontWeight: 900 }}>Lectura rapida, criterio profundo</Typography>
                 </Stack>
                 <Typography sx={{ mt: 1.2, color: "rgba(255,255,255,0.70)", lineHeight: 1.65 }}>
@@ -720,7 +720,7 @@ export default function LandingPage() {
             }}
           >
             <Box>
-              <Typography sx={{ color: "#DDF7EE", fontSize: 12, fontWeight: 850, textTransform: "uppercase" }}>
+              <Typography sx={{ color: "#EEF3F8", fontSize: 12, fontWeight: 850, textTransform: "uppercase" }}>
                 Operacion en Mexico
               </Typography>
               <Typography sx={{ mt: 1.4, maxWidth: 620, fontSize: { xs: 33, md: 49 }, lineHeight: 1.03, fontWeight: 900 }}>
@@ -754,7 +754,7 @@ export default function LandingPage() {
                     border: "1px solid rgba(255,255,255,0.10)",
                   }}
                 >
-                  <Box sx={{ color: "#DDF7EE", display: "grid", placeItems: "center", width: 34, height: 34 }}>
+                  <Box sx={{ color: "#EEF3F8", display: "grid", placeItems: "center", width: 34, height: 34 }}>
                     {icon}
                   </Box>
                   <Typography sx={{ mt: 2, color: "#fff", fontWeight: 900 }}>{title}</Typography>
@@ -818,4 +818,5 @@ export default function LandingPage() {
     </Box>
   );
 }
+
 

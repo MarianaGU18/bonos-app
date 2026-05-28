@@ -27,12 +27,12 @@ import TrendingUpOutlinedIcon from "@mui/icons-material/TrendingUpOutlined";
 import { useAuth } from "../context/AuthContext";
 
 const chartColors = {
-  cash: "#3877D6",
-  cetes: "#27B58A",
-  bonds: "#C98922",
+  cash: "#1D4E89",
+  cetes: "#7FB3D5",
+  bonds: "#7FB3D5",
   yield: "#7C5CFC",
   grid: "rgba(16,24,32,0.08)",
-  text: "#667382",
+  text: "#1F2937",
 };
 
 const BarChartComponent = dynamic(
@@ -54,8 +54,8 @@ const BarChartComponent = dynamic(
             <BarChart data={data} margin={{ top: 12, right: 10, left: -12, bottom: 0 }} barCategoryGap="28%">
               <defs>
                 <linearGradient id="portfolioBar" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#27B58A" stopOpacity={0.98} />
-                  <stop offset="100%" stopColor="#3877D6" stopOpacity={0.88} />
+                  <stop offset="0%" stopColor="#7FB3D5" stopOpacity={0.98} />
+                  <stop offset="100%" stopColor="#1D4E89" stopOpacity={0.88} />
                 </linearGradient>
               </defs>
               <CartesianGrid vertical={false} stroke={chartColors.grid} strokeDasharray="4 6" />
@@ -74,11 +74,11 @@ const BarChartComponent = dynamic(
                 tickFormatter={(value) => `$${Math.round(value / 1000)}k`}
               />
               <Tooltip
-                cursor={{ fill: "rgba(39,181,138,0.08)" }}
+                cursor={{ fill: "rgba(127,179,213,0.08)" }}
                 contentStyle={{
                   borderRadius: 12,
-                  border: "1px solid rgba(16,24,32,0.10)",
-                  boxShadow: "0 18px 38px rgba(16,24,32,0.14)",
+                  border: "1px solid #D8E3EC",
+                  boxShadow: "0 18px 38px rgba(11,31,58,0.12)",
                 }}
                 formatter={(value) => [`$${Number(value).toLocaleString("es-MX")}`, "Valor"]}
               />
@@ -123,8 +123,8 @@ const DonutChartComponent = dynamic(
               <Tooltip
                 contentStyle={{
                   borderRadius: 12,
-                  border: "1px solid rgba(16,24,32,0.10)",
-                  boxShadow: "0 18px 38px rgba(16,24,32,0.14)",
+                  border: "1px solid #D8E3EC",
+                  boxShadow: "0 18px 38px rgba(11,31,58,0.12)",
                 }}
                 formatter={(value, name) => [`$${Number(value).toLocaleString("es-MX")}`, name]}
               />
@@ -150,10 +150,10 @@ function MetricCard({ icon, label, value, helper, tone = "light" }) {
       sx={{
         p: 2.5,
         minHeight: 156,
-        bgcolor: dark ? "#101820" : "#FFFFFF",
-        color: dark ? "#fff" : "#101820",
+        bgcolor: dark ? "#0B1F3A" : "#FFFFFF",
+        color: dark ? "#fff" : "#1F2937",
         borderRadius: "18px",
-        border: dark ? "1px solid rgba(255,255,255,0.10)" : "1px solid rgba(16,24,32,0.10)",
+        border: dark ? "1px solid rgba(255,255,255,0.10)" : "1px solid #D8E3EC",
         boxShadow: dark ? "0 24px 58px rgba(16,24,32,0.18)" : "0 14px 34px rgba(16,24,32,0.06)",
       }}
     >
@@ -165,8 +165,8 @@ function MetricCard({ icon, label, value, helper, tone = "light" }) {
             borderRadius: "12px",
             display: "grid",
             placeItems: "center",
-            bgcolor: dark ? "rgba(255,255,255,0.08)" : "rgba(39,181,138,0.10)",
-            color: dark ? "#DDF7EE" : "#27B58A",
+            bgcolor: dark ? "rgba(255,255,255,0.08)" : "rgba(127,179,213,0.10)",
+            color: dark ? "#EEF3F8" : "#7FB3D5",
           }}
         >
           {icon}
@@ -175,12 +175,12 @@ function MetricCard({ icon, label, value, helper, tone = "light" }) {
           label={helper}
           size="small"
           sx={{
-            bgcolor: dark ? "rgba(39,181,138,0.16)" : "#F5F7FA",
-            color: dark ? "#DDF7EE" : "#667382",
+            bgcolor: dark ? "rgba(127,179,213,0.16)" : "#EEF3F8",
+            color: dark ? "#EEF3F8" : "#1F2937",
           }}
         />
       </Stack>
-      <Typography sx={{ mt: 2.4, color: dark ? "rgba(255,255,255,0.58)" : "#667382", fontSize: 13, fontWeight: 800 }}>
+      <Typography sx={{ mt: 2.4, color: dark ? "rgba(255,255,255,0.58)" : "#1F2937", fontSize: 13, fontWeight: 800 }}>
         {label}
       </Typography>
       <Typography sx={{ mt: 0.8, fontSize: { xs: 27, md: 31 }, lineHeight: 1, fontWeight: 950 }}>
@@ -284,7 +284,7 @@ function DashboardContent({ user, isAuthenticated }) {
       { name: "Rendimiento", value: 0, color: chartColors.yield },
     ].filter((item) => item.value > 0);
 
-    return items.length ? items : [{ name: "Sin capital", value: 1, color: "#D9E1EA" }];
+    return items.length ? items : [{ name: "Sin capital", value: 1, color: "#D8E3EC" }];
   }, [portfolio.cashBalance, portfolio.cetesBalance]);
 
   const activeRatio = portfolio.total > 0 ? Math.round((portfolio.cetesBalance / portfolio.total) * 100) : 0;
@@ -303,9 +303,9 @@ function DashboardContent({ user, isAuthenticated }) {
       sx={{
         minHeight: "100vh",
         background: `
-          radial-gradient(circle at 9% 8%, rgba(39,181,138,0.12), transparent 25%),
-          radial-gradient(circle at 86% 6%, rgba(56,119,214,0.10), transparent 24%),
-          linear-gradient(180deg, #FFFFFF 0%, #F5F7FA 44%, #EEF2F6 100%)
+          radial-gradient(circle at 9% 8%, rgba(127,179,213,0.12), transparent 25%),
+          radial-gradient(circle at 86% 6%, rgba(29,78,137,0.10), transparent 24%),
+          linear-gradient(180deg, #FFFFFF 0%, #EEF3F8 44%, #EEF3F8 100%)
         `,
       }}
     >
@@ -319,8 +319,8 @@ function DashboardContent({ user, isAuthenticated }) {
             overflow: "hidden",
             border: "1px solid rgba(255,255,255,0.12)",
             background: `
-              radial-gradient(circle at 83% 10%, rgba(39,181,138,0.26), transparent 28%),
-              linear-gradient(145deg, #2F3B48 0%, #101820 100%)
+              radial-gradient(circle at 83% 10%, rgba(127,179,213,0.26), transparent 28%),
+              linear-gradient(145deg, #1D4E89 0%, #0B1F3A 100%)
             `,
             boxShadow: "0 30px 76px rgba(16,24,32,0.18)",
           }}
@@ -331,9 +331,9 @@ function DashboardContent({ user, isAuthenticated }) {
                 label="Dashboard financiero"
                 sx={{
                   mb: 2,
-                  bgcolor: "rgba(39,181,138,0.16)",
-                  color: "#DDF7EE",
-                  border: "1px solid rgba(39,181,138,0.28)",
+                  bgcolor: "rgba(127,179,213,0.16)",
+                  color: "#EEF3F8",
+                  border: "1px solid rgba(127,179,213,0.28)",
                 }}
               />
               <Typography sx={{ fontSize: { xs: 38, md: 54 }, lineHeight: 1, fontWeight: 950 }}>
@@ -349,7 +349,7 @@ function DashboardContent({ user, isAuthenticated }) {
                 href="/cetes"
                 variant="contained"
                 endIcon={<ArrowForwardIcon />}
-                sx={{ bgcolor: "#fff", color: "#101820", "&:hover": { bgcolor: "#EEF2F6" } }}
+                sx={{ bgcolor: "#fff", color: "#1F2937", "&:hover": { bgcolor: "#EEF3F8" } }}
               >
                 Operar CETES
               </Button>
@@ -420,16 +420,16 @@ function DashboardContent({ user, isAuthenticated }) {
             <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" spacing={2} sx={{ mb: 2 }}>
               <Box>
                 <Stack direction="row" spacing={1} alignItems="center">
-                  <InsightsOutlinedIcon sx={{ color: "#27B58A" }} />
+                  <InsightsOutlinedIcon sx={{ color: "#7FB3D5" }} />
                   <Typography sx={{ fontSize: 20, fontWeight: 900 }}>
                     Evolucion del portafolio
                   </Typography>
                 </Stack>
-                <Typography sx={{ mt: 0.7, color: "#667382", fontSize: 14 }}>
+                <Typography sx={{ mt: 0.7, color: "#1F2937", fontSize: 14 }}>
                   Ultimos 6 meses calculados desde movimientos registrados.
                 </Typography>
               </Box>
-              <Chip label="Valor mensual" sx={{ alignSelf: "flex-start", bgcolor: "#F5F7FA" }} />
+              <Chip label="Valor mensual" sx={{ alignSelf: "flex-start", bgcolor: "#EEF3F8" }} />
             </Stack>
             <BarChartComponent data={chartData} />
           </Paper>
@@ -443,12 +443,12 @@ function DashboardContent({ user, isAuthenticated }) {
             }}
           >
             <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
-              <DonutLargeOutlinedIcon sx={{ color: "#3877D6" }} />
+              <DonutLargeOutlinedIcon sx={{ color: "#1D4E89" }} />
               <Typography sx={{ fontSize: 20, fontWeight: 900 }}>
                 Distribucion
               </Typography>
             </Stack>
-            <Typography sx={{ color: "#667382", fontSize: 14 }}>
+            <Typography sx={{ color: "#1F2937", fontSize: 14 }}>
               Porcentaje del dinero por tipo de posicion.
             </Typography>
 
@@ -462,8 +462,8 @@ function DashboardContent({ user, isAuthenticated }) {
                   pointerEvents: "none",
                 }}
               >
-                <Typography sx={{ color: "#667382", fontSize: 12, fontWeight: 800 }}>Total</Typography>
-                <Typography sx={{ color: "#101820", fontSize: 23, fontWeight: 950 }}>{fmt(portfolio.total)}</Typography>
+                <Typography sx={{ color: "#1F2937", fontSize: 12, fontWeight: 800 }}>Total</Typography>
+                <Typography sx={{ color: "#1F2937", fontSize: 23, fontWeight: 950 }}>{fmt(portfolio.total)}</Typography>
               </Box>
             </Box>
 
@@ -474,9 +474,9 @@ function DashboardContent({ user, isAuthenticated }) {
                   <Stack key={item.name} direction="row" justifyContent="space-between" alignItems="center">
                     <Stack direction="row" spacing={1} alignItems="center">
                       <Box sx={{ width: 10, height: 10, borderRadius: "50%", bgcolor: item.color }} />
-                      <Typography sx={{ color: "#101820", fontWeight: 800 }}>{item.name}</Typography>
+                      <Typography sx={{ color: "#1F2937", fontWeight: 800 }}>{item.name}</Typography>
                     </Stack>
-                    <Typography sx={{ color: "#667382", fontWeight: 800 }}>{percent}%</Typography>
+                    <Typography sx={{ color: "#1F2937", fontWeight: 800 }}>{percent}%</Typography>
                   </Stack>
                 );
               })}
@@ -529,15 +529,15 @@ function DashboardContent({ user, isAuthenticated }) {
                     borderRadius: "12px",
                     display: "grid",
                     placeItems: "center",
-                    bgcolor: "rgba(39,181,138,0.10)",
-                    color: "#27B58A",
+                    bgcolor: "rgba(127,179,213,0.10)",
+                    color: "#7FB3D5",
                   }}
                 >
                   {item.icon}
                 </Box>
                 <Box>
                   <Typography sx={{ fontWeight: 900 }}>{item.title}</Typography>
-                  <Typography sx={{ mt: 0.4, color: "#667382", fontSize: 14 }}>{item.body}</Typography>
+                  <Typography sx={{ mt: 0.4, color: "#1F2937", fontSize: 14 }}>{item.body}</Typography>
                 </Box>
               </Stack>
               <Button component={Link} href={item.href} variant="outlined" endIcon={<ArrowForwardIcon />}>
@@ -573,3 +573,6 @@ function ProtectedDashboardPage() {
 }
 
 export default ProtectedDashboardPage;
+
+
+

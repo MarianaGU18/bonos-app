@@ -12,28 +12,28 @@ export function StyledTextField({ sx, ...props }) {
         "& .MuiOutlinedInput-root": {
           minHeight: 54,
           borderRadius: "12px",
-          bgcolor: "#F8FAFC",
+          bgcolor: "#EEF3F8",
           transition: "background-color 160ms ease, box-shadow 160ms ease",
           "& fieldset": {
-            borderColor: "rgba(16,24,32,0.14)",
+            borderColor: "#D8E3EC",
           },
           "&:hover fieldset": {
             borderColor: "rgba(16,24,32,0.28)",
           },
           "&.Mui-focused": {
             bgcolor: "#FFFFFF",
-            boxShadow: "0 0 0 4px rgba(39,181,138,0.14)",
+            boxShadow: "0 0 0 4px rgba(127,179,213,0.14)",
           },
           "&.Mui-focused fieldset": {
-            borderColor: "#27B58A",
+            borderColor: "#7FB3D5",
           },
         },
         "& .MuiInputLabel-root": {
-          color: "#667382",
+          color: "#1F2937",
           fontWeight: 700,
         },
         "& .MuiInputLabel-root.Mui-focused": {
-          color: "#17212B",
+          color: "#0B1F3A",
         },
         ...sx,
       }}
@@ -53,11 +53,11 @@ export function PrimaryButton({ sx, ...props }) {
         mb: 1,
         py: 1.45,
         borderRadius: "12px",
-        bgcolor: "#17212B",
+        bgcolor: "#0B1F3A",
         color: "#FFFFFF",
         boxShadow: "0 16px 30px rgba(16,24,32,0.18)",
         "&:hover": {
-          bgcolor: "#0B1117",
+          bgcolor: "#0B1F3A",
           boxShadow: "0 18px 36px rgba(16,24,32,0.22)",
         },
         ...sx,
@@ -66,3 +66,4 @@ export function PrimaryButton({ sx, ...props }) {
     />
   );
 }
+
