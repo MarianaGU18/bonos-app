@@ -1,123 +1,119 @@
 "use client";
 
-import { Container, Typography, Box, Paper, Chip } from "@mui/material";
-
-import SavingsIcon from "@mui/icons-material/Savings";
-import CetesCalculator from "../context/CetesCalculator"; // Importamos el componente
+import { Box, Chip, Container, Paper, Stack, Typography } from "@mui/material";
+import SavingsOutlinedIcon from "@mui/icons-material/SavingsOutlined";
+import ShieldOutlinedIcon from "@mui/icons-material/ShieldOutlined";
+import SpeedOutlinedIcon from "@mui/icons-material/SpeedOutlined";
+import VerifiedOutlinedIcon from "@mui/icons-material/VerifiedOutlined";
+import CetesCalculator from "../context/CetesCalculator";
 
 export default function CetesPage() {
   return (
     <Box
       sx={{
         minHeight: "100vh",
-
-        background: (theme) => `
-        linear-gradient(
-          135deg,
-          ${theme.palette.background.default} 0%,
-          ${theme.palette.background.subtle} 50%,
-          ${theme.palette.background.default} 100%
-        )
-      `,
+        background: `
+          radial-gradient(circle at 8% 8%, rgba(127,179,213,0.13), transparent 25%),
+          radial-gradient(circle at 88% 9%, rgba(29,78,137,0.10), transparent 24%),
+          linear-gradient(180deg, #FFFFFF 0%, #EEF3F8 48%, #EEF3F8 100%)
+        `,
       }}
     >
-      <Container
-        maxWidth="xl"
-        sx={{
-          py: {
-            xs: 4,
-            md: 6,
-          },
-        }}
-      >
-        {/* HEADER */}
-
+      <Container maxWidth="xl" sx={{ py: { xs: 4, md: 5 } }}>
         <Paper
           sx={{
-            mb: 5,
-
-            p: {
-              xs: 4,
-              md: 5,
-            },
-
-            background: (theme) => `
-            linear-gradient(
-              135deg,
-              ${theme.palette.primary.main} 0%,
-              ${theme.palette.background.dark} 100%
-            )
-          `,
-
-            color: "white",
-            border: "2px solid #ff1744",
+            mb: 3,
+            p: { xs: 3, md: 4 },
+            borderRadius: "20px",
+            color: "#fff",
+            overflow: "hidden",
+            background: `
+              radial-gradient(circle at 84% 12%, rgba(127,179,213,0.25), transparent 28%),
+              linear-gradient(145deg, #1D4E89 0%, #0B1F3A 100%)
+            `,
+            border: "1px solid rgba(255,255,255,0.12)",
+            boxShadow: "0 30px 76px rgba(16,24,32,0.18)",
           }}
         >
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-
-              alignItems: "center",
-
-              gap: 3,
-            }}
-          >
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-
-                gap: 3,
-              }}
-            >
+          <Stack direction={{ xs: "column", md: "row" }} justifyContent="space-between" spacing={3}>
+            <Stack direction={{ xs: "column", sm: "row" }} spacing={2.4} alignItems={{ sm: "center" }}>
               <Box
                 sx={{
-                  width: 72,
-
-                  height: 72,
-
-                  borderRadius: 3,
-
+                  width: 62,
+                  height: 62,
+                  borderRadius: "16px",
                   bgcolor: "rgba(255,255,255,0.08)",
-
-                  border: "1px solid rgba(0, 242, 20, 0.94)",
-
-                  display: "flex",
-
-                  alignItems: "center",
-
-                  justifyContent: "center",
+                  border: "1px solid rgba(255,255,255,0.12)",
+                  display: "grid",
+                  placeItems: "center",
+                  color: "#EEF3F8",
                 }}
               >
-                <SavingsIcon
+                <SavingsOutlinedIcon sx={{ fontSize: 34 }} />
+              </Box>
+              <Box>
+                <Chip
+                  label="Mercado gubernamental"
                   sx={{
-                    fontSize: 38,
+                    mb: 1.2,
+                    bgcolor: "rgba(127,179,213,0.16)",
+                    color: "#EEF3F8",
+                    border: "1px solid rgba(127,179,213,0.28)",
                   }}
                 />
-              </Box>
-
-              <Box>
-                <Typography variant="h3">CETES Valuation</Typography>
-
-                <Typography
-                  variant="body1"
-                  sx={{
-                    opacity: 0.8,
-
-                    mt: 1,
-                  }}
-                >
-                  Calculate your government bond investment returns
+                <Typography component="h1" sx={{ fontSize: { xs: 36, md: 52 }, lineHeight: 1, fontWeight: 950 }}>
+                  Operacion CETES
+                </Typography>
+                <Typography sx={{ mt: 1.4, maxWidth: 720, color: "rgba(255,255,255,0.66)", fontSize: 17, lineHeight: 1.7 }}>
+                  Define monto, plazo y tasa con un resumen financiero visible
+                  antes de confirmar la inversion.
                 </Typography>
               </Box>
-            </Box>
-          </Box>
+            </Stack>
+          </Stack>
         </Paper>
 
-        {/* CALCULADORA REUTILIZABLE */}
+        <Box
+          sx={{
+            mb: 3,
+            display: "grid",
+            gridTemplateColumns: { xs: "1fr", md: "repeat(3, 1fr)" },
+            gap: 1.5,
+          }}
+        >
+          {[
+            [<VerifiedOutlinedIcon key="nominal" />, "Valor nominal", "$10.00 MXN"],
+            [<SpeedOutlinedIcon key="settle" />, "Liquidacion", "Mismo dia"],
+            [<ShieldOutlinedIcon key="risk" />, "Riesgo", "Gobierno federal"],
+          ].map(([icon, label, value]) => (
+            <Paper
+              key={label}
+              sx={{
+                p: 2,
+                borderRadius: "16px",
+                bgcolor: "rgba(255,255,255,0.88)",
+                border: "1px solid #D8E3EC",
+              }}
+            >
+              <Stack direction="row" spacing={1.2} alignItems="center">
+                <Box sx={{ color: "#7FB3D5", display: "grid", placeItems: "center" }}>{icon}</Box>
+                <Box>
+                  <Typography sx={{ color: "#1F2937", fontSize: 13, fontWeight: 800 }}>
+                    {label}
+                  </Typography>
+                  <Typography sx={{ color: "#1F2937", fontSize: 20, fontWeight: 900, mt: 0.3 }}>
+                    {value}
+                  </Typography>
+                </Box>
+              </Stack>
+            </Paper>
+          ))}
+        </Box>
+
         <CetesCalculator />
       </Container>
     </Box>
   );
 }
+
+

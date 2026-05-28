@@ -1,19 +1,17 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  Typography,
-  FormControlLabel,
-  Checkbox,
-  CircularProgress,
   Box,
+  Button,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   Divider,
   Stack,
+  Typography,
 } from "@mui/material";
 import { useAuth } from "../context/AuthContext";
 
@@ -32,7 +30,6 @@ export default function SellCeteModal({ open, onClose, onConfirm, ceteId }) {
     setLoading(true);
     try {
       const data = await estimateCeteSale(ceteId);
-      console.log("Backend Estimate Response:", data);
       setEstimation(data);
     } catch (error) {
       console.error("Error loading estimation:", error);
@@ -58,68 +55,48 @@ export default function SellCeteModal({ open, onClose, onConfirm, ceteId }) {
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="xs">
-      <DialogTitle sx={{ fontWeight: "bold" }}>Confirmar Venta</DialogTitle>
+      <DialogTitle sx={{ fontWeight: 900 }}>Confirmar venta</DialogTitle>
       <DialogContent>
         {loading ? (
-          <Box sx={{ display: "flex", justifyContent: "center", p: 3 }}>
+          <Box sx={{ display: "grid", placeItems: "center", p: 4 }}>
             <CircularProgress />
           </Box>
         ) : estimation ? (
           <Box sx={{ mt: 1 }}>
-            <Typography variant="body2" color="text.secondary" gutterBottom>
-              ¿Estás seguro de que deseas vender esta inversión? A continuación
-              se muestra el desglose de tu rendimiento estimado:
+            <Typography variant="body2" color="text.secondary">
+              Estas por vender esta inversion. Revisa el desglose estimado
+              antes de confirmar la operacion.
             </Typography>
 
             <Stack spacing={1.5} sx={{ mt: 3, mb: 3 }}>
-              <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-                <Typography variant="body1">Inversión Original:</Typography>
-                <Typography variant="body1" sx={{ fontWeight: "medium" }}>
-                  {fmt(totalValue - profit)}
-                </Typography>
-              </Box>
+              <Stack direction="row" justifyContent="space-between" spacing={2}>
+                <Typography>Inversion original</Typography>
+                <Typography sx={{ fontWeight: 850 }}>{fmt(totalValue - profit)}</Typography>
+              </Stack>
 
-              <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-                <Typography variant="body1" color="success.main">
-                  Interés Devengado (+):
-                </Typography>
-                <Typography
-                  variant="body1"
-                  color="success.main"
-                  sx={{ fontWeight: "bold" }}
-                >
+              <Stack direction="row" justifyContent="space-between" spacing={2}>
+                <Typography color="success.main">Interes devengado</Typography>
+                <Typography color="success.main" sx={{ fontWeight: 900 }}>
                   {fmt(profit)}
                 </Typography>
-              </Box>
+              </Stack>
 
               <Divider />
 
-              <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-                <Typography variant="h6">Total a Recibir:</Typography>
-                <Typography
-                  variant="h6"
-                  color="primary"
-                  sx={{ fontWeight: "bold" }}
-                >
+              <Stack direction="row" justifyContent="space-between" spacing={2}>
+                <Typography variant="h6">Total a recibir</Typography>
+                <Typography variant="h6" color="primary" sx={{ fontWeight: 950 }}>
                   {fmt(totalValue)}
                 </Typography>
-              </Box>
+              </Stack>
             </Stack>
-
-            <Divider sx={{ my: 2 }} />
           </Box>
         ) : (
-          <Typography color="error">
-            No se pudo cargar la estimación.
-          </Typography>
+          <Typography color="error">No se pudo cargar la estimacion.</Typography>
         )}
       </DialogContent>
       <DialogActions sx={{ p: 2, pt: 0 }}>
-        <Button
-          onClick={onClose}
-          color="inherit"
-          sx={{ textTransform: "none" }}
-        >
+        <Button onClick={onClose} color="inherit">
           Cancelar
         </Button>
         <Button
@@ -127,9 +104,9 @@ export default function SellCeteModal({ open, onClose, onConfirm, ceteId }) {
           variant="contained"
           color="error"
           disabled={loading || !estimation}
-          sx={{ textTransform: "none", borderRadius: 2 }}
+          sx={{ borderRadius: "12px" }}
         >
-          Confirmar Venta
+          Confirmar venta
         </Button>
       </DialogActions>
     </Dialog>

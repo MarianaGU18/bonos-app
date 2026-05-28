@@ -2,6 +2,7 @@ import { CssBaseline, ThemeProvider } from "@mui/material";
 import { theme } from "./styles/GlobalTheme";
 import AppBarGlobal from "./components/AppBarGlobal";
 import Footer from "./components/Footer";
+import AppMain from "./components/AppMain";
 
 import ClientAuthProvider from "./context/ClientAuthProvider";
 
@@ -19,7 +20,7 @@ export default function RootLayout({ children }) {
 
           <ClientAuthProvider>
             <AppBarGlobal />
-            {children}
+            <AppMain>{children}</AppMain>
             <Footer />
           </ClientAuthProvider>
         </ThemeProvider>
