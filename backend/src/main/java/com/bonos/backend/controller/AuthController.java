@@ -73,7 +73,8 @@ public class AuthController {
                         savedUser.getMaternallast(),
                         "REGISTER OK",
                         savedUser.getRole().name(),
-                        savedUser.getEmail()
+                        savedUser.getEmail(),
+                        savedUser.getBirthdate()
                 ));
     }
 
@@ -100,7 +101,8 @@ public class AuthController {
                         authenticatedUser.getMaternallast(),
                         "LOGIN OK",
                         authenticatedUser.getRole().name(),
-                        authenticatedUser.getEmail()
+                        authenticatedUser.getEmail(),
+                        authenticatedUser.getBirthdate()
                 ));
     }
 
