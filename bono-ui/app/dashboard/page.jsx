@@ -51,14 +51,22 @@ const BarChartComponent = dynamic(
       return function ChartWrapper({ data }) {
         return (
           <ResponsiveContainer width="100%" height={290}>
-            <BarChart data={data} margin={{ top: 12, right: 10, left: -12, bottom: 0 }} barCategoryGap="28%">
+            <BarChart
+              data={data}
+              margin={{ top: 12, right: 10, left: -12, bottom: 0 }}
+              barCategoryGap="28%"
+            >
               <defs>
                 <linearGradient id="portfolioBar" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stopColor="#7FB3D5" stopOpacity={0.98} />
                   <stop offset="100%" stopColor="#1D4E89" stopOpacity={0.88} />
                 </linearGradient>
               </defs>
-              <CartesianGrid vertical={false} stroke={chartColors.grid} strokeDasharray="4 6" />
+              <CartesianGrid
+                vertical={false}
+                stroke={chartColors.grid}
+                strokeDasharray="4 6"
+              />
               <XAxis
                 dataKey="name"
                 axisLine={false}
@@ -80,9 +88,17 @@ const BarChartComponent = dynamic(
                   border: "1px solid #D8E3EC",
                   boxShadow: "0 18px 38px rgba(11,31,58,0.12)",
                 }}
-                formatter={(value) => [`$${Number(value).toLocaleString("es-MX")}`, "Valor"]}
+                formatter={(value) => [
+                  `$${Number(value).toLocaleString("es-MX")}`,
+                  "Valor",
+                ]}
               />
-              <Bar dataKey="value" name="Valor de cartera" fill="url(#portfolioBar)" radius={[8, 8, 0, 0]} />
+              <Bar
+                dataKey="value"
+                name="Valor de cartera"
+                fill="url(#portfolioBar)"
+                radius={[8, 8, 0, 0]}
+              />
             </BarChart>
           </ResponsiveContainer>
         );
@@ -126,7 +142,10 @@ const DonutChartComponent = dynamic(
                   border: "1px solid #D8E3EC",
                   boxShadow: "0 18px 38px rgba(11,31,58,0.12)",
                 }}
-                formatter={(value, name) => [`$${Number(value).toLocaleString("es-MX")}`, name]}
+                formatter={(value, name) => [
+                  `$${Number(value).toLocaleString("es-MX")}`,
+                  name,
+                ]}
               />
             </PieChart>
           </ResponsiveContainer>
@@ -154,10 +173,16 @@ function MetricCard({ icon, label, value, helper, tone = "light" }) {
         color: dark ? "#fff" : "#1F2937",
         borderRadius: "18px",
         border: dark ? "1px solid rgba(255,255,255,0.10)" : "1px solid #D8E3EC",
-        boxShadow: dark ? "0 24px 58px rgba(16,24,32,0.18)" : "0 14px 34px rgba(16,24,32,0.06)",
+        boxShadow: dark
+          ? "0 24px 58px rgba(16,24,32,0.18)"
+          : "0 14px 34px rgba(16,24,32,0.06)",
       }}
     >
-      <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
+      <Stack
+        direction="row"
+        justifyContent="space-between"
+        alignItems="flex-start"
+      >
         <Box
           sx={{
             width: 42,
@@ -180,10 +205,24 @@ function MetricCard({ icon, label, value, helper, tone = "light" }) {
           }}
         />
       </Stack>
-      <Typography sx={{ mt: 2.4, color: dark ? "rgba(255,255,255,0.58)" : "#1F2937", fontSize: 13, fontWeight: 800 }}>
+      <Typography
+        sx={{
+          mt: 2.4,
+          color: dark ? "rgba(255,255,255,0.58)" : "#1F2937",
+          fontSize: 13,
+          fontWeight: 800,
+        }}
+      >
         {label}
       </Typography>
-      <Typography sx={{ mt: 0.8, fontSize: { xs: 27, md: 31 }, lineHeight: 1, fontWeight: 950 }}>
+      <Typography
+        sx={{
+          mt: 0.8,
+          fontSize: { xs: 27, md: 31 },
+          lineHeight: 1,
+          fontWeight: 950,
+        }}
+      >
         {value}
       </Typography>
     </Paper>
@@ -227,16 +266,35 @@ function DashboardContent({ user, isAuthenticated }) {
       const transRes = await authFetch(`/portafolio/transacciones/${user.id}`);
       if (transRes.ok) {
         const transactions = await transRes.json();
-        const months = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
+        const months = [
+          "Ene",
+          "Feb",
+          "Mar",
+          "Abr",
+          "May",
+          "Jun",
+          "Jul",
+          "Ago",
+          "Sep",
+          "Oct",
+          "Nov",
+          "Dic",
+        ];
         const now = new Date();
         const history = [];
 
         let runningTotal = currentPortfolio.total;
-        const sortedTrans = [...transactions].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        const sortedTrans = [...transactions].sort(
+          (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
+        );
         let transIdx = 0;
 
         for (let i = 0; i < 6; i++) {
-          const targetMonthStart = new Date(now.getFullYear(), now.getMonth() - i, 1);
+          const targetMonthStart = new Date(
+            now.getFullYear(),
+            now.getMonth() - i,
+            1,
+          );
           const monthLabel = months[targetMonthStart.getMonth()];
 
           history.unshift({
@@ -278,17 +336,33 @@ function DashboardContent({ user, isAuthenticated }) {
 
   const allocationData = useMemo(() => {
     const items = [
-      { name: "Efectivo", value: Number(portfolio.cashBalance || 0), color: chartColors.cash },
-      { name: "CETES", value: Number(portfolio.cetesBalance || 0), color: chartColors.cetes },
+      {
+        name: "Efectivo",
+        value: Number(portfolio.cashBalance || 0),
+        color: chartColors.cash,
+      },
+      {
+        name: "CETES",
+        value: Number(portfolio.cetesBalance || 0),
+        color: chartColors.cetes,
+      },
       { name: "Bonos", value: 0, color: chartColors.bonds },
       { name: "Rendimiento", value: 0, color: chartColors.yield },
     ].filter((item) => item.value > 0);
 
-    return items.length ? items : [{ name: "Sin capital", value: 1, color: "#D8E3EC" }];
+    return items.length
+      ? items
+      : [{ name: "Sin capital", value: 1, color: "#D8E3EC" }];
   }, [portfolio.cashBalance, portfolio.cetesBalance]);
 
-  const activeRatio = portfolio.total > 0 ? Math.round((portfolio.cetesBalance / portfolio.total) * 100) : 0;
-  const liquidityRatio = portfolio.total > 0 ? Math.round((portfolio.cashBalance / portfolio.total) * 100) : 0;
+  const activeRatio =
+    portfolio.total > 0
+      ? Math.round((portfolio.cetesBalance / portfolio.total) * 100)
+      : 0;
+  const liquidityRatio =
+    portfolio.total > 0
+      ? Math.round((portfolio.cashBalance / portfolio.total) * 100)
+      : 0;
 
   if (loadingPortfolio) {
     return (
@@ -325,7 +399,11 @@ function DashboardContent({ user, isAuthenticated }) {
             boxShadow: "0 30px 76px rgba(16,24,32,0.18)",
           }}
         >
-          <Stack direction={{ xs: "column", md: "row" }} justifyContent="space-between" spacing={3}>
+          <Stack
+            direction={{ xs: "column", md: "row" }}
+            justifyContent="space-between"
+            spacing={3}
+          >
             <Box>
               <Chip
                 label="Dashboard financiero"
@@ -336,23 +414,32 @@ function DashboardContent({ user, isAuthenticated }) {
                   border: "1px solid rgba(127,179,213,0.28)",
                 }}
               />
-              <Typography sx={{ fontSize: { xs: 38, md: 54 }, lineHeight: 1, fontWeight: 950 }}>
+              <Typography
+                sx={{
+                  fontSize: { xs: 38, md: 54 },
+                  lineHeight: 1,
+                  fontWeight: 950,
+                }}
+              >
                 Hola, {user?.name}.
               </Typography>
-              <Typography sx={{ mt: 1.6, maxWidth: 680, color: "rgba(255,255,255,0.66)", fontSize: 17 }}>
-                Tu posicion, liquidez y rendimiento se organizan para decidir rapido sin perder control.
+              <Typography
+                sx={{
+                  mt: 1.6,
+                  maxWidth: 680,
+                  color: "rgba(255,255,255,0.66)",
+                  fontSize: 17,
+                }}
+              >
+                Tu posicion, liquidez y rendimiento se organizan para decidir
+                rapido sin perder control.
               </Typography>
             </Box>
-            <Stack direction={{ xs: "column", sm: "row" }} spacing={1.2} alignItems={{ sm: "center" }}>
-              <Button
-                component={Link}
-                href="/cetes"
-                variant="contained"
-                endIcon={<ArrowForwardIcon />}
-                sx={{ bgcolor: "#fff", color: "#1F2937", "&:hover": { bgcolor: "#EEF3F8" } }}
-              >
-                Operar CETES
-              </Button>
+            <Stack
+              direction={{ xs: "column", sm: "row" }}
+              spacing={1.2}
+              alignItems={{ sm: "center" }}
+            >
               <Button
                 component={Link}
                 href="/perfil"
@@ -417,7 +504,12 @@ function DashboardContent({ user, isAuthenticated }) {
               boxShadow: "0 18px 44px rgba(16,24,32,0.07)",
             }}
           >
-            <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" spacing={2} sx={{ mb: 2 }}>
+            <Stack
+              direction={{ xs: "column", sm: "row" }}
+              justifyContent="space-between"
+              spacing={2}
+              sx={{ mb: 2 }}
+            >
               <Box>
                 <Stack direction="row" spacing={1} alignItems="center">
                   <InsightsOutlinedIcon sx={{ color: "#7FB3D5" }} />
@@ -429,7 +521,10 @@ function DashboardContent({ user, isAuthenticated }) {
                   Ultimos 6 meses calculados desde movimientos registrados.
                 </Typography>
               </Box>
-              <Chip label="Valor mensual" sx={{ alignSelf: "flex-start", bgcolor: "#EEF3F8" }} />
+              <Chip
+                label="Valor mensual"
+                sx={{ alignSelf: "flex-start", bgcolor: "#EEF3F8" }}
+              />
             </Stack>
             <BarChartComponent data={chartData} />
           </Paper>
@@ -442,7 +537,12 @@ function DashboardContent({ user, isAuthenticated }) {
               boxShadow: "0 18px 44px rgba(16,24,32,0.07)",
             }}
           >
-            <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
+            <Stack
+              direction="row"
+              spacing={1}
+              alignItems="center"
+              sx={{ mb: 1 }}
+            >
               <DonutLargeOutlinedIcon sx={{ color: "#1D4E89" }} />
               <Typography sx={{ fontSize: 20, fontWeight: 900 }}>
                 Distribucion
@@ -462,21 +562,48 @@ function DashboardContent({ user, isAuthenticated }) {
                   pointerEvents: "none",
                 }}
               >
-                <Typography sx={{ color: "#1F2937", fontSize: 12, fontWeight: 800 }}>Total</Typography>
-                <Typography sx={{ color: "#1F2937", fontSize: 23, fontWeight: 950 }}>{fmt(portfolio.total)}</Typography>
+                <Typography
+                  sx={{ color: "#1F2937", fontSize: 12, fontWeight: 800 }}
+                >
+                  Total
+                </Typography>
+                <Typography
+                  sx={{ color: "#1F2937", fontSize: 23, fontWeight: 950 }}
+                >
+                  {fmt(portfolio.total)}
+                </Typography>
               </Box>
             </Box>
 
             <Stack spacing={1.2}>
               {allocationData.map((item) => {
-                const percent = portfolio.total > 0 ? Math.round((item.value / portfolio.total) * 100) : 0;
+                const percent =
+                  portfolio.total > 0
+                    ? Math.round((item.value / portfolio.total) * 100)
+                    : 0;
                 return (
-                  <Stack key={item.name} direction="row" justifyContent="space-between" alignItems="center">
+                  <Stack
+                    key={item.name}
+                    direction="row"
+                    justifyContent="space-between"
+                    alignItems="center"
+                  >
                     <Stack direction="row" spacing={1} alignItems="center">
-                      <Box sx={{ width: 10, height: 10, borderRadius: "50%", bgcolor: item.color }} />
-                      <Typography sx={{ color: "#1F2937", fontWeight: 800 }}>{item.name}</Typography>
+                      <Box
+                        sx={{
+                          width: 10,
+                          height: 10,
+                          borderRadius: "50%",
+                          bgcolor: item.color,
+                        }}
+                      />
+                      <Typography sx={{ color: "#1F2937", fontWeight: 800 }}>
+                        {item.name}
+                      </Typography>
                     </Stack>
-                    <Typography sx={{ color: "#1F2937", fontWeight: 800 }}>{percent}%</Typography>
+                    <Typography sx={{ color: "#1F2937", fontWeight: 800 }}>
+                      {percent}%
+                    </Typography>
                   </Stack>
                 );
               })}
@@ -537,10 +664,17 @@ function DashboardContent({ user, isAuthenticated }) {
                 </Box>
                 <Box>
                   <Typography sx={{ fontWeight: 900 }}>{item.title}</Typography>
-                  <Typography sx={{ mt: 0.4, color: "#1F2937", fontSize: 14 }}>{item.body}</Typography>
+                  <Typography sx={{ mt: 0.4, color: "#1F2937", fontSize: 14 }}>
+                    {item.body}
+                  </Typography>
                 </Box>
               </Stack>
-              <Button component={Link} href={item.href} variant="outlined" endIcon={<ArrowForwardIcon />}>
+              <Button
+                component={Link}
+                href={item.href}
+                variant="outlined"
+                endIcon={<ArrowForwardIcon />}
+              >
                 {item.action}
               </Button>
             </Paper>
@@ -563,7 +697,14 @@ function ProtectedDashboardPage() {
 
   if (!isAuthenticated) {
     return (
-      <Box sx={{ display: "grid", placeItems: "center", height: "100vh", bgcolor: "background.default" }}>
+      <Box
+        sx={{
+          display: "grid",
+          placeItems: "center",
+          height: "100vh",
+          bgcolor: "background.default",
+        }}
+      >
         <CircularProgress />
       </Box>
     );
@@ -573,6 +714,3 @@ function ProtectedDashboardPage() {
 }
 
 export default ProtectedDashboardPage;
-
-
-

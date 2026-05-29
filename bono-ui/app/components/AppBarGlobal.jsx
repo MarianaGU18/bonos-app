@@ -16,8 +16,8 @@ import {
   Typography,
 } from "@mui/material";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
-import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
 import CloseIcon from "@mui/icons-material/Close";
 import LogoutIcon from "@mui/icons-material/Logout";
 import MenuIcon from "@mui/icons-material/Menu";
@@ -35,34 +35,63 @@ const publicNav = [
 
 const privateNav = [
   { label: "Dashboard", href: "/dashboard" },
-  { label: "Bonos", href: "/cetes" },
+  { label: "Cetes", href: "/cetes" },
+  { label: "Bonos", href: "/bonos" },
   { label: "Cartera", href: "/portafolio" },
   { label: "Perfil", href: "/perfil" },
 ];
 
 function Brand({ href, compact = false }) {
   return (
-    <Stack component={Link} href={href} direction="row" spacing={1.1} alignItems="center" sx={{ color: "inherit", textDecoration: "none" }}>
+    <Stack
+      component={Link}
+      href={href}
+      direction="row"
+      spacing={1.1}
+      alignItems="center"
+      sx={{ color: "inherit", textDecoration: "none" }}
+    >
       <Box
         sx={{
           width: compact ? 34 : 38,
           height: compact ? 34 : 38,
-          borderRadius: "12px",
+          borderRadius: "20%",
+          overflow: "hidden",
           display: "grid",
           placeItems: "center",
-          color: "#1F2937",
-          bgcolor: "#EEF3F8",
+          bgcolor: "#1C285A",
           boxShadow: "0 10px 22px rgba(127,179,213,0.22)",
         }}
       >
-        <AccountBalanceIcon fontSize={compact ? "small" : "medium"} />
+        <Image
+          src="/Logo.png"
+          alt="Logo Acero Inteligente"
+          width={compact ? 24 : 28}
+          height={compact ? 24 : 28}
+          style={{ objectFit: "contain" }}
+        />
       </Box>
       <Box sx={{ lineHeight: 1 }}>
-        <Typography sx={{ color: "#1F2937", fontSize: compact ? 15 : 17, fontWeight: 900, letterSpacing: 0 }}>
+        <Typography
+          sx={{
+            color: "#1F2937",
+            fontSize: compact ? 15 : 17,
+            fontWeight: 900,
+            letterSpacing: 0,
+          }}
+        >
           Acero Inteligente
         </Typography>
         {!compact && (
-          <Typography sx={{ display: { xs: "none", sm: "block" }, mt: 0.3, color: "#1F2937", fontSize: 11, fontWeight: 750 }}>
+          <Typography
+            sx={{
+              display: { xs: "none", sm: "block" },
+              mt: 0.3,
+              color: "#1F2937",
+              fontSize: 11,
+              fontWeight: 750,
+            }}
+          >
             Inversion en bonos
           </Typography>
         )}
@@ -73,7 +102,12 @@ function Brand({ href, compact = false }) {
 
 function NavLinks({ items, isActive, onNavigate, mobile = false }) {
   return (
-    <Stack component="nav" direction={mobile ? "column" : "row"} spacing={mobile ? 0.7 : 0.3} sx={{ width: mobile ? "100%" : "auto" }}>
+    <Stack
+      component="nav"
+      direction={mobile ? "column" : "row"}
+      spacing={mobile ? 0.7 : 0.3}
+      sx={{ width: mobile ? "100%" : "auto" }}
+    >
       {items.map((item) => {
         const active = isActive(item.href);
         return (
@@ -96,7 +130,9 @@ function NavLinks({ items, isActive, onNavigate, mobile = false }) {
               "&:hover": {
                 transform: "none",
                 boxShadow: "none",
-                bgcolor: active ? "rgba(127,179,213,0.18)" : "rgba(16,24,32,0.05)",
+                bgcolor: active
+                  ? "rgba(127,179,213,0.18)"
+                  : "rgba(16,24,32,0.05)",
               },
             }}
           >
@@ -144,7 +180,13 @@ export default function AppBarGlobal() {
   if (loading) return null;
   if (pathname === "/inicio") return null;
 
-  const homePath = isAdmin ? "/admin" : isColaborador ? "/colab" : user ? "/dashboard" : "/inicio";
+  const homePath = isAdmin
+    ? "/admin"
+    : isColaborador
+      ? "/colab"
+      : user
+        ? "/dashboard"
+        : "/inicio";
   const navItems = user ? privateNav : publicNav;
   const compact = !user && !scrolled;
 
@@ -172,9 +214,12 @@ export default function AppBarGlobal() {
         color: "#1F2937",
         border: "1px solid #D8E3EC",
         bgcolor: "#EEF3F8",
-        boxShadow: scrolled ? "0 12px 28px rgba(11,31,58,0.08)" : "0 6px 18px rgba(11,31,58,0.04)",
+        boxShadow: scrolled
+          ? "0 12px 28px rgba(11,31,58,0.08)"
+          : "0 6px 18px rgba(11,31,58,0.04)",
         backdropFilter: "none",
-        transition: "transform 260ms ease, opacity 220ms ease, min-height 220ms ease, background-color 220ms ease, box-shadow 220ms ease, border-color 220ms ease",
+        transition:
+          "transform 260ms ease, opacity 220ms ease, min-height 220ms ease, background-color 220ms ease, box-shadow 220ms ease, border-color 220ms ease",
         opacity: hidden ? 0 : 1,
         pointerEvents: hidden ? "none" : "auto",
         "&:hover": {
@@ -193,11 +238,18 @@ export default function AppBarGlobal() {
       >
         <Brand href={homePath} compact={compact} />
 
-        <Box sx={{ display: { xs: "none", md: "block" }, ml: { md: 2, lg: 4 } }}>
+        <Box
+          sx={{ display: { xs: "none", md: "block" }, ml: { md: 2, lg: 4 } }}
+        >
           <NavLinks items={navItems} isActive={isActive} />
         </Box>
 
-        <Stack direction="row" spacing={1} alignItems="center" sx={{ ml: "auto" }}>
+        <Stack
+          direction="row"
+          spacing={1}
+          alignItems="center"
+          sx={{ ml: "auto" }}
+        >
           {user && (
             <IconButton
               aria-label="Notificaciones"
@@ -219,8 +271,21 @@ export default function AppBarGlobal() {
 
           {user ? (
             <>
-              <IconButton onClick={(event) => setAnchorEl(event.currentTarget)} aria-label="Abrir menu de usuario" sx={{ p: 0.25 }}>
-                <Avatar sx={{ width: 38, height: 38, borderRadius: "12px", bgcolor: "#0B1F3A", color: "#fff", fontWeight: 900 }}>
+              <IconButton
+                onClick={(event) => setAnchorEl(event.currentTarget)}
+                aria-label="Abrir menu de usuario"
+                sx={{ p: 0.25 }}
+              >
+                <Avatar
+                  sx={{
+                    width: 38,
+                    height: 38,
+                    borderRadius: "12px",
+                    bgcolor: "#0B1F3A",
+                    color: "#fff",
+                    fontWeight: 900,
+                  }}
+                >
                   {user.name?.charAt(0).toUpperCase() || "U"}
                 </Avatar>
               </IconButton>
@@ -228,13 +293,39 @@ export default function AppBarGlobal() {
                 anchorEl={anchorEl}
                 open={Boolean(anchorEl)}
                 onClose={() => setAnchorEl(null)}
-                PaperProps={{ sx: { mt: 1.3, minWidth: 210, borderRadius: "14px", border: "1px solid #D8E3EC", boxShadow: "0 22px 56px rgba(11,31,58,0.14)" } }}
+                PaperProps={{
+                  sx: {
+                    mt: 1.3,
+                    minWidth: 210,
+                    borderRadius: "14px",
+                    border: "1px solid #D8E3EC",
+                    boxShadow: "0 22px 56px rgba(11,31,58,0.14)",
+                  },
+                }}
                 anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
                 transformOrigin={{ vertical: "top", horizontal: "right" }}
               >
-                <MenuItem component={Link} href="/perfil" onClick={() => setAnchorEl(null)}>Perfil</MenuItem>
-                <MenuItem component={Link} href="/portafolio" onClick={() => setAnchorEl(null)}>Cartera</MenuItem>
-                <MenuItem component={Link} href="/contact" onClick={() => setAnchorEl(null)}>Contacto</MenuItem>
+                <MenuItem
+                  component={Link}
+                  href="/perfil"
+                  onClick={() => setAnchorEl(null)}
+                >
+                  Perfil
+                </MenuItem>
+                <MenuItem
+                  component={Link}
+                  href="/portafolio"
+                  onClick={() => setAnchorEl(null)}
+                >
+                  Cartera
+                </MenuItem>
+                <MenuItem
+                  component={Link}
+                  href="/contact"
+                  onClick={() => setAnchorEl(null)}
+                >
+                  Contacto
+                </MenuItem>
                 <Divider sx={{ my: 1 }} />
                 <MenuItem onClick={handleLogout} sx={{ color: "error.main" }}>
                   <LogoutIcon fontSize="small" sx={{ mr: 1 }} />
@@ -243,15 +334,29 @@ export default function AppBarGlobal() {
               </Menu>
             </>
           ) : (
-            <Stack direction="row" spacing={0.8} sx={{ display: { xs: "none", sm: "flex" } }}>
-              <Button component={Link} href="/login" sx={{ color: "#0B1F3A", px: 1.5, boxShadow: "none" }}>
+            <Stack
+              direction="row"
+              spacing={0.8}
+              sx={{ display: { xs: "none", sm: "flex" } }}
+            >
+              <Button
+                component={Link}
+                href="/login"
+                sx={{ color: "#0B1F3A", px: 1.5, boxShadow: "none" }}
+              >
                 Entrar
               </Button>
               <Button
                 component={Link}
                 href="/register"
                 variant="contained"
-                sx={{ borderRadius: "10px", bgcolor: "#0B1F3A", color: "#fff", px: 2, "&:hover": { bgcolor: "#0B1F3A" } }}
+                sx={{
+                  borderRadius: "10px",
+                  bgcolor: "#0B1F3A",
+                  color: "#fff",
+                  px: 2,
+                  "&:hover": { bgcolor: "#0B1F3A" },
+                }}
               >
                 Crear cuenta
               </Button>
@@ -261,28 +366,58 @@ export default function AppBarGlobal() {
           <IconButton
             onClick={() => setDrawerOpen(true)}
             aria-label="Abrir navegacion"
-            sx={{ display: { xs: "inline-flex", md: "none" }, color: "#0B1F3A" }}
+            sx={{
+              display: { xs: "inline-flex", md: "none" },
+              color: "#0B1F3A",
+            }}
           >
             <MenuIcon />
           </IconButton>
         </Stack>
       </Toolbar>
 
-      <Drawer anchor="right" open={drawerOpen} onClose={() => setDrawerOpen(false)}>
+      <Drawer
+        anchor="right"
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+      >
         <Box sx={{ width: 310, p: 2.5, bgcolor: "#EEF3F8", minHeight: "100%" }}>
-          <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 3 }}>
+          <Stack
+            direction="row"
+            justifyContent="space-between"
+            alignItems="center"
+            sx={{ mb: 3 }}
+          >
             <Brand href={homePath} />
-            <IconButton onClick={() => setDrawerOpen(false)} aria-label="Cerrar navegacion">
+            <IconButton
+              onClick={() => setDrawerOpen(false)}
+              aria-label="Cerrar navegacion"
+            >
               <CloseIcon />
             </IconButton>
           </Stack>
-          <NavLinks items={navItems} isActive={isActive} mobile onNavigate={() => setDrawerOpen(false)} />
+          <NavLinks
+            items={navItems}
+            isActive={isActive}
+            mobile
+            onNavigate={() => setDrawerOpen(false)}
+          />
           {!user && (
             <Stack spacing={1.2} sx={{ mt: 3 }}>
-              <Button component={Link} href="/login" variant="outlined" onClick={() => setDrawerOpen(false)}>
+              <Button
+                component={Link}
+                href="/login"
+                variant="outlined"
+                onClick={() => setDrawerOpen(false)}
+              >
                 Entrar
               </Button>
-              <Button component={Link} href="/register" variant="contained" onClick={() => setDrawerOpen(false)}>
+              <Button
+                component={Link}
+                href="/register"
+                variant="contained"
+                onClick={() => setDrawerOpen(false)}
+              >
                 Crear cuenta
               </Button>
             </Stack>
@@ -292,5 +427,3 @@ export default function AppBarGlobal() {
     </AppBar>
   );
 }
-
-

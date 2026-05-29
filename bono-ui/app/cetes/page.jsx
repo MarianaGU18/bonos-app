@@ -35,8 +35,16 @@ export default function CetesPage() {
             boxShadow: "0 30px 76px rgba(16,24,32,0.18)",
           }}
         >
-          <Stack direction={{ xs: "column", md: "row" }} justifyContent="space-between" spacing={3}>
-            <Stack direction={{ xs: "column", sm: "row" }} spacing={2.4} alignItems={{ sm: "center" }}>
+          <Stack
+            direction={{ xs: "column", md: "row" }}
+            justifyContent="space-between"
+            spacing={3}
+          >
+            <Stack
+              direction={{ xs: "column", sm: "row" }}
+              spacing={2.4}
+              alignItems={{ sm: "center" }}
+            >
               <Box
                 sx={{
                   width: 62,
@@ -52,19 +60,25 @@ export default function CetesPage() {
                 <SavingsOutlinedIcon sx={{ fontSize: 34 }} />
               </Box>
               <Box>
-                <Chip
-                  label="Mercado gubernamental"
+                <Typography
+                  component="h1"
                   sx={{
-                    mb: 1.2,
-                    bgcolor: "rgba(127,179,213,0.16)",
-                    color: "#EEF3F8",
-                    border: "1px solid rgba(127,179,213,0.28)",
+                    fontSize: { xs: 36, md: 52 },
+                    lineHeight: 1,
+                    fontWeight: 950,
                   }}
-                />
-                <Typography component="h1" sx={{ fontSize: { xs: 36, md: 52 }, lineHeight: 1, fontWeight: 950 }}>
+                >
                   Operacion CETES
                 </Typography>
-                <Typography sx={{ mt: 1.4, maxWidth: 720, color: "rgba(255,255,255,0.66)", fontSize: 17, lineHeight: 1.7 }}>
+                <Typography
+                  sx={{
+                    mt: 1.4,
+                    maxWidth: 720,
+                    color: "rgba(255,255,255,0.66)",
+                    fontSize: 17,
+                    lineHeight: 1.7,
+                  }}
+                >
                   Define monto, plazo y tasa con un resumen financiero visible
                   antes de confirmar la inversion.
                 </Typography>
@@ -73,7 +87,7 @@ export default function CetesPage() {
           </Stack>
         </Paper>
 
-        <Box
+        {/*<Box
           sx={{
             mb: 3,
             display: "grid",
@@ -108,12 +122,10 @@ export default function CetesPage() {
               </Stack>
             </Paper>
           ))}
-        </Box>
+        </Box>*/}
 
         <CetesCalculator />
       </Container>
     </Box>
   );
 }
-
-
