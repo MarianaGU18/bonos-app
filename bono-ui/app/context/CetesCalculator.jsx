@@ -42,11 +42,18 @@ function StatPill({ icon, label, value }) {
         border: "1px solid rgba(255,255,255,0.12)",
       }}
     >
-      <Stack direction="row" spacing={1} alignItems="center" sx={{ color: "rgba(255,255,255,0.7)" }}>
+      <Stack
+        direction="row"
+        spacing={1}
+        alignItems="center"
+        sx={{ color: "rgba(255,255,255,0.7)" }}
+      >
         {icon}
         <Typography sx={{ fontSize: 12, fontWeight: 800 }}>{label}</Typography>
       </Stack>
-      <Typography sx={{ mt: 0.8, fontSize: 20, fontWeight: 900, color: "#fff" }}>
+      <Typography
+        sx={{ mt: 0.8, fontSize: 20, fontWeight: 900, color: "#fff" }}
+      >
         {value}
       </Typography>
     </Box>
@@ -55,7 +62,12 @@ function StatPill({ icon, label, value }) {
 
 function ResumenRow({ label, value, highlight = false, color = "#FFFFFF" }) {
   return (
-    <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={2}>
+    <Stack
+      direction="row"
+      justifyContent="space-between"
+      alignItems="center"
+      spacing={2}
+    >
       <Typography sx={{ color: "rgba(255,255,255,0.66)", fontSize: 14 }}>
         {label}
       </Typography>
@@ -103,11 +115,11 @@ export default function CetesCalculator() {
   const { user, calculateInversion, getCetesRates, buyCetes } = useAuth();
   const router = useRouter();
 
-  const [monto, setMonto] = useState(1000);
-  const [plazo, setPlazo] = useState(28);
-  const [tasa, setTasa] = useState(6.45);
-  const [titulos, setTitulos] = useState(100);
-  const [isManualRate, setIsManualRate] = useState(false);
+  const [monto, setMonto] = useState("");
+  const [plazo, setPlazo] = useState("");
+  const [tasa, setTasa] = useState("");
+  const [titulos, setTitulos] = useState("");
+  const [isManualRate, setIsManualRate] = useState(true);
   const [defaultRates, setDefaultRates] = useState({});
   const [calculo, setCalculo] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -118,8 +130,6 @@ export default function CetesCalculator() {
       try {
         const rates = await getCetesRates();
         setDefaultRates(rates);
-        const rate28 = rates[28] || rates["28"];
-        if (rate28) setTasa(rate28);
       } catch (error) {
         console.error("Error fetching rates:", error);
       }
@@ -140,7 +150,11 @@ export default function CetesCalculator() {
     async (m, p, t) => {
       try {
         setLoading(true);
-        const result = await calculateInversion(Number(m), Number(p), Number(t));
+        const result = await calculateInversion(
+          Number(m),
+          Number(p),
+          Number(t),
+        );
         setCalculo(result);
       } catch (error) {
         console.error("Error calculo:", error);
@@ -151,22 +165,28 @@ export default function CetesCalculator() {
     [calculateInversion],
   );
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (monto && Number(monto) >= 10) {
-        ejecutarCalculo(monto, plazo, tasa);
-      } else {
-        setCalculo(null);
-      }
-    }, 300);
-
-    return () => clearTimeout(timer);
-  }, [monto, plazo, tasa, ejecutarCalculo]);
+  const handleCalculateClick = () => {
+    const numMonto = Number(monto);
+    if (!monto || numMonto < 100 || numMonto > 10000000) {
+      alert("El monto debe estar entre 100 y 10,000,000");
+      return;
+    }
+    if (!plazo) {
+      alert("Por favor selecciona un plazo");
+      return;
+    }
+    if (!tasa) {
+      alert("Por favor ingresa una tasa");
+      return;
+    }
+    ejecutarCalculo(monto, plazo, tasa);
+  };
 
   const handlePlazoChange = (e) => {
     const nuevoPlazo = e.target.value;
     setPlazo(nuevoPlazo);
-    const tasaSugerida = defaultRates[nuevoPlazo] || defaultRates[String(nuevoPlazo)];
+    const tasaSugerida =
+      defaultRates[nuevoPlazo] || defaultRates[String(nuevoPlazo)];
 
     let currentTasa = tasa;
     if (!isManualRate && tasaSugerida) {
@@ -207,13 +227,11 @@ export default function CetesCalculator() {
   };
 
   const handleReset = () => {
-    setMonto(1000);
-    setPlazo(28);
-    setTitulos(0);
+    setMonto("");
+    setPlazo("");
+    setTitulos("");
     setCalculationMode("monto");
-    setIsManualRate(false);
-    const rate28 = defaultRates[28] || defaultRates["28"];
-    setTasa(rate28 || 6.45);
+    setTasa("");
     setCalculo(null);
   };
 
@@ -227,13 +245,27 @@ export default function CetesCalculator() {
     });
   };
 
-  const getTasaPeriodo = () => ((tasa * plazo) / 360).toFixed(2);
+  const getTasaPeriodo = () => {
+    if (!tasa || !plazo) return "0.00";
+    return ((tasa * plazo) / 360).toFixed(2);
+  };
 
   const getRendimientoReal = () => {
-    if (!calculo || !calculo.totalFinal || !calculo.inversionCetes) return "0.00";
-    const gananciaNeta = calculo.totalFinal - calculo.remanente - calculo.inversionCetes;
+    if (!calculo || !calculo.totalFinal || !calculo.inversionCetes)
+      return "0.00";
+    const gananciaNeta =
+      calculo.totalFinal - calculo.remanente - calculo.inversionCetes;
     return ((gananciaNeta / calculo.inversionCetes) * 100).toFixed(2);
   };
+
+  // Definición de canBuy para habilitar/deshabilitar el botón de compra
+  const canBuy =
+    !loading &&
+    !!calculo && // Debe haber un cálculo previo (haber picado a Calcular)
+    !!user &&
+    Number(user.balance || 0) >= Number(monto || 0) &&
+    Number(monto || 0) >= 100 &&
+    Number(monto || 0) <= 10000000;
 
   const handleBuy = async () => {
     try {
@@ -245,19 +277,15 @@ export default function CetesCalculator() {
     }
   };
 
-  const canBuy =
-    !loading &&
-    calculo &&
-    user &&
-    Number(user.balance || 0) >= Number(monto || 0) &&
-    Number(monto || 0) >= 100;
-
   return (
     <Box sx={{ p: { xs: 0, md: 0 } }}>
       <Box
         sx={{
           display: "grid",
-          gridTemplateColumns: { xs: "1fr", lg: "minmax(0, 1.35fr) minmax(360px, 0.9fr)" },
+          gridTemplateColumns: {
+            xs: "1fr",
+            lg: "minmax(0, 1.35fr) minmax(360px, 0.9fr)",
+          },
           gap: 3,
           alignItems: "start",
         }}
@@ -273,23 +301,34 @@ export default function CetesCalculator() {
               bgcolor: "rgba(255,255,255,0.92)",
             }}
           >
-            <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" spacing={2} sx={{ mb: 3 }}>
+            <Stack
+              direction={{ xs: "column", sm: "row" }}
+              justifyContent="space-between"
+              spacing={2}
+              sx={{ mb: 3 }}
+            >
               <Box>
-                <Typography sx={{ color: "#7FB3D5", fontSize: 12, fontWeight: 900, textTransform: "uppercase" }}>
+                <Typography
+                  sx={{
+                    color: "#7FB3D5",
+                    fontSize: 12,
+                    fontWeight: 900,
+                    textTransform: "uppercase",
+                  }}
+                >
                   Define tu operacion
                 </Typography>
-                <Typography variant="h4" sx={{ mt: 0.5, color: "#1F2937", fontWeight: 950 }}>
+                <Typography
+                  variant="h4"
+                  sx={{ mt: 0.5, color: "#1F2937", fontWeight: 950 }}
+                >
                   Configura la inversion
                 </Typography>
                 <Typography sx={{ mt: 0.8, color: "#1F2937", fontSize: 14 }}>
-                  Ajusta monto, titulos, plazo y tasa. El resumen se actualiza automaticamente.
+                  Ajusta monto, titulos, plazo y tasa. El resumen se actualiza
+                  automaticamente.
                 </Typography>
               </Box>
-              <Chip
-                icon={<SavingsIcon />}
-                label={`Precio estimado $${precioActual.toFixed(4)}`}
-                sx={{ bgcolor: "rgba(127,179,213,0.12)", color: "#0B1F3A", fontWeight: 900 }}
-              />
             </Stack>
 
             <Grid container spacing={2.2}>
@@ -300,7 +339,11 @@ export default function CetesCalculator() {
                   type="number"
                   value={monto}
                   onChange={handleMontoChange}
-                  InputProps={{ startAdornment: <InputAdornment position="start">$</InputAdornment> }}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">$</InputAdornment>
+                    ),
+                  }}
                 />
               </Grid>
               <Grid item xs={12} md={6}>
@@ -312,15 +355,20 @@ export default function CetesCalculator() {
                   onChange={handleTitulosChange}
                 />
               </Grid>
-              <Grid item xs={12} md={6}>
-                <StyledField select label="Plazo" value={plazo} onChange={handlePlazoChange}>
+              {/*<Grid item xs={12} md={6}>
+                <StyledField
+                  select
+                  label="Plazo"
+                  value={plazo || ""}
+                  onChange={handlePlazoChange}
+                >
                   {terms.map((term) => (
                     <MenuItem key={term.value} value={term.value}>
                       {term.label} - {term.helper}
                     </MenuItem>
                   ))}
                 </StyledField>
-              </Grid>
+              </Grid>*/}
               <Grid item xs={12} md={6}>
                 <StyledField
                   label="Tasa anual"
@@ -331,7 +379,11 @@ export default function CetesCalculator() {
                     setIsManualRate(true);
                   }}
                   helperText="Puedes ajustar la tasa manualmente"
-                  InputProps={{ endAdornment: <InputAdornment position="end">%</InputAdornment> }}
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">%</InputAdornment>
+                    ),
+                  }}
                 />
               </Grid>
             </Grid>
@@ -352,7 +404,9 @@ export default function CetesCalculator() {
                     <Grid item xs={6} md={3} key={term.value}>
                       <Button
                         fullWidth
-                        onClick={() => handlePlazoChange({ target: { value: term.value } })}
+                        onClick={() =>
+                          handlePlazoChange({ target: { value: term.value } })
+                        }
                         sx={{
                           py: 1.4,
                           borderRadius: "10px",
@@ -361,12 +415,20 @@ export default function CetesCalculator() {
                           bgcolor: selected ? "#0B1F3A" : "#FFFFFF",
                           color: selected ? "#FFFFFF" : "#0B1F3A",
                           border: "1px solid #D8E3EC",
-                          boxShadow: selected ? "0 14px 28px rgba(16,24,32,0.18)" : "none",
-                          "&:hover": { bgcolor: selected ? "#0B1F3A" : "#FFFFFF" },
+                          boxShadow: selected
+                            ? "0 14px 28px rgba(16,24,32,0.18)"
+                            : "none",
+                          "&:hover": {
+                            bgcolor: selected ? "#0B1F3A" : "#FFFFFF",
+                          },
                         }}
                       >
-                        <Typography sx={{ fontWeight: 900, fontSize: 14 }}>{term.label}</Typography>
-                        <Typography sx={{ opacity: 0.68, fontSize: 12 }}>{term.helper}</Typography>
+                        <Typography sx={{ fontWeight: 900, fontSize: 14 }}>
+                          {term.label}
+                        </Typography>
+                        <Typography sx={{ opacity: 0.68, fontSize: 12 }}>
+                          {term.helper}
+                        </Typography>
                       </Button>
                     </Grid>
                   );
@@ -374,25 +436,60 @@ export default function CetesCalculator() {
               </Grid>
             </Box>
 
-            <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5} sx={{ mt: 3 }}>
+            <Stack spacing={2} sx={{ mt: 3 }}>
+              {/* Fila 1: Calcular y Limpiar */}
+              <Stack direction="row" spacing={2}>
+                <Button
+                  fullWidth
+                  variant="contained"
+                  onClick={handleCalculateClick}
+                  disabled={loading}
+                  sx={{
+                    py: 1.6,
+                    bgcolor: "#0B1F3A",
+                    fontWeight: 700,
+                    "&:hover": { bgcolor: "#1D4E89" },
+                  }}
+                >
+                  Calcular
+                </Button>
+                <Button
+                  fullWidth
+                  variant="outlined"
+                  startIcon={<RestartAltIcon />}
+                  onClick={handleReset}
+                  sx={{
+                    py: 1.6,
+                    color: "#0B1F3A",
+                    borderColor: "#D8E3EC",
+                    fontWeight: 700,
+                  }}
+                >
+                  Limpiar
+                </Button>
+              </Stack>
+
+              {/* Fila 2: Comprar (Confirmar Inversión) */}
               <Button
                 fullWidth
                 variant="contained"
-                startIcon={loading ? <CircularProgress size={18} color="inherit" /> : <RequestQuoteIcon />}
+                color="success"
+                startIcon={
+                  loading ? (
+                    <CircularProgress size={18} color="inherit" />
+                  ) : (
+                    <RequestQuoteIcon />
+                  )
+                }
                 disabled={!canBuy}
                 onClick={handleBuy}
-                sx={{ py: 1.6, bgcolor: "#0B1F3A", "&:hover": { bgcolor: "#0B1F3A" } }}
+                sx={{
+                  py: 2,
+                  fontWeight: 900,
+                  fontSize: "1.1rem",
+                }}
               >
-                Confirmar inversion
-              </Button>
-              <Button
-                fullWidth
-                variant="outlined"
-                startIcon={<RestartAltIcon />}
-                onClick={handleReset}
-                sx={{ py: 1.6, color: "#0B1F3A", borderColor: "#D8E3EC" }}
-              >
-                Limpiar
+                Comprar (Confirmar Inversión)
               </Button>
             </Stack>
           </Paper>
@@ -415,49 +512,87 @@ export default function CetesCalculator() {
               boxShadow: "0 30px 76px rgba(16,24,32,0.22)",
             }}
           >
-            <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ mb: 3 }}>
+            <Stack
+              direction="row"
+              justifyContent="space-between"
+              alignItems="flex-start"
+              sx={{ mb: 3 }}
+            >
               <Box>
-                <Typography sx={{ color: "rgba(255,255,255,0.62)", fontSize: 13, fontWeight: 900, textTransform: "uppercase" }}>
+                <Typography
+                  sx={{
+                    color: "rgba(255,255,255,0.62)",
+                    fontSize: 13,
+                    fontWeight: 900,
+                    textTransform: "uppercase",
+                  }}
+                >
                   Resumen de la operacion
                 </Typography>
-                <Typography sx={{ mt: 0.8, fontSize: 34, lineHeight: 1, fontWeight: 900 }}>
+                <Typography
+                  sx={{ mt: 0.8, fontSize: 34, lineHeight: 1, fontWeight: 900 }}
+                >
                   {calculo?.totalFinal
                     ? `$${Number(calculo.totalFinal).toLocaleString("es-MX", { minimumFractionDigits: 2 })}`
                     : "$0.00"}
                 </Typography>
               </Box>
-              <Chip
-                label={`${getRendimientoReal()}% esperado`}
-                sx={{ bgcolor: "rgba(127,179,213,0.16)", color: "#EEF3F8", fontWeight: 900 }}
-              />
             </Stack>
 
             <Grid container spacing={1.5} sx={{ mb: 3 }}>
               <Grid item xs={6}>
-                <StatPill icon={<PercentIcon fontSize="small" />} label="Tasa periodo" value={`${getTasaPeriodo()}%`} />
+                <StatPill
+                  icon={<PercentIcon fontSize="small" />}
+                  label="Tasa periodo"
+                  value={`${getTasaPeriodo()}%`}
+                />
               </Grid>
               <Grid item xs={6}>
-                <StatPill icon={<CalendarMonthIcon fontSize="small" />} label="Vence" value={getFechaVencimiento()} />
+                <StatPill
+                  icon={<CalendarMonthIcon fontSize="small" />}
+                  label="Vence"
+                  value={getFechaVencimiento()}
+                />
               </Grid>
               <Grid item xs={6}>
-                <StatPill icon={<TrendingUpIcon fontSize="small" />} label="Titulos" value={calculo?.titulosCetes || titulos || 0} />
+                <StatPill
+                  icon={<TrendingUpIcon fontSize="small" />}
+                  label="Titulos"
+                  value={calculo?.titulosCetes || titulos || 0}
+                />
               </Grid>
               <Grid item xs={6}>
-                <StatPill icon={<AccountBalanceWalletIcon fontSize="small" />} label="Remanente" value={`$${Number(calculo?.remanente || 0).toFixed(2)}`} />
+                <StatPill
+                  icon={<AccountBalanceWalletIcon fontSize="small" />}
+                  label="Remanente"
+                  value={`$${Number(calculo?.remanente || 0).toFixed(2)}`}
+                />
               </Grid>
             </Grid>
 
             <Divider sx={{ borderColor: "rgba(255,255,255,0.12)", mb: 2.5 }} />
 
             {loading ? (
-              <Box sx={{ display: "grid", placeItems: "center", minHeight: 210 }}>
+              <Box
+                sx={{ display: "grid", placeItems: "center", minHeight: 210 }}
+              >
                 <CircularProgress sx={{ color: "#EEF3F8" }} />
               </Box>
             ) : (
               <Stack spacing={2}>
-                <ResumenRow label="Precio actual CETE" value={`$${precioActual.toFixed(4)}`} />
-                <ResumenRow label="Inversion real" value={`$${Number(calculo?.inversionCetes || 0).toLocaleString("es-MX")}`} />
-                <ResumenRow label="ISR estimado" value={`$${Number(calculo?.isr || 0).toFixed(2)}`} color="#EEF3F8" />
+                <ResumenRow
+                  label="Precio actual CETE"
+                  value={`$${precioActual.toFixed(4)}`}
+                />
+                <ResumenRow
+                  label="Inversion real"
+                  value={`$${Number(calculo?.inversionCetes || 0).toLocaleString("es-MX")}`}
+                />
+                <ResumenRow
+                  label="ISR estimado"
+                  value={`$${Number(calculo?.isr || 0).toFixed(2)}`}
+                  color="#EEF3F8"
+                />
                 <Divider sx={{ borderColor: "rgba(255,255,255,0.12)" }} />
                 <ResumenRow
                   label="Total al vencimiento"
@@ -476,6 +611,3 @@ export default function CetesCalculator() {
     </Box>
   );
 }
-
-
-

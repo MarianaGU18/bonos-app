@@ -1,7 +1,7 @@
 "use client";
 
 import { Box, Container, Divider, Stack, Typography } from "@mui/material";
-import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 
 export default function Footer() {
@@ -30,14 +30,21 @@ export default function Footer() {
               sx={{
                 width: 34,
                 height: 34,
-                borderRadius: "12px",
+                borderRadius: "20%",
+                overflow: "hidden",
                 display: "grid",
                 placeItems: "center",
-                bgcolor: "#0B1F3A",
-                color: "#EEF3F8",
+                bgcolor: "#1C285A",
+                boxShadow: "0 8px 16px rgba(127,179,213,0.18)",
               }}
             >
-              <AccountBalanceIcon fontSize="small" />
+              <Image
+                src="/Logo.png"
+                alt="Logo Acero Inteligente"
+                width={24}
+                height={24}
+                style={{ objectFit: "contain" }}
+              />
             </Box>
             <Box>
               <Typography
@@ -59,4 +66,3 @@ export default function Footer() {
     </Box>
   );
 }
-
