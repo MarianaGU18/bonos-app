@@ -17,6 +17,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import AccountBalanceWalletOutlinedIcon from "@mui/icons-material/AccountBalanceWalletOutlined";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import AccountBalanceOutlinedIcon from "@mui/icons-material/AccountBalanceOutlined";
 import AutoGraphOutlinedIcon from "@mui/icons-material/AutoGraphOutlined";
 import DonutLargeOutlinedIcon from "@mui/icons-material/DonutLargeOutlined";
 import InsightsOutlinedIcon from "@mui/icons-material/InsightsOutlined";
@@ -234,6 +235,7 @@ function DashboardContent({ user, isAuthenticated }) {
   const [portfolio, setPortfolio] = useState({
     cashBalance: 0,
     cetesBalance: 0,
+    bondsBalance: 0,
     total: 0,
   });
   const [chartData, setChartData] = useState([]);
@@ -258,6 +260,7 @@ function DashboardContent({ user, isAuthenticated }) {
       const currentPortfolio = {
         cashBalance: portData.cashBalance,
         cetesBalance: portData.cetesBalance,
+        bondsBalance: portData.bondsBalance || 0,
         total: portData.totalBalance,
       };
 
@@ -346,7 +349,7 @@ function DashboardContent({ user, isAuthenticated }) {
         value: Number(portfolio.cetesBalance || 0),
         color: chartColors.cetes,
       },
-      { name: "Bonos", value: 0, color: chartColors.bonds },
+      { name: "Bonos", value: Number(portfolio.bondsBalance || 0), color: chartColors.bonds },
       { name: "Rendimiento", value: 0, color: chartColors.yield },
     ].filter((item) => item.value > 0);
 
@@ -358,6 +361,10 @@ function DashboardContent({ user, isAuthenticated }) {
   const activeRatio =
     portfolio.total > 0
       ? Math.round((portfolio.cetesBalance / portfolio.total) * 100)
+      : 0;
+  const bondsRatio =
+    portfolio.total > 0
+      ? Math.round((portfolio.bondsBalance / portfolio.total) * 100)
       : 0;
   const liquidityRatio =
     portfolio.total > 0
@@ -480,11 +487,10 @@ function DashboardContent({ user, isAuthenticated }) {
             helper={`${activeRatio}% activo`}
           />
           <MetricCard
-            icon={<TrendingUpOutlinedIcon />}
-            label="Valor total"
-            value={fmt(portfolio.total)}
-            helper="MXN"
-            tone="dark"
+            icon={<AccountBalanceOutlinedIcon />}
+            label="Invertido en Bonos"
+            value={fmt(portfolio.bondsBalance)}
+            helper={`${bondsRatio}% activo`}
           />
         </Box>
 
@@ -615,7 +621,7 @@ function DashboardContent({ user, isAuthenticated }) {
           sx={{
             mt: 2,
             display: "grid",
-            gridTemplateColumns: { xs: "1fr", md: "repeat(2, 1fr)" },
+            gridTemplateColumns: { xs: "1fr", md: "repeat(3, 1fr)" },
             gap: 2,
           }}
         >
@@ -625,6 +631,13 @@ function DashboardContent({ user, isAuthenticated }) {
               title: "Valuacion CETES",
               body: "Calcula precios, plazo, tasa y remanente antes de operar.",
               href: "/cetes",
+              action: "Abrir calculadora",
+            },
+            {
+              icon: <AccountBalanceOutlinedIcon />,
+              title: "Valuacion Bonos",
+              body: "Calcula precio teórico, rendimiento y cupones antes de invertir.",
+              href: "/bonos",
               action: "Abrir calculadora",
             },
             {

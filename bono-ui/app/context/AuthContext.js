@@ -30,7 +30,7 @@ const handleResponse = async (res) => {
     const statusMessages = {
       400: "The information provided is incorrect. Please check the fields.",
       401: "Your session has expired. Please log in again.",
-      403: "Access denied. This is likely a security configuration issue on the server.",
+      403: "Correo o contraseña incorrectos. Intenta nuevamente.",
       404: "The requested resource was not found.",
       409: "This email address is already registered. Please use another one.",
       500: "Our servers are having trouble. Please try again in a few minutes.",

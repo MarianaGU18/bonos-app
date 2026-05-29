@@ -2,6 +2,7 @@
 
 import React, { useState, useCallback, useEffect } from "react";
 import {
+  Alert,
   Box,
   Button,
   Chip,
@@ -12,6 +13,7 @@ import {
   InputAdornment,
   MenuItem,
   Paper,
+  Snackbar,
   Stack,
   TextField,
   Typography,
@@ -121,6 +123,7 @@ export default function BonosPage() {
   const [calculo, setCalculo] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -206,7 +209,7 @@ export default function BonosPage() {
       }
 
       setError("");
-      alert("¡Inversión confirmada! Tu bono ha sido registrado en tu cartera.");
+      setSuccessMessage("¡Inversión confirmada! Tu bono ha sido registrado en tu cartera.");
     } catch {
       setError("Error de conexión. Intenta nuevamente.");
     }
@@ -496,6 +499,9 @@ export default function BonosPage() {
             </Paper>
           </Box>
         </Box>
+        <Snackbar open={!!successMessage} autoHideDuration={3000} onClose={() => setSuccessMessage("")}>
+          <Alert severity="success">{successMessage}</Alert>
+        </Snackbar>
       </Container>
     </Box>
   );
