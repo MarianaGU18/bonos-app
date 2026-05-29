@@ -75,6 +75,22 @@ public class SecurityConfig {
                         "ROLE_COLABORADOR"
                 )
 
+                // 🔒 BONOS PROTEGIDO
+                .requestMatchers("/api/v1/bonos/**")
+                .hasAnyAuthority(
+                        "ROLE_USER",
+                        "ROLE_ADMIN",
+                        "ROLE_COLABORADOR"
+                )
+
+                // 🔒 BONOS ACTIVOS PROTEGIDO
+                .requestMatchers("/api/v1/bonos-activos/**")
+                .hasAnyAuthority(
+                        "ROLE_USER",
+                        "ROLE_ADMIN",
+                        "ROLE_COLABORADOR"
+                )
+
                 // 🔒 PORTAFOLIO PROTEGIDO
                 .requestMatchers("/api/v1/portafolio/**")
                 .authenticated()

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import {
   Box,
   Button,
@@ -17,14 +17,12 @@ import {
   Typography,
 } from "@mui/material";
 import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
+import { useAuth } from "../context/AuthContext";
 import CalculateIcon from "@mui/icons-material/Calculate";
 import PercentIcon from "@mui/icons-material/Percent";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import PaidIcon from "@mui/icons-material/Paid";
-import ShieldOutlinedIcon from "@mui/icons-material/ShieldOutlined";
-import VerifiedOutlinedIcon from "@mui/icons-material/VerifiedOutlined";
-import SpeedOutlinedIcon from "@mui/icons-material/SpeedOutlined";
 
 const FRECUENCIAS = ["MENSUAL", "TRIMESTRAL", "SEMESTRAL", "ANUAL"];
 const API_BASE = "http://localhost:8080";
@@ -101,6 +99,17 @@ function ResumenRow({ label, value, highlight = false, color = "#FFFFFF" }) {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function BonosPage() {
+  const { user, authFetch } = useAuth();
+  const [portafolio, setPortafolio] = useState({ cashBalance: 0 });
+
+  useEffect(() => {
+    if (!user) return;
+    authFetch(`/portafolio/user/${user.id}`)
+      .then(r => r.json())
+      .then(data => setPortafolio(data))
+      .catch(() => {});
+  }, [user]);
+
   const [form, setForm] = useState({
     valorNominal: "",
     tasaCuponAnual: "",
@@ -120,6 +129,10 @@ export default function BonosPage() {
   const ejecutarCalculo = useCallback(async (params) => {
     const { valorNominal, tasaCuponAnual, tasaDescuento, plazoDias, frecuenciaPago, precioCompra } = params;
 
+    if (!tasaCuponAnual || Number(tasaCuponAnual) <= 0) {
+      setError("La tasa cupón anual debe ser mayor a 0");
+      return;
+    }
     if (!valorNominal || valorNominal <= 0) { setError("Todos los campos deben ser mayores a 0 y las tasas no pueden superar 100%."); return; }
     if (!precioCompra || precioCompra <= 0) { setError("Todos los campos deben ser mayores a 0 y las tasas no pueden superar 100%."); return; }
     if (tasaCuponAnual < 0 || tasaCuponAnual > 100) { setError("Todos los campos deben ser mayores a 0 y las tasas no pueden superar 100%."); return; }
@@ -155,6 +168,48 @@ export default function BonosPage() {
     });
     setCalculo(null);
     setError("");
+  };
+
+  const handleConfirmarInversion = async () => {
+    if (!calculo || !user) return;
+
+    if (portafolio.cashBalance < Number(form.precioCompra)) {
+      setError("Saldo insuficiente en tu cartera para realizar esta inversión.");
+      return;
+    }
+
+    try {
+      const res = await authFetch("/bonos-activos/comprar", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: user.id,
+          valorNominal: Number(form.valorNominal),
+          precioCompra: Number(form.precioCompra),
+          precioTeorico: Number(calculo.precioTeorico),
+          tasaCuponAnual: Number(form.tasaCuponAnual),
+          tasaDescuento: Number(form.tasaDescuento),
+          plazoDias: Number(form.plazoDias),
+          frecuenciaPago: form.frecuenciaPago,
+          rendimiento: Number(calculo.rendimiento),
+        }),
+      });
+
+      if (!res.ok) {
+        const err = await res.text();
+        if (err.includes("Insufficient funds")) {
+          setError("Saldo insuficiente en tu cartera para realizar esta inversión.");
+        } else {
+          setError("No se pudo completar la compra. Intenta nuevamente.");
+        }
+        return;
+      }
+
+      setError("");
+      alert("¡Inversión confirmada! Tu bono ha sido registrado en tu cartera.");
+    } catch {
+      setError("Error de conexión. Intenta nuevamente.");
+    }
   };
 
   const rendimiento = calculo
@@ -224,40 +279,6 @@ export default function BonosPage() {
             </Box>
           </Stack>
         </Paper>
-
-        {/* INFO PILLS */}
-        <Box
-          sx={{
-            mb: 3,
-            display: "grid",
-            gridTemplateColumns: { xs: "1fr", md: "repeat(3, 1fr)" },
-            gap: 1.5,
-          }}
-        >
-          {[
-            [<VerifiedOutlinedIcon key="tipo" />, "Tipo de instrumento", "Tasa fija"],
-            [<SpeedOutlinedIcon key="calc" />, "Método de valuación", "Valor presente"],
-            [<ShieldOutlinedIcon key="riesgo" />, "Riesgo", "Emisor privado / público"],
-          ].map(([icon, label, value]) => (
-            <Paper
-              key={label}
-              sx={{
-                p: 2,
-                borderRadius: "16px",
-                bgcolor: "rgba(255,255,255,0.88)",
-                border: "1px solid #D8E3EC",
-              }}
-            >
-              <Stack direction="row" spacing={1.2} alignItems="center">
-                <Box sx={{ color: "#7FB3D5", display: "grid", placeItems: "center" }}>{icon}</Box>
-                <Box>
-                  <Typography sx={{ color: "#1F2937", fontSize: 13, fontWeight: 800 }}>{label}</Typography>
-                  <Typography sx={{ color: "#1F2937", fontSize: 20, fontWeight: 900, mt: 0.3 }}>{value}</Typography>
-                </Box>
-              </Stack>
-            </Paper>
-          ))}
-        </Box>
 
         {/* CALCULADORA */}
         <Box
@@ -334,7 +355,7 @@ export default function BonosPage() {
                   InputProps={{ endAdornment: <InputAdornment position="end">%</InputAdornment> }}
                 />
               </Grid>
-              <Grid item xs={12} md={6}>
+              <Grid item xs={12} md={5}>
                 <StyledField
                   label="Plazo (días)"
                   name="plazoDias"
@@ -343,13 +364,14 @@ export default function BonosPage() {
                   onChange={handleChange}
                 />
               </Grid>
-              <Grid item xs={12} md={6}>
+              <Grid item xs={12} md={7}>
                 <StyledField
                   select
                   label="Frecuencia de Pago"
                   name="frecuenciaPago"
                   value={form.frecuenciaPago}
                   onChange={handleChange}
+                  sx={{ minWidth: 200 }}
                 >
                   {FRECUENCIAS.map((f) => (
                     <MenuItem key={f} value={f}>{f}</MenuItem>
@@ -385,6 +407,17 @@ export default function BonosPage() {
                 Limpiar
               </Button>
             </Stack>
+            {calculo && (
+              <Button
+                fullWidth
+                variant="contained"
+                color="success"
+                sx={{ py: 1.6, fontWeight: 700, mt: 1 }}
+                onClick={handleConfirmarInversion}
+              >
+                Confirmar Inversión
+              </Button>
+            )}
           </Paper>
 
           {/* RIGHT: RESULTADOS */}
