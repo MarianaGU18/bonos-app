@@ -104,9 +104,11 @@ export default function PortfolioPage() {
   const [portfolio, setPortfolio] = useState({
     cashBalance: 0,
     cetesBalance: 0,
+    bondsBalance: 0,
     total: 0,
   });
   const [investments, setInvestments] = useState([]);
+  const [bonos, setBonos] = useState([]);
   const [transactions, setTransactions] = useState([]);
   const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
   const [depositAmount, setDepositAmount] = useState("");
@@ -138,6 +140,7 @@ export default function PortfolioPage() {
       setPortfolio({
         cashBalance: portData.cashBalance,
         cetesBalance: portData.cetesBalance,
+        bondsBalance: portData.bondsBalance || 0,
         total: portData.totalBalance,
       });
 
@@ -148,6 +151,9 @@ export default function PortfolioPage() {
 
       if (cetesRes.ok) setInvestments(await cetesRes.json());
       if (transRes.ok) setTransactions(await transRes.json());
+
+      const bonosRes = await authFetch(`/bonos-activos/portafolio/${user.id}`);
+      if (bonosRes.ok) setBonos(await bonosRes.json());
     } catch (err) {
       setError("No se pudo conectar con el portafolio. Intenta nuevamente.");
     } finally {
@@ -354,6 +360,19 @@ export default function PortfolioPage() {
               </Box>
               <Box>
                 <Stack direction="row" justifyContent="space-between" sx={{ mb: 0.8 }}>
+                  <Typography sx={{ fontWeight: 850 }}>Bonos</Typography>
+                  <Typography sx={{ color: "#1F2937", fontWeight: 850 }}>
+                    {portfolio.total > 0 ? Math.round((portfolio.bondsBalance / portfolio.total) * 100) : 0}%
+                  </Typography>
+                </Stack>
+                <LinearProgress
+                  variant="determinate"
+                  value={portfolio.total > 0 ? Math.round((portfolio.bondsBalance / portfolio.total) * 100) : 0}
+                  sx={{ height: 10, borderRadius: 999, bgcolor: "#EEF3F8", "& .MuiLinearProgress-bar": { bgcolor: "#2E8B57" } }}
+                />
+              </Box>
+              <Box>
+                <Stack direction="row" justifyContent="space-between" sx={{ mb: 0.8 }}>
                   <Typography sx={{ fontWeight: 850 }}>Efectivo</Typography>
                   <Typography sx={{ color: "#1F2937", fontWeight: 850 }}>{allocation.cash}%</Typography>
                 </Stack>
@@ -378,7 +397,7 @@ export default function PortfolioPage() {
                 gap: 1.4,
               }}
             >
-              {investments.length ? (
+              {(investments.length || bonos.length) ? (
                 investments.slice(0, 4).map((cete) => (
                   <Box
                     key={cete.id}
@@ -404,6 +423,20 @@ export default function PortfolioPage() {
               ) : (
                 <Typography sx={{ color: "#1F2937" }}>Aun no hay inversiones activas.</Typography>
               )}
+              {bonos.slice(0, 4).map((bono) => (
+                <Box key={bono.id} sx={{ p: 2, borderRadius: "16px", border: "1px solid #D8E3EC", bgcolor: "#EEF3F8" }}>
+                  <Stack direction="row" justifyContent="space-between" alignItems="center">
+                    <Chip label="BONO" size="small" sx={{ bgcolor: "rgba(46,139,87,0.12)", color: "#0B1F3A" }} />
+                    <Typography sx={{ color: "#1F2937", fontSize: 13 }}>{bono.plazoDias} dias</Typography>
+                  </Stack>
+                  <Typography sx={{ mt: 2, fontSize: 24, lineHeight: 1, fontWeight: 950 }}>
+                    {fmt(bono.precioCompra)}
+                  </Typography>
+                  <Typography sx={{ mt: 0.8, color: "#1F2937", fontSize: 14 }}>
+                    Tasa cupón {bono.tasaCuponAnual}%
+                  </Typography>
+                </Box>
+              ))}
             </Box>
           </AppPanel>
         </Box>
@@ -433,7 +466,7 @@ export default function PortfolioPage() {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {investments.length ? (
+                {(investments.length || bonos.length) ? (
                   investments.map((cete) => (
                     <TableRow key={cete.id} hover>
                       <TableCell>
@@ -463,6 +496,17 @@ export default function PortfolioPage() {
                     </TableCell>
                   </TableRow>
                 )}
+                {bonos.map((bono) => (
+                  <TableRow key={`bono-${bono.id}`} hover>
+                    <TableCell>
+                      <Chip label="BONO" size="small" sx={{ bgcolor: "rgba(46,139,87,0.12)", color: "#0B1F3A" }} />
+                    </TableCell>
+                    <TableCell>{bono.plazoDias} dias</TableCell>
+                    <TableCell>{bono.tasaCuponAnual}%</TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 900 }}>{fmt(bono.precioCompra)}</TableCell>
+                    <TableCell align="right">—</TableCell>
+                  </TableRow>
+                ))}
               </TableBody>
             </Table>
           </TableContainer>
