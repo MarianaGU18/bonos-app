@@ -428,7 +428,6 @@ export default function PortfolioPage() {
                 />
               </Box>
               <Box>
-<<<<<<< HEAD
                 <Stack direction="row" justifyContent="space-between" sx={{ mb: 0.8 }}>
                   <Typography sx={{ fontWeight: 850 }}>Bonos</Typography>
                   <Typography sx={{ color: "#1F2937", fontWeight: 850 }}>
