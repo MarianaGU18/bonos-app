@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 
 export default function AppMain({ children }) {
   const pathname = usePathname();
-  const isLanding = pathname === "/" || pathname === "/inicio";
+  const isLanding = pathname === "/";
 
   return (
     <Box

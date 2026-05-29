@@ -2,9 +2,11 @@
 
 import React, { useEffect, useState } from "react";
 import {
+  Alert,
   Box,
   Button,
   Chip,
+  Collapse,
   Container,
   Divider,
   Paper,
@@ -12,9 +14,9 @@ import {
   Typography,
 } from "@mui/material";
 import NextLink from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import AutoGraphOutlinedIcon from "@mui/icons-material/AutoGraphOutlined";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import ShieldOutlinedIcon from "@mui/icons-material/ShieldOutlined";
 import TrendingUpOutlinedIcon from "@mui/icons-material/TrendingUpOutlined";
@@ -78,6 +80,7 @@ export default function LoginPage() {
   const { login, user, loading } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
 
   useEffect(() => {
     if (!loading && user) {
@@ -91,11 +94,14 @@ export default function LoginPage() {
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    setErrorMsg("");
     try {
       await login(email, password);
-    } catch (error) {
-      alert("No se pudo iniciar sesion");
-      console.error(error);
+    } catch (err) {
+      setErrorMsg(
+        err.message || "No se pudo iniciar sesión. Verifique sus credenciales.",
+      );
+      console.error(err);
     }
   };
 
@@ -108,7 +114,11 @@ export default function LoginPage() {
         alignItems: "stretch",
       }}
     >
-      <Container maxWidth={false} disableGutters sx={{ display: "flex", minHeight: "100vh" }}>
+      <Container
+        maxWidth={false}
+        disableGutters
+        sx={{ display: "flex", minHeight: "100vh" }}
+      >
         <Box
           sx={{
             display: "grid",
@@ -130,26 +140,37 @@ export default function LoginPage() {
               `,
             }}
           >
-            <Stack sx={{ position: "relative", zIndex: 2, width: "100%" }} justifyContent="space-between">
+            <Stack
+              sx={{ position: "relative", zIndex: 2, width: "100%" }}
+              justifyContent="space-between"
+            >
               <Stack direction="row" alignItems="center" spacing={1.4}>
                 <Box
                   sx={{
                     width: 42,
                     height: 42,
                     borderRadius: "12px",
+                    overflow: "hidden",
                     display: "grid",
                     placeItems: "center",
-                    bgcolor: "#EEF3F8",
-                    color: "#1F2937",
+                    bgcolor: "#1C285A",
                   }}
                 >
-                  <AutoGraphOutlinedIcon />
+                  <Image
+                    src="/Logo.png"
+                    alt="Logo"
+                    width={28}
+                    height={28}
+                    style={{ objectFit: "contain" }}
+                  />
                 </Box>
                 <Box>
                   <Typography sx={{ fontWeight: 900, fontSize: 18 }}>
                     Acero Inteligente
                   </Typography>
-                  <Typography sx={{ color: "rgba(255,255,255,0.58)", fontSize: 12 }}>
+                  <Typography
+                    sx={{ color: "rgba(255,255,255,0.58)", fontSize: 12 }}
+                  >
                     Plataforma de renta fija
                   </Typography>
                 </Box>
@@ -167,10 +188,23 @@ export default function LoginPage() {
                     border: "1px solid rgba(127,179,213,0.28)",
                   }}
                 />
-                <Typography sx={{ fontSize: { lg: 58, xl: 68 }, lineHeight: 0.98, fontWeight: 950 }}>
+                <Typography
+                  sx={{
+                    fontSize: { lg: 58, xl: 68 },
+                    lineHeight: 0.98,
+                    fontWeight: 950,
+                  }}
+                >
                   Entra a tu mesa de decision financiera.
                 </Typography>
-                <Typography sx={{ mt: 3, color: "rgba(255,255,255,0.66)", fontSize: 18, lineHeight: 1.72 }}>
+                <Typography
+                  sx={{
+                    mt: 3,
+                    color: "rgba(255,255,255,0.66)",
+                    fontSize: 18,
+                    lineHeight: 1.72,
+                  }}
+                >
                   Revisa rendimiento, liquidez, vencimientos y capital
                   disponible desde una interfaz creada para operar bonos con
                   claridad.
@@ -188,9 +222,16 @@ export default function LoginPage() {
                   maxWidth: 620,
                 }}
               >
-                <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
+                <Stack
+                  direction="row"
+                  alignItems="center"
+                  justifyContent="space-between"
+                  sx={{ mb: 2 }}
+                >
                   <Box>
-                    <Typography sx={{ color: "rgba(255,255,255,0.58)", fontSize: 13 }}>
+                    <Typography
+                      sx={{ color: "rgba(255,255,255,0.58)", fontSize: 13 }}
+                    >
                       Resumen institucional
                     </Typography>
                     <Typography sx={{ mt: 0.4, fontSize: 28, fontWeight: 900 }}>
@@ -200,7 +241,14 @@ export default function LoginPage() {
                   <TrendingUpOutlinedIcon sx={{ color: "#EEF3F8" }} />
                 </Stack>
                 <MarketLine />
-                <Box sx={{ mt: 1.2, display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 1 }}>
+                <Box
+                  sx={{
+                    mt: 1.2,
+                    display: "grid",
+                    gridTemplateColumns: "repeat(3, 1fr)",
+                    gap: 1,
+                  }}
+                >
                   {metrics.map(([label, value]) => (
                     <Box
                       key={label}
@@ -211,10 +259,14 @@ export default function LoginPage() {
                         border: "1px solid rgba(255,255,255,0.10)",
                       }}
                     >
-                      <Typography sx={{ color: "rgba(255,255,255,0.55)", fontSize: 12 }}>
+                      <Typography
+                        sx={{ color: "rgba(255,255,255,0.55)", fontSize: 12 }}
+                      >
                         {label}
                       </Typography>
-                      <Typography sx={{ mt: 0.5, fontWeight: 900, fontSize: 20 }}>
+                      <Typography
+                        sx={{ mt: 0.5, fontWeight: 900, fontSize: 20 }}
+                      >
                         {value}
                       </Typography>
                     </Box>
@@ -239,31 +291,53 @@ export default function LoginPage() {
             }}
           >
             <Box sx={{ width: "100%", maxWidth: 470 }}>
-              <Stack direction="row" alignItems="center" spacing={1.3} sx={{ mb: 5 }}>
+              <Stack
+                direction="row"
+                alignItems="center"
+                spacing={1.3}
+                sx={{ mb: 5 }}
+              >
                 <Box
                   sx={{
                     width: 38,
                     height: 38,
                     borderRadius: "12px",
+                    overflow: "hidden",
                     display: { xs: "grid", lg: "none" },
                     placeItems: "center",
-                    bgcolor: "#0B1F3A",
-                    color: "#EEF3F8",
+                    bgcolor: "#1C285A",
                   }}
                 >
-                  <AutoGraphOutlinedIcon fontSize="small" />
+                  <Image
+                    src="/Logo.png"
+                    alt="Logo"
+                    width={24}
+                    height={24}
+                    style={{ objectFit: "contain" }}
+                  />
                 </Box>
-                <Typography sx={{ display: { xs: "block", lg: "none" }, fontWeight: 900 }}>
+                <Typography
+                  sx={{ display: { xs: "block", lg: "none" }, fontWeight: 900 }}
+                >
                   Acero Inteligente
                 </Typography>
               </Stack>
 
               <Box sx={{ mb: 4 }}>
-                <Typography component="h1" sx={{ color: "#1F2937", fontSize: { xs: 36, sm: 44 }, lineHeight: 1.04, fontWeight: 950 }}>
+                <Typography
+                  component="h1"
+                  sx={{
+                    color: "#1F2937",
+                    fontSize: { xs: 36, sm: 44 },
+                    lineHeight: 1.04,
+                    fontWeight: 950,
+                  }}
+                >
                   Bienvenido de vuelta
                 </Typography>
                 <Typography sx={{ mt: 1.4, color: "#1F2937", lineHeight: 1.7 }}>
-                  Accede para revisar tu dashboard, cartera y oportunidades de CETES.
+                  Accede para revisar tu dashboard, cartera y oportunidades de
+                  CETES.
                 </Typography>
               </Box>
 
@@ -276,9 +350,16 @@ export default function LoginPage() {
                   boxShadow: "0 24px 60px rgba(11,31,58,0.10)",
                 }}
               >
-                <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 2.5 }}>
+                <Stack
+                  direction="row"
+                  alignItems="center"
+                  spacing={1}
+                  sx={{ mb: 2.5 }}
+                >
                   <LockOutlinedIcon sx={{ color: "#7FB3D5" }} />
-                  <Typography sx={{ fontWeight: 900 }}>Acceso a plataforma</Typography>
+                  <Typography sx={{ fontWeight: 900 }}>
+                    Acceso a plataforma
+                  </Typography>
                 </Stack>
                 <Divider sx={{ mb: 3 }} />
 
@@ -301,19 +382,53 @@ export default function LoginPage() {
                     Entrar
                   </PrimaryButton>
 
-                  <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" spacing={1.2} sx={{ mt: 2 }}>
+                  <Stack
+                    direction={{ xs: "column", sm: "row" }}
+                    justifyContent="space-between"
+                    spacing={1.2}
+                    sx={{ mt: 2 }}
+                  >
                     <Typography variant="body2" color="text.secondary">
                       No tienes cuenta?{" "}
-                      <NextLink href="/register" style={{ textDecoration: "none" }}>
-                        <Typography component="span" sx={{ fontWeight: 900, color: "#0B1F3A" }}>
+                      <NextLink
+                        href="/register"
+                        style={{ textDecoration: "none" }}
+                      >
+                        <Typography
+                          component="span"
+                          sx={{ fontWeight: 900, color: "#0B1F3A" }}
+                        >
                           Crear cuenta
                         </Typography>
                       </NextLink>
                     </Typography>
-                    <Button size="small" sx={{ alignSelf: { xs: "flex-start", sm: "center" }, color: "#1F2937", p: 0, minWidth: 0 }}>
+                    <Button
+                      size="small"
+                      sx={{
+                        alignSelf: { xs: "flex-start", sm: "center" },
+                        color: "#1F2937",
+                        p: 0,
+                        minWidth: 0,
+                      }}
+                    >
                       Recuperar acceso
                     </Button>
                   </Stack>
+
+                  <Collapse in={!!errorMsg} sx={{ mt: 3 }}>
+                    <Alert
+                      severity="error"
+                      variant="filled"
+                      onClose={() => setErrorMsg("")}
+                      sx={{
+                        borderRadius: "12px",
+                        fontSize: 14,
+                        fontWeight: 600,
+                      }}
+                    >
+                      {errorMsg}
+                    </Alert>
+                  </Collapse>
                 </form>
               </Paper>
             </Box>
@@ -323,6 +438,3 @@ export default function LoginPage() {
     </Box>
   );
 }
-
-
-

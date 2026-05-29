@@ -26,11 +26,11 @@ import { useEffect, useRef, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 
 const publicNav = [
-  { label: "Inicio", href: "/inicio#inicio" },
-  { label: "Valor", href: "/inicio#valor" },
-  { label: "Modulos", href: "/inicio#modulos" },
-  { label: "Confianza", href: "/inicio#confianza" },
-  { label: "Operacion", href: "/inicio#operacion" },
+  { label: "Inicio", href: "/" },
+  { label: "Valor", href: "/#valor" },
+  { label: "Modulos", href: "/#modulos" },
+  { label: "Confianza", href: "/#confianza" },
+  { label: "Operacion", href: "/#operacion" },
 ];
 
 const privateNav = [
@@ -150,7 +150,6 @@ export default function AppBarGlobal() {
   const [anchorEl, setAnchorEl] = useState(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [hidden, setHidden] = useState(false);
   const lastScrollY = useRef(0);
 
   useEffect(() => {
@@ -159,14 +158,6 @@ export default function AppBarGlobal() {
       const delta = currentY - lastScrollY.current;
 
       setScrolled(currentY > 18);
-
-      if (currentY < 40) {
-        setHidden(false);
-      } else if (currentY > 120 && delta > 10) {
-        setHidden(true);
-      } else if (delta < -10) {
-        setHidden(false);
-      }
 
       lastScrollY.current = currentY;
     };
@@ -178,7 +169,6 @@ export default function AppBarGlobal() {
   }, []);
 
   if (loading) return null;
-  if (pathname === "/inicio") return null;
 
   const homePath = isAdmin
     ? "/admin"
@@ -186,7 +176,7 @@ export default function AppBarGlobal() {
       ? "/colab"
       : user
         ? "/dashboard"
-        : "/inicio";
+        : "/";
   const navItems = user ? privateNav : publicNav;
   const compact = !user && !scrolled;
 
@@ -208,7 +198,7 @@ export default function AppBarGlobal() {
         top: { xs: 10, md: 14 },
         left: "50%",
         width: "min(1180px, calc(100% - 28px))",
-        transform: hidden ? "translate(-50%, -92px)" : "translate(-50%, 0)",
+        transform: "translate(-50%, 0)",
         zIndex: (theme) => theme.zIndex.appBar,
         borderRadius: "16px",
         color: "#1F2937",
@@ -219,13 +209,7 @@ export default function AppBarGlobal() {
           : "0 6px 18px rgba(11,31,58,0.04)",
         backdropFilter: "none",
         transition:
-          "transform 260ms ease, opacity 220ms ease, min-height 220ms ease, background-color 220ms ease, box-shadow 220ms ease, border-color 220ms ease",
-        opacity: hidden ? 0 : 1,
-        pointerEvents: hidden ? "none" : "auto",
-        "&:hover": {
-          transform: "translate(-50%, 0)",
-          opacity: 1,
-        },
+          "min-height 220ms ease, background-color 220ms ease, box-shadow 220ms ease, border-color 220ms ease",
       }}
     >
       <Toolbar
