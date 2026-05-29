@@ -349,14 +349,18 @@ function DashboardContent({ user, isAuthenticated }) {
         value: Number(portfolio.cetesBalance || 0),
         color: chartColors.cetes,
       },
-      { name: "Bonos", value: Number(portfolio.bondsBalance || 0), color: chartColors.bonds },
+      {
+        name: "Bonos",
+        value: Number(portfolio.bondsBalance || 0),
+        color: chartColors.bonds,
+      },
       { name: "Rendimiento", value: 0, color: chartColors.yield },
     ].filter((item) => item.value > 0);
 
     return items.length
       ? items
       : [{ name: "Sin capital", value: 1, color: "#D8E3EC" }];
-  }, [portfolio.cashBalance, portfolio.cetesBalance]);
+  }, [portfolio.cashBalance, portfolio.cetesBalance, portfolio.bondsBalance]);
 
   const activeRatio =
     portfolio.total > 0
