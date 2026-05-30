@@ -125,7 +125,7 @@ export default function BonosPage() {
       .then((r) => r.json())
       .then((data) => setPortafolio(data))
       .catch(() => {});
-  }, [user]);
+  }, [user, authFetch]);
 
   const [form, setForm] = useState({
     valorNominal: "",
