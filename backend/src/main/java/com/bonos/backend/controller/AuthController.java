@@ -14,7 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @CrossOrigin(
-        origins = "http://localhost:3000",
+        origins = {"http://localhost:3000", "https://bonos-app-mu.vercel.app"},
         allowCredentials = "true"
 )
 @RestController
@@ -58,9 +58,9 @@ public class AuthController {
 
         ResponseCookie cookie = ResponseCookie.from("token", token)
                 .httpOnly(true)
-                .secure(false)
+                .secure(true)
                 .path("/")
-                .sameSite("Lax")
+                .sameSite("None")
                 .maxAge(60 * 60 * 24)
                 .build();
 
@@ -86,9 +86,9 @@ public class AuthController {
 
         ResponseCookie cookie = ResponseCookie.from("token", token)
                 .httpOnly(true)
-                .secure(false)
+                .secure(true)
                 .path("/")
-                .sameSite("Lax")
+                .sameSite("None")
                 .maxAge(60 * 60 * 24)
                 .build();
 
