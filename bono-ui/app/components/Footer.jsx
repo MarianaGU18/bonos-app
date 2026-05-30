@@ -38,7 +38,7 @@ export default function Footer() {
             >
               <Image
                 src="/Logo.png"
-                alt="Logo Acero Inteligente"
+                alt="Logo NeoInvest"
                 width={24}
                 height={24}
                 style={{ objectFit: "contain" }}
@@ -48,16 +48,13 @@ export default function Footer() {
               <Typography
                 sx={{ color: "#0F172A", fontWeight: 900, lineHeight: 1 }}
               >
-                Acero Inteligente
-              </Typography>
-              <Typography sx={{ color: "#1F2937", fontSize: 12, mt: 0.3 }}>
-                Plataforma de inversion en bonos
+                NeoInvest
               </Typography>
             </Box>
           </Stack>
           <Divider flexItem sx={{ display: { sm: "none" } }} />
           <Typography variant="body2" sx={{ color: "#1F2937" }}>
-            Copyright (c) {new Date().getFullYear()} Acero Inteligente.
+            Copyright (c) {new Date().getFullYear()} NeoInvest.
           </Typography>
         </Stack>
       </Container>

@@ -35,6 +35,7 @@ import SavingsOutlinedIcon from "@mui/icons-material/SavingsOutlined";
 import TrendingUpOutlinedIcon from "@mui/icons-material/TrendingUpOutlined";
 import { useAuth } from "../context/AuthContext";
 import SellCeteModal from "../components/SellCeteModal";
+import SellBonoModal from "../components/SellBonoModal";
 
 const TRANSACTION_TYPE_LABELS = {
   DEPOSITO: "Deposito",
@@ -144,6 +145,8 @@ export default function PortfolioPage() {
   const [successMessage, setSuccessMessage] = useState("");
   const [sellModalOpen, setSellModalOpen] = useState(false);
   const [selectedCeteId, setSelectedCeteId] = useState(null);
+  const [sellBonoModalOpen, setSellBonoModalOpen] = useState(false);
+  const [selectedBonoId, setSelectedBonoId] = useState(null);
 
   const fmt = (val) =>
     new Intl.NumberFormat("es-MX", {
@@ -233,6 +236,25 @@ export default function PortfolioPage() {
     }
   };
 
+  const handleOpenSellBonoModal = (id) => {
+    setSelectedBonoId(id);
+    setSellBonoModalOpen(true);
+  };
+
+  const handleConfirmSellBono = async (id) => {
+    try {
+      const res = await authFetch(`/bonos-activos/vender/${id}`, { method: "POST" });
+
+      if (!res.ok) throw new Error();
+
+      setSellBonoModalOpen(false);
+      setSuccessMessage("Bono vendido correctamente.");
+      await loadAllData();
+    } catch {
+      setError("No se pudo completar la venta del bono.");
+    }
+  };
+
   const allocation = useMemo(() => {
     const total = Number(portfolio.total || 0);
     const cash =
@@ -243,17 +265,13 @@ export default function PortfolioPage() {
       total > 0
         ? Math.round((Number(portfolio.cetesBalance || 0) / total) * 100)
         : 0;
-    return { cash, cetes };
+    const bonds =
+      total > 0
+        ? Math.round((Number(portfolio.bondsBalance || 0) / total) * 100)
+        : 0;
+    return { cash, cetes, bonds };
   }, [portfolio]);
 
-  const avgRate = useMemo(() => {
-    if (!investments.length) return 0;
-    const totalRate = investments.reduce(
-      (sum, item) => sum + Number(item.tasaCompra || 0),
-      0,
-    );
-    return (totalRate / investments.length).toFixed(2);
-  }, [investments]);
 
   if (authLoading || (loading && investments.length === 0)) {
     return (
@@ -372,10 +390,9 @@ export default function PortfolioPage() {
           />
           <SummaryCard
             icon={<TrendingUpOutlinedIcon />}
-            label="Tasa promedio"
-            value={`${avgRate}%`}
-            helper={`${investments.length} posiciones`}
-            dark
+            label="Invertido en Bonos"
+            value={fmt(portfolio.bondsBalance)}
+            helper={`${allocation.bonds}% activo`}
           />
         </Box>
 
@@ -633,7 +650,16 @@ export default function PortfolioPage() {
                     <TableCell>{bono.plazoDias} dias</TableCell>
                     <TableCell>{bono.tasaCuponAnual}%</TableCell>
                     <TableCell align="right" sx={{ fontWeight: 900 }}>{fmt(bono.precioCompra)}</TableCell>
-                    <TableCell align="right">—</TableCell>
+                    <TableCell align="right">
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        color="error"
+                        onClick={() => handleOpenSellBonoModal(bono.id)}
+                      >
+                        Vender
+                      </Button>
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -701,6 +727,13 @@ export default function PortfolioPage() {
           onClose={() => setSellModalOpen(false)}
           onConfirm={handleConfirmSell}
           ceteId={selectedCeteId}
+        />
+
+        <SellBonoModal
+          open={sellBonoModalOpen}
+          onClose={() => setSellBonoModalOpen(false)}
+          onConfirm={handleConfirmSellBono}
+          bonoId={selectedBonoId}
         />
 
         <Dialog

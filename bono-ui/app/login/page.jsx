@@ -166,7 +166,7 @@ export default function LoginPage() {
                 </Box>
                 <Box>
                   <Typography sx={{ fontWeight: 900, fontSize: 18 }}>
-                    Acero Inteligente
+                    NeoInvest
                   </Typography>
                   <Typography
                     sx={{ color: "rgba(255,255,255,0.58)", fontSize: 12 }}
@@ -319,7 +319,7 @@ export default function LoginPage() {
                 <Typography
                   sx={{ display: { xs: "block", lg: "none" }, fontWeight: 900 }}
                 >
-                  Acero Inteligente
+                  NeoInvest
                 </Typography>
               </Stack>
 

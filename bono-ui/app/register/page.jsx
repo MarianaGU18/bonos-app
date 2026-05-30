@@ -79,6 +79,23 @@ export default function RegisterPage() {
     setLoading(true);
     setError(null);
 
+    if (birthdate) {
+      const birth = new Date(birthdate);
+      const today = new Date();
+      const age =
+        today.getFullYear() -
+        birth.getFullYear() -
+        (today < new Date(today.getFullYear(), birth.getMonth(), birth.getDate())
+          ? 1
+          : 0);
+      if (age < 18) {
+        setSnackbarMessage("Solo se aceptan usuarios mayores de edad.");
+        setSnackbarOpen(true);
+        setLoading(false);
+        return;
+      }
+    }
+
     try {
       await register({
         name,
@@ -92,8 +109,16 @@ export default function RegisterPage() {
       handleNext();
     } catch (err) {
       console.error("Registration failed:", err);
-      // Ahora confiamos plenamente en el mensaje que viene del AuthContext
-      setSnackbarMessage(err.message);
+      const msg = err.message || "";
+      const isAgeError =
+        msg.includes("18") ||
+        msg.toLowerCase().includes("age") ||
+        msg.toLowerCase().includes("mayor") ||
+        msg.toLowerCase().includes("edad") ||
+        msg.toLowerCase().includes("minor");
+      setSnackbarMessage(
+        isAgeError ? "Solo se aceptan usuarios mayores de edad." : msg,
+      );
       setSnackbarOpen(true);
     } finally {
       setLoading(false);

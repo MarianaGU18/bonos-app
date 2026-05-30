@@ -1,12 +1,15 @@
 package com.bonos.backend.service;
 
+import com.bonos.backend.dto.CeteSaleEstimateResponse;
 import com.bonos.backend.model.*;
 import com.bonos.backend.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 @Service
@@ -60,5 +63,54 @@ public class BonoCompraService {
         Portafolio p = portafolioRepository.findByUserId(userId)
                 .orElseThrow(() -> new RuntimeException("Portfolio not found"));
         return bonoRepository.findByPortafolioId(p.getId());
+    }
+
+    public CeteSaleEstimateResponse estimarVentaBono(Long bonoId) {
+        Bono bono = bonoRepository.findById(bonoId)
+                .orElseThrow(() -> new RuntimeException("Bono not found"));
+
+        long diasTranscurridos = ChronoUnit.DAYS.between(bono.getFechaCompra(), LocalDate.now());
+        if (diasTranscurridos < 0) diasTranscurridos = 0;
+
+        BigDecimal gananciaTotalPosible = bono.getValorNominal().subtract(bono.getPrecioCompra());
+        BigDecimal factorTiempo = BigDecimal.valueOf(diasTranscurridos)
+                .divide(BigDecimal.valueOf(bono.getPlazoDias()), 12, RoundingMode.HALF_UP);
+        BigDecimal gananciaGenerada = gananciaTotalPosible.multiply(factorTiempo);
+        BigDecimal montoVentaFinal = bono.getPrecioCompra().add(gananciaGenerada);
+
+        return new CeteSaleEstimateResponse(
+                montoVentaFinal.setScale(2, RoundingMode.HALF_UP),
+                gananciaGenerada.setScale(2, RoundingMode.HALF_UP)
+        );
+    }
+
+    @Transactional
+    public Portafolio venderBono(Long bonoId) {
+        Bono bono = bonoRepository.findById(bonoId)
+                .orElseThrow(() -> new RuntimeException("Bono not found"));
+
+        Portafolio portafolio = bono.getPortafolio();
+
+        long diasTranscurridos = ChronoUnit.DAYS.between(bono.getFechaCompra(), LocalDate.now());
+        if (diasTranscurridos < 0) diasTranscurridos = 0;
+
+        BigDecimal gananciaTotalPosible = bono.getValorNominal().subtract(bono.getPrecioCompra());
+        BigDecimal factorTiempo = BigDecimal.valueOf(diasTranscurridos)
+                .divide(BigDecimal.valueOf(bono.getPlazoDias()), 12, RoundingMode.HALF_UP);
+        BigDecimal gananciaGenerada = gananciaTotalPosible.multiply(factorTiempo);
+        BigDecimal montoVentaFinal = bono.getPrecioCompra().add(gananciaGenerada);
+
+        portafolio.setBondsBalance(portafolio.getBondsBalance().subtract(bono.getPrecioCompra()));
+        portafolio.setCashBalance(portafolio.getCashBalance().add(montoVentaFinal));
+        portafolio.setTotalBalance(portafolio.getTotalBalance().add(gananciaGenerada));
+        portafolioRepository.save(portafolio);
+
+        transaccionService.registrarTransaccion(
+                portafolio.getUser(), TipoTransaccion.VENTA, montoVentaFinal,
+                String.format("Bono sale - Days held: %d/%d", diasTranscurridos, bono.getPlazoDias())
+        );
+
+        bonoRepository.delete(bono);
+        return portafolio;
     }
 }

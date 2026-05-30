@@ -1,5 +1,6 @@
 package com.bonos.backend.controller;
 
+import com.bonos.backend.dto.CeteSaleEstimateResponse;
 import com.bonos.backend.model.*;
 import com.bonos.backend.repository.UserRepository;
 import com.bonos.backend.service.BonoCompraService;
@@ -40,5 +41,15 @@ public class BonoCompraController {
     @GetMapping("/portafolio/{userId}")
     public ResponseEntity<List<Bono>> obtenerBonos(@PathVariable Long userId) {
         return ResponseEntity.ok(bonoCompraService.obtenerBonos(userId));
+    }
+
+    @GetMapping("/estimar-venta/{bonoId}")
+    public ResponseEntity<CeteSaleEstimateResponse> estimarVentaBono(@PathVariable Long bonoId) {
+        return ResponseEntity.ok(bonoCompraService.estimarVentaBono(bonoId));
+    }
+
+    @PostMapping("/vender/{bonoId}")
+    public ResponseEntity<?> venderBono(@PathVariable Long bonoId) {
+        return ResponseEntity.ok(bonoCompraService.venderBono(bonoId));
     }
 }
