@@ -74,7 +74,8 @@ public class AuthController {
                         "REGISTER OK",
                         savedUser.getRole().name(),
                         savedUser.getEmail(),
-                        savedUser.getBirthdate()
+                        savedUser.getBirthdate(),
+                        token
                 ));
     }
 
@@ -102,7 +103,8 @@ public class AuthController {
                         "LOGIN OK",
                         authenticatedUser.getRole().name(),
                         authenticatedUser.getEmail(),
-                        authenticatedUser.getBirthdate()
+                        authenticatedUser.getBirthdate(),
+                        token
                 ));
     }
 

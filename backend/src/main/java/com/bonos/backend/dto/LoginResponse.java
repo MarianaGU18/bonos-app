@@ -10,6 +10,7 @@ public record LoginResponse(
         String message,
         String role,
         String email,
-        LocalDate birthdate
+        LocalDate birthdate,
+        String token
 ) {
 }

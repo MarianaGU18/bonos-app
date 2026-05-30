@@ -5,7 +5,6 @@ import {
   useContext,
   useState,
   useCallback,
-  useMemo,
 } from "react";
 
 const AuthContext = createContext();
@@ -63,39 +62,51 @@ const handleResponse = async (res) => {
   return data;
 };
 
+// Safe localStorage helpers — Safari private mode throws SecurityError on write
+const storage = {
+  get: (key) => {
+    try { return typeof window !== "undefined" ? localStorage.getItem(key) : null; } catch { return null; }
+  },
+  set: (key, value) => {
+    try { if (typeof window !== "undefined") localStorage.setItem(key, value); } catch { /* private mode */ }
+  },
+  remove: (key) => {
+    try { if (typeof window !== "undefined") localStorage.removeItem(key); } catch { /* private mode */ }
+  },
+};
+
 export function AuthProvider({ children }) {
-  // Función de limpieza para asegurar consistencia en los nombres de campos
   const normalizeUser = (data) => {
     if (!data) return null;
-    console.log("AuthContext: Datos recibidos para normalizar:", data);
     const normalized = { ...data };
-    // Aseguramos que siempre exista la propiedad en minúsculas para el resto de la app
     normalized.birthdate = data.birthdate || data.birthDate || "";
     return normalized;
   };
 
   const [user, setUser] = useState(() => {
-    if (typeof window !== "undefined") {
-      const storedUser = localStorage.getItem("user");
-      return storedUser ? normalizeUser(JSON.parse(storedUser)) : null;
-    }
-    return null;
+    const storedUser = storage.get("user");
+    return storedUser ? normalizeUser(JSON.parse(storedUser)) : null;
   });
 
   const [loading, setLoading] = useState(false);
 
   const authFetch = useCallback(async (url, options = {}) => {
+    const token = storage.get("token");
     const res = await fetch(`${API_URL}${url}`, {
       ...options,
       credentials: "include",
       headers: {
         "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
         ...(options.headers || {}),
       },
     });
 
     if (res.status === 401) {
-      logout();
+      storage.remove("token");
+      storage.remove("user");
+      setUser(null);
+      if (typeof window !== "undefined") window.location.assign("/login");
       throw new Error("Session expired");
     }
 
@@ -136,9 +147,7 @@ export function AuthProvider({ children }) {
 
       const finalUser = normalizeUser(mergedData);
       setUser(finalUser);
-      if (typeof window !== "undefined") {
-        localStorage.setItem("user", JSON.stringify(finalUser));
-      }
+      storage.set("user", JSON.stringify(finalUser));
       return finalUser;
     } catch (error) {
       console.error("AuthContext: Error in updateUser function:", error);
@@ -165,10 +174,7 @@ export function AuthProvider({ children }) {
       // Update the user state with the new balance from the portfolio
       const updatedUser = { ...user, balance: updatedPortfolio.cashBalance };
       setUser(updatedUser);
-      if (typeof window !== "undefined") {
-        localStorage.setItem("user", JSON.stringify(updatedUser));
-      }
-
+      storage.set("user", JSON.stringify(updatedUser));
       return updatedUser;
     } catch (error) {
       console.error("AuthContext: Error in makeDeposit function:", error);
@@ -187,10 +193,11 @@ export function AuthProvider({ children }) {
     });
 
     const data = await handleResponse(response);
-    console.log("AuthContext: Respuesta cruda del login:", data);
     if (data.message !== "LOGIN OK") {
       throw new Error(data.message || "Login failed");
     }
+
+    if (data.token) storage.set("token", data.token);
 
     // After login, fetch the portfolio to get the correct balance
     try {
@@ -198,28 +205,22 @@ export function AuthProvider({ children }) {
         `${API_URL}/portafolio/user/${data.id}`,
         {
           credentials: "include",
+          headers: data.token ? { Authorization: `Bearer ${data.token}` } : {},
         },
       );
       if (!portfolioRes.ok) {
-        // If portfolio doesn't exist, default balance to 0
-        console.warn(
-          "Could not fetch portfolio after login. Defaulting balance to 0.",
-        );
         data.balance = 0;
       } else {
         const portfolioData = await portfolioRes.json();
         data.balance = portfolioData.cashBalance;
       }
-    } catch (e) {
-      console.error("Error fetching portfolio, defaulting balance to 0:", e);
+    } catch {
       data.balance = 0;
     }
 
     const finalUser = normalizeUser(data);
     setUser(finalUser);
-    if (typeof window !== "undefined") {
-      localStorage.setItem("user", JSON.stringify(finalUser));
-    }
+    storage.set("user", JSON.stringify(finalUser));
     return finalUser;
   };
 
@@ -231,10 +232,9 @@ export function AuthProvider({ children }) {
       });
     } finally {
       setUser(null);
-      localStorage.removeItem("user");
-      if (typeof window !== "undefined") {
-        window.location.assign("/login");
-      }
+      storage.remove("token");
+      storage.remove("user");
+      window.location.assign("/login");
     }
   };
 
@@ -256,19 +256,16 @@ export function AuthProvider({ children }) {
 
     const data = await handleResponse(response);
 
-    // Combinamos datos del formulario con la respuesta del servidor
-    const mergedData = { ...userData, ...data, balance: 0 };
+    if (data.token) storage.set("token", data.token);
 
-    // Si el servidor devuelve la fecha nula/vacía pero nosotros la tenemos en el form, la preservamos
+    const mergedData = { ...userData, ...data, balance: 0 };
     if (!data.birthdate && !data.birthDate && userData.birthdate) {
       mergedData.birthdate = userData.birthdate;
     }
 
     const finalUser = normalizeUser(mergedData);
     setUser(finalUser);
-    if (typeof window !== "undefined") {
-      localStorage.setItem("user", JSON.stringify(finalUser));
-    }
+    storage.set("user", JSON.stringify(finalUser));
     return finalUser;
   };
 
@@ -283,9 +280,7 @@ export function AuthProvider({ children }) {
       // Actualizar el balance del usuario en el estado global
       const updatedUser = { ...user, balance: updatedPortfolio.cashBalance };
       setUser(updatedUser);
-      if (typeof window !== "undefined") {
-        localStorage.setItem("user", JSON.stringify(updatedUser));
-      }
+      storage.set("user", JSON.stringify(updatedUser));
       return updatedPortfolio;
     } finally {
       setLoading(false);
@@ -324,9 +319,7 @@ export function AuthProvider({ children }) {
       const updatedPortfolio = await handleResponse(response);
       const updatedUser = { ...user, balance: updatedPortfolio.cashBalance };
       setUser(updatedUser);
-      if (typeof window !== "undefined") {
-        localStorage.setItem("user", JSON.stringify(updatedUser));
-      }
+      storage.set("user", JSON.stringify(updatedUser));
     } finally {
       setLoading(false);
     }
