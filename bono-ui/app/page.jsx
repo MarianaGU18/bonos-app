@@ -426,7 +426,7 @@ export default function LandingPage() {
                   lineHeight: 1.65,
                 }}
               >
-                Acero Inteligente centraliza analisis, operacion y seguimiento
+                NeoInvest centraliza analisis, operacion y seguimiento
                 de bonos para que cada decision tenga contexto, disciplina y
                 velocidad.
               </Typography>
@@ -776,7 +776,7 @@ export default function LandingPage() {
           <SectionHeader
             eyebrow="Siguiente paso"
             title="Convierte tu cartera en un sistema de decisiones."
-            body="Empieza con una cuenta o entra directamente a tu dashboard si ya formas parte de Acero Inteligente."
+            body="Empieza con una cuenta o entra directamente a tu dashboard si ya formas parte de NeoInvest."
             align="center"
             maxWidth={820}
           />

@@ -10,6 +10,9 @@ import org.springframework.web.server.ResponseStatusException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
+import java.time.Period;
 import java.util.Optional;
 
 @Service
@@ -29,6 +32,17 @@ public class UserService {
         // Verificar si el email ya existe
         if (userRepository.findByEmail(user.getEmail()).isPresent()) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Email address already registered");
+        }
+
+        // Verificar que el usuario sea mayor de edad
+        if (user.getBirthdate() != null) {
+            int age = Period.between(user.getBirthdate(), LocalDate.now()).getYears();
+            if (age < 18) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Solo se aceptan usuarios mayores de edad.");
+            }
+        } else {
+            // Opcional: Requerir fecha de nacimiento
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Birthdate is required");
         }
 
         // Asignar rol por defecto si no tiene uno

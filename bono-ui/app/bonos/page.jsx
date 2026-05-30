@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useCallback, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import {
   Alert,
   Box,
@@ -25,6 +26,7 @@ import PercentIcon from "@mui/icons-material/Percent";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import PaidIcon from "@mui/icons-material/Paid";
+import RequestQuoteIcon from "@mui/icons-material/RequestQuote";
 
 const FRECUENCIAS = ["MENSUAL", "TRIMESTRAL", "SEMESTRAL", "ANUAL"];
 const API_BASE = "https://bonos-app-production.up.railway.app";
@@ -114,6 +116,7 @@ function ResumenRow({ label, value, highlight = false, color = "#FFFFFF" }) {
 
 export default function BonosPage() {
   const { user, authFetch } = useAuth();
+  const router = useRouter();
   const [portafolio, setPortafolio] = useState({ cashBalance: 0 });
 
   useEffect(() => {
@@ -263,6 +266,7 @@ export default function BonosPage() {
       setSuccessMessage(
         "¡Inversión confirmada! Tu bono ha sido registrado en tu cartera.",
       );
+      setTimeout(() => router.push("/portafolio"), 2000);
     } catch {
       setError("Error de conexión. Intenta nuevamente.");
     }
@@ -510,52 +514,62 @@ export default function BonosPage() {
               </Box>
             )}
 
-            <Stack
-              direction={{ xs: "column", sm: "row" }}
-              spacing={1.5}
-              sx={{ mt: 3 }}
-            >
-              <Button
-                fullWidth
-                variant="contained"
-                startIcon={
-                  loading ? (
-                    <CircularProgress size={18} color="inherit" />
-                  ) : (
-                    <CalculateIcon />
-                  )
-                }
-                disabled={loading}
-                onClick={() => ejecutarCalculo(form)}
-                sx={{
-                  py: 1.6,
-                  bgcolor: "#0B1F3A",
-                  "&:hover": { bgcolor: "#1D4E89" },
-                }}
-              >
-                {loading ? "Calculando..." : "Calcular"}
-              </Button>
-              <Button
-                fullWidth
-                variant="outlined"
-                startIcon={<RestartAltIcon />}
-                onClick={handleReset}
-                sx={{ py: 1.6, color: "#0B1F3A", borderColor: "#D8E3EC" }}
-              >
-                Limpiar
-              </Button>
-            </Stack>
-            {calculo && (
+            <Stack spacing={2} sx={{ mt: 3 }}>
+              <Stack direction="row" spacing={2}>
+                <Button
+                  fullWidth
+                  variant="contained"
+                  startIcon={
+                    loading ? (
+                      <CircularProgress size={18} color="inherit" />
+                    ) : (
+                      <CalculateIcon />
+                    )
+                  }
+                  disabled={loading}
+                  onClick={() => ejecutarCalculo(form)}
+                  sx={{
+                    py: 1.6,
+                    bgcolor: "#0B1F3A",
+                    fontWeight: 700,
+                    "&:hover": { bgcolor: "#1D4E89" },
+                  }}
+                >
+                  {loading ? "Calculando..." : "Calcular"}
+                </Button>
+                <Button
+                  fullWidth
+                  variant="outlined"
+                  startIcon={<RestartAltIcon />}
+                  onClick={handleReset}
+                  sx={{
+                    py: 1.6,
+                    color: "#0B1F3A",
+                    borderColor: "#D8E3EC",
+                    fontWeight: 700,
+                  }}
+                >
+                  Limpiar
+                </Button>
+              </Stack>
               <Button
                 fullWidth
                 variant="contained"
                 color="success"
-                sx={{ py: 1.6, fontWeight: 700, mt: 1 }}
+                startIcon={
+                  loading ? (
+                    <CircularProgress size={18} color="inherit" />
+                  ) : (
+                    <RequestQuoteIcon />
+                  )
+                }
+                disabled={!calculo || loading}
                 onClick={handleConfirmarInversion}
+                sx={{ py: 2, fontWeight: 900, fontSize: "1.1rem" }}
               >
                 Confirmar Inversión
               </Button>
-            )}
+            </Stack>
           </Paper>
 
           {/* RIGHT: RESULTADOS */}

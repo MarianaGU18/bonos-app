@@ -3,6 +3,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
+  Alert,
   Box,
   Button,
   Chip,
@@ -12,6 +13,7 @@ import {
   InputAdornment,
   MenuItem,
   Paper,
+  Snackbar,
   Stack,
   TextField,
   Typography,
@@ -124,6 +126,8 @@ export default function CetesCalculator() {
   const [calculo, setCalculo] = useState(null);
   const [loading, setLoading] = useState(false);
   const [calculationMode, setCalculationMode] = useState("monto");
+  const [successMessage, setSuccessMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
     const fetchRates = async () => {
@@ -168,15 +172,15 @@ export default function CetesCalculator() {
   const handleCalculateClick = () => {
     const numMonto = Number(monto);
     if (!monto || numMonto < 100 || numMonto > 10000000) {
-      alert("El monto debe estar entre 100 y 10,000,000");
+      setErrorMessage("El monto debe estar entre 100 y 10,000,000");
       return;
     }
     if (!plazo) {
-      alert("Por favor selecciona un plazo");
+      setErrorMessage("Por favor selecciona un plazo");
       return;
     }
     if (!tasa) {
-      alert("Por favor ingresa una tasa");
+      setErrorMessage("Por favor ingresa una tasa");
       return;
     }
     ejecutarCalculo(monto, plazo, tasa);
@@ -270,10 +274,10 @@ export default function CetesCalculator() {
   const handleBuy = async () => {
     try {
       await buyCetes(Number(monto), Number(plazo), Number(tasa));
-      alert("Inversion realizada con exito");
-      router.push("/portafolio");
+      setSuccessMessage("Inversion realizada con exito");
+      setTimeout(() => router.push("/portafolio"), 1500);
     } catch (error) {
-      alert("Error: " + error.message);
+      setErrorMessage("Error: " + error.message);
     }
   };
 
@@ -608,6 +612,13 @@ export default function CetesCalculator() {
           </Paper>
         </Box>
       </Box>
+
+      <Snackbar open={!!successMessage} autoHideDuration={3000} onClose={() => setSuccessMessage("")}>
+        <Alert severity="success" onClose={() => setSuccessMessage("")}>{successMessage}</Alert>
+      </Snackbar>
+      <Snackbar open={!!errorMessage} autoHideDuration={4000} onClose={() => setErrorMessage("")}>
+        <Alert severity="error" onClose={() => setErrorMessage("")}>{errorMessage}</Alert>
+      </Snackbar>
     </Box>
   );
 }

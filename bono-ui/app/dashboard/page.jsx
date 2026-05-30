@@ -292,6 +292,15 @@ function DashboardContent({ user, isAuthenticated }) {
         );
         let transIdx = 0;
 
+        const firstTransMonth =
+          sortedTrans.length > 0
+            ? new Date(
+                new Date(sortedTrans[sortedTrans.length - 1].createdAt).getFullYear(),
+                new Date(sortedTrans[sortedTrans.length - 1].createdAt).getMonth(),
+                1,
+              )
+            : now;
+
         for (let i = 0; i < 6; i++) {
           const targetMonthStart = new Date(
             now.getFullYear(),
@@ -300,9 +309,11 @@ function DashboardContent({ user, isAuthenticated }) {
           );
           const monthLabel = months[targetMonthStart.getMonth()];
 
+          const beforeFirstTrans = sortedTrans.length > 0 && targetMonthStart < firstTransMonth;
+
           history.unshift({
             name: monthLabel,
-            value: Number(Math.max(0, runningTotal).toFixed(2)),
+            value: beforeFirstTrans ? 0 : Number(Math.max(0, runningTotal).toFixed(2)),
           });
 
           while (transIdx < sortedTrans.length) {
@@ -310,9 +321,9 @@ function DashboardContent({ user, isAuthenticated }) {
             if (transDate >= targetMonthStart) {
               const amount = sortedTrans[transIdx].monto;
               const type = sortedTrans[transIdx].tipo;
-              if (type === "DEPOSITO" || type === "VENTA") {
+              if (type === "DEPOSITO") {
                 runningTotal -= amount;
-              } else {
+              } else if (type === "RETIRO") {
                 runningTotal += amount;
               }
               transIdx++;

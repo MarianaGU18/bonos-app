@@ -65,7 +65,7 @@ function Brand({ href, compact = false }) {
       >
         <Image
           src="/Logo.png"
-          alt="Logo Acero Inteligente"
+          alt="Logo NeoInvest"
           width={compact ? 24 : 28}
           height={compact ? 24 : 28}
           style={{ objectFit: "contain" }}
@@ -80,21 +80,8 @@ function Brand({ href, compact = false }) {
             letterSpacing: 0,
           }}
         >
-          Acero Inteligente
+          NeoInvest
         </Typography>
-        {!compact && (
-          <Typography
-            sx={{
-              display: { xs: "none", sm: "block" },
-              mt: 0.3,
-              color: "#1F2937",
-              fontSize: 11,
-              fontWeight: 750,
-            }}
-          >
-            Inversion en bonos
-          </Typography>
-        )}
       </Box>
     </Stack>
   );
