@@ -70,29 +70,29 @@ const valueItems = [
 const modules = [
   {
     eyebrow: "Mercado",
-    title: "Valuacion CETES",
-    body: "Calcula precios y rendimiento usando referencias de mercado para comparar oportunidades por plazo.",
+    title: "Calculadora de CETES",
+    body: "Calcula precio, rendimiento e ISR estimado para plazos de 28, 91, 182 y 364 días con tasas oficiales de Banxico.",
     icon: <AutoGraphOutlinedIcon />,
     accent: colors.blue,
   },
   {
-    eyebrow: "Portafolio",
-    title: "Balance y efectivo",
-    body: "Revisa capital disponible, posicion invertida y valor total sin perder contexto de movimiento.",
-    icon: <AccountBalanceWalletOutlinedIcon />,
+    eyebrow: "Instrumentos",
+    title: "Calculadora de Bonos",
+    body: "Obtén el precio teórico, VP cupones, VP valor nominal y rendimiento de bonos de tasa fija.",
+    icon: <InsightsOutlinedIcon />,
     accent: colors.green,
   },
   {
-    eyebrow: "Analitica",
-    title: "Evolucion visual",
-    body: "Entiende el comportamiento de la cartera por periodos y detecta cambios relevantes con rapidez.",
-    icon: <InsightsOutlinedIcon />,
+    eyebrow: "Portafolio",
+    title: "Cartera consolidada",
+    body: "Visualiza tu efectivo, CETES y bonos activos en un solo dashboard con historial de movimientos.",
+    icon: <AccountBalanceWalletOutlinedIcon />,
     accent: colors.teal,
   },
   {
-    eyebrow: "Control",
-    title: "Riesgo y vencimientos",
-    body: "Organiza vencimientos, liquidez y exposicion por plazo para mantener una estrategia disciplinada.",
+    eyebrow: "Operacion",
+    title: "Compra y venta",
+    body: "Ejecuta operaciones de compra y venta de CETES y bonos con cargo directo a tu saldo disponible.",
     icon: <ShieldOutlinedIcon />,
     accent: colors.amber,
   },
@@ -415,7 +415,7 @@ export default function LandingPage() {
                   letterSpacing: 0,
                 }}
               >
-                Renta fija con lectura institucional.
+                Invierte en CETES y Bonos desde un solo lugar.
               </Typography>
               <Typography
                 sx={{
@@ -426,9 +426,7 @@ export default function LandingPage() {
                   lineHeight: 1.65,
                 }}
               >
-                NeoInvest centraliza analisis, operacion y seguimiento
-                de bonos para que cada decision tenga contexto, disciplina y
-                velocidad.
+                NeoInvest te permite calcular, comprar y administrar tus inversiones en instrumentos de renta fija mexicanos con claridad y seguridad.
               </Typography>
 
               <Stack direction={{ xs: "column", sm: "row" }} spacing={1.2} sx={{ mt: 4 }}>
@@ -554,8 +552,7 @@ export default function LandingPage() {
         >
           <SectionHeader
             eyebrow="Funcionalidades"
-            title="Modulos ordenados por tarea, no por menu."
-            body="El usuario entiende primero que puede analizar, operar, monitorear y controlar. Despues decide a que pantalla entrar."
+            title="Todo lo que necesitas para invertir en renta fija."
             align="center"
           />
 
@@ -670,8 +667,8 @@ export default function LandingPage() {
           <Box>
             <SectionHeader
               eyebrow="Confianza"
-              title="Controles visibles para operar con tranquilidad."
-              body="La confianza no depende de llenar la pantalla de mensajes. Depende de mostrar seguridad, trazabilidad y estado justo donde el usuario decide."
+              title="Seguridad y transparencia."
+              body="Autenticación con JWT, contraseñas cifradas con BCrypt y rutas protegidas para mantener tu información segura."
             />
             <Stack spacing={1.2} sx={{ mt: 3.5 }}>
               {trustItems.map(([title, body]) => (
@@ -775,8 +772,8 @@ export default function LandingPage() {
         >
           <SectionHeader
             eyebrow="Siguiente paso"
-            title="Convierte tu cartera en un sistema de decisiones."
-            body="Empieza con una cuenta o entra directamente a tu dashboard si ya formas parte de NeoInvest."
+            title="Empieza a invertir hoy."
+            body="Crea tu cuenta gratis y accede a tu dashboard personalizado."
             align="center"
             maxWidth={820}
           />
