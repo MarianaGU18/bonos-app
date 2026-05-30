@@ -87,43 +87,6 @@ export default function CetesPage() {
           </Stack>
         </Paper>
 
-        {/*<Box
-          sx={{
-            mb: 3,
-            display: "grid",
-            gridTemplateColumns: { xs: "1fr", md: "repeat(3, 1fr)" },
-            gap: 1.5,
-          }}
-        >
-          {[
-            [<VerifiedOutlinedIcon key="nominal" />, "Valor nominal", "$10.00 MXN"],
-            [<SpeedOutlinedIcon key="settle" />, "Liquidacion", "Mismo dia"],
-            [<ShieldOutlinedIcon key="risk" />, "Riesgo", "Gobierno federal"],
-          ].map(([icon, label, value]) => (
-            <Paper
-              key={label}
-              sx={{
-                p: 2,
-                borderRadius: "16px",
-                bgcolor: "rgba(255,255,255,0.88)",
-                border: "1px solid #D8E3EC",
-              }}
-            >
-              <Stack direction="row" spacing={1.2} alignItems="center">
-                <Box sx={{ color: "#7FB3D5", display: "grid", placeItems: "center" }}>{icon}</Box>
-                <Box>
-                  <Typography sx={{ color: "#1F2937", fontSize: 13, fontWeight: 800 }}>
-                    {label}
-                  </Typography>
-                  <Typography sx={{ color: "#1F2937", fontSize: 20, fontWeight: 900, mt: 0.3 }}>
-                    {value}
-                  </Typography>
-                </Box>
-              </Stack>
-            </Paper>
-          ))}
-        </Box>*/}
-
         <CetesCalculator />
       </Container>
     </Box>

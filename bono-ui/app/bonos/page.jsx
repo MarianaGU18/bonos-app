@@ -27,7 +27,7 @@ import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import PaidIcon from "@mui/icons-material/Paid";
 
 const FRECUENCIAS = ["MENSUAL", "TRIMESTRAL", "SEMESTRAL", "ANUAL"];
-const API_BASE = "http://localhost:8080";
+const API_BASE = "https://bonos-app-production.up.railway.app";
 
 // ─── Subcomponents ────────────────────────────────────────────────────────────
 
@@ -67,11 +67,18 @@ function StatPill({ icon, label, value }) {
         border: "1px solid rgba(255,255,255,0.12)",
       }}
     >
-      <Stack direction="row" spacing={1} alignItems="center" sx={{ color: "rgba(255,255,255,0.7)" }}>
+      <Stack
+        direction="row"
+        spacing={1}
+        alignItems="center"
+        sx={{ color: "rgba(255,255,255,0.7)" }}
+      >
         {icon}
         <Typography sx={{ fontSize: 12, fontWeight: 800 }}>{label}</Typography>
       </Stack>
-      <Typography sx={{ mt: 0.8, fontSize: 20, fontWeight: 900, color: "#fff" }}>
+      <Typography
+        sx={{ mt: 0.8, fontSize: 20, fontWeight: 900, color: "#fff" }}
+      >
         {value}
       </Typography>
     </Box>
@@ -80,7 +87,12 @@ function StatPill({ icon, label, value }) {
 
 function ResumenRow({ label, value, highlight = false, color = "#FFFFFF" }) {
   return (
-    <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={2}>
+    <Stack
+      direction="row"
+      justifyContent="space-between"
+      alignItems="center"
+      spacing={2}
+    >
       <Typography sx={{ color: "rgba(255,255,255,0.66)", fontSize: 14 }}>
         {label}
       </Typography>
@@ -107,8 +119,8 @@ export default function BonosPage() {
   useEffect(() => {
     if (!user) return;
     authFetch(`/portafolio/user/${user.id}`)
-      .then(r => r.json())
-      .then(data => setPortafolio(data))
+      .then((r) => r.json())
+      .then((data) => setPortafolio(data))
       .catch(() => {});
   }, [user]);
 
@@ -130,18 +142,53 @@ export default function BonosPage() {
   };
 
   const ejecutarCalculo = useCallback(async (params) => {
-    const { valorNominal, tasaCuponAnual, tasaDescuento, plazoDias, frecuenciaPago, precioCompra } = params;
+    const {
+      valorNominal,
+      tasaCuponAnual,
+      tasaDescuento,
+      plazoDias,
+      frecuenciaPago,
+      precioCompra,
+    } = params;
 
     if (!tasaCuponAnual || Number(tasaCuponAnual) <= 0) {
       setError("La tasa cupón anual debe ser mayor a 0");
       return;
     }
-    if (!valorNominal || valorNominal <= 0) { setError("Todos los campos deben ser mayores a 0 y las tasas no pueden superar 100%."); return; }
-    if (!precioCompra || precioCompra <= 0) { setError("Todos los campos deben ser mayores a 0 y las tasas no pueden superar 100%."); return; }
-    if (tasaCuponAnual < 0 || tasaCuponAnual > 100) { setError("Todos los campos deben ser mayores a 0 y las tasas no pueden superar 100%."); return; }
-    if (!tasaDescuento || tasaDescuento <= 0 || tasaDescuento > 100) { setError("Todos los campos deben ser mayores a 0 y las tasas no pueden superar 100%."); return; }
-    if (!plazoDias || plazoDias <= 0) { setError("Todos los campos deben ser mayores a 0 y las tasas no pueden superar 100%."); return; }
-    if (!frecuenciaPago) { setError("Selecciona una frecuencia de pago."); return; }
+    if (!valorNominal || valorNominal <= 0) {
+      setError(
+        "Todos los campos deben ser mayores a 0 y las tasas no pueden superar 100%.",
+      );
+      return;
+    }
+    if (!precioCompra || precioCompra <= 0) {
+      setError(
+        "Todos los campos deben ser mayores a 0 y las tasas no pueden superar 100%.",
+      );
+      return;
+    }
+    if (tasaCuponAnual < 0 || tasaCuponAnual > 100) {
+      setError(
+        "Todos los campos deben ser mayores a 0 y las tasas no pueden superar 100%.",
+      );
+      return;
+    }
+    if (!tasaDescuento || tasaDescuento <= 0 || tasaDescuento > 100) {
+      setError(
+        "Todos los campos deben ser mayores a 0 y las tasas no pueden superar 100%.",
+      );
+      return;
+    }
+    if (!plazoDias || plazoDias <= 0) {
+      setError(
+        "Todos los campos deben ser mayores a 0 y las tasas no pueden superar 100%.",
+      );
+      return;
+    }
+    if (!frecuenciaPago) {
+      setError("Selecciona una frecuencia de pago.");
+      return;
+    }
     setError("");
 
     const url = `${API_BASE}/api/bonos/calcular?valorNominal=${valorNominal}&tasaCuponAnual=${tasaCuponAnual}&tasaDescuento=${tasaDescuento}&plazoDias=${plazoDias}&frecuenciaPago=${frecuenciaPago}&precioCompra=${precioCompra || 0}`;
@@ -177,7 +224,9 @@ export default function BonosPage() {
     if (!calculo || !user) return;
 
     if (portafolio.cashBalance < Number(form.precioCompra)) {
-      setError("Saldo insuficiente en tu cartera para realizar esta inversión.");
+      setError(
+        "Saldo insuficiente en tu cartera para realizar esta inversión.",
+      );
       return;
     }
 
@@ -201,7 +250,9 @@ export default function BonosPage() {
       if (!res.ok) {
         const err = await res.text();
         if (err.includes("Insufficient funds")) {
-          setError("Saldo insuficiente en tu cartera para realizar esta inversión.");
+          setError(
+            "Saldo insuficiente en tu cartera para realizar esta inversión.",
+          );
         } else {
           setError("No se pudo completar la compra. Intenta nuevamente.");
         }
@@ -209,14 +260,18 @@ export default function BonosPage() {
       }
 
       setError("");
-      setSuccessMessage("¡Inversión confirmada! Tu bono ha sido registrado en tu cartera.");
+      setSuccessMessage(
+        "¡Inversión confirmada! Tu bono ha sido registrado en tu cartera.",
+      );
     } catch {
       setError("Error de conexión. Intenta nuevamente.");
     }
   };
 
   const rendimiento = calculo
-    ? (Math.abs(Number(calculo.rendimiento)) < 0.005 ? "0.00" : Number(calculo.rendimiento).toFixed(2))
+    ? Math.abs(Number(calculo.rendimiento)) < 0.005
+      ? "0.00"
+      : Number(calculo.rendimiento).toFixed(2)
     : "0.00";
 
   return (
@@ -231,7 +286,6 @@ export default function BonosPage() {
       }}
     >
       <Container maxWidth="xl" sx={{ py: { xs: 4, md: 5 } }}>
-
         {/* HEADER */}
         <Paper
           sx={{
@@ -248,7 +302,11 @@ export default function BonosPage() {
             boxShadow: "0 30px 76px rgba(16,24,32,0.18)",
           }}
         >
-          <Stack direction={{ xs: "column", sm: "row" }} spacing={2.4} alignItems={{ sm: "center" }}>
+          <Stack
+            direction={{ xs: "column", sm: "row" }}
+            spacing={2.4}
+            alignItems={{ sm: "center" }}
+          >
             <Box
               sx={{
                 width: 62,
@@ -273,11 +331,27 @@ export default function BonosPage() {
                   border: "1px solid rgba(127,179,213,0.28)",
                 }}
               />
-              <Typography component="h1" sx={{ fontSize: { xs: 36, md: 52 }, lineHeight: 1, fontWeight: 950 }}>
+              <Typography
+                component="h1"
+                sx={{
+                  fontSize: { xs: 36, md: 52 },
+                  lineHeight: 1,
+                  fontWeight: 950,
+                }}
+              >
                 Valuación de Bonos
               </Typography>
-              <Typography sx={{ mt: 1.4, maxWidth: 720, color: "rgba(255,255,255,0.66)", fontSize: 17, lineHeight: 1.7 }}>
-                Calcula el precio teórico y rendimiento de bonos de tasa fija con descuento por periodo.
+              <Typography
+                sx={{
+                  mt: 1.4,
+                  maxWidth: 720,
+                  color: "rgba(255,255,255,0.66)",
+                  fontSize: 17,
+                  lineHeight: 1.7,
+                }}
+              >
+                Calcula el precio teórico y rendimiento de bonos de tasa fija
+                con descuento por periodo.
               </Typography>
             </Box>
           </Stack>
@@ -287,7 +361,10 @@ export default function BonosPage() {
         <Box
           sx={{
             display: "grid",
-            gridTemplateColumns: { xs: "1fr", lg: "minmax(0, 1.35fr) minmax(360px, 0.9fr)" },
+            gridTemplateColumns: {
+              xs: "1fr",
+              lg: "minmax(0, 1.35fr) minmax(360px, 0.9fr)",
+            },
             gap: 3,
             alignItems: "start",
           }}
@@ -302,16 +379,32 @@ export default function BonosPage() {
               bgcolor: "rgba(255,255,255,0.92)",
             }}
           >
-            <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" spacing={2} sx={{ mb: 3 }}>
+            <Stack
+              direction={{ xs: "column", sm: "row" }}
+              justifyContent="space-between"
+              spacing={2}
+              sx={{ mb: 3 }}
+            >
               <Box>
-                <Typography sx={{ color: "#7FB3D5", fontSize: 12, fontWeight: 900, textTransform: "uppercase" }}>
+                <Typography
+                  sx={{
+                    color: "#7FB3D5",
+                    fontSize: 12,
+                    fontWeight: 900,
+                    textTransform: "uppercase",
+                  }}
+                >
                   Parámetros del bono
                 </Typography>
-                <Typography variant="h4" sx={{ mt: 0.5, color: "#1F2937", fontWeight: 950 }}>
+                <Typography
+                  variant="h4"
+                  sx={{ mt: 0.5, color: "#1F2937", fontWeight: 950 }}
+                >
                   Configura la valuación
                 </Typography>
                 <Typography sx={{ mt: 0.8, color: "#1F2937", fontSize: 14 }}>
-                  Ingresa los datos del bono y presiona Calcular para obtener el precio teórico.
+                  Ingresa los datos del bono y presiona Calcular para obtener el
+                  precio teórico.
                 </Typography>
               </Box>
             </Stack>
@@ -324,7 +417,11 @@ export default function BonosPage() {
                   type="number"
                   value={form.valorNominal}
                   onChange={handleChange}
-                  InputProps={{ startAdornment: <InputAdornment position="start">$</InputAdornment> }}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">$</InputAdornment>
+                    ),
+                  }}
                 />
               </Grid>
               <Grid item xs={12} md={6}>
@@ -334,7 +431,11 @@ export default function BonosPage() {
                   type="number"
                   value={form.precioCompra}
                   onChange={handleChange}
-                  InputProps={{ startAdornment: <InputAdornment position="start">$</InputAdornment> }}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">$</InputAdornment>
+                    ),
+                  }}
                 />
               </Grid>
               <Grid item xs={12} md={6}>
@@ -344,7 +445,11 @@ export default function BonosPage() {
                   type="number"
                   value={form.tasaCuponAnual}
                   onChange={handleChange}
-                  InputProps={{ endAdornment: <InputAdornment position="end">%</InputAdornment> }}
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">%</InputAdornment>
+                    ),
+                  }}
                 />
               </Grid>
               <Grid item xs={12} md={6}>
@@ -355,7 +460,11 @@ export default function BonosPage() {
                   value={form.tasaDescuento}
                   onChange={handleChange}
                   helperText="Tasa de mercado anual"
-                  InputProps={{ endAdornment: <InputAdornment position="end">%</InputAdornment> }}
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">%</InputAdornment>
+                    ),
+                  }}
                 />
               </Grid>
               <Grid item xs={12} md={5}>
@@ -377,26 +486,52 @@ export default function BonosPage() {
                   sx={{ minWidth: 200 }}
                 >
                   {FRECUENCIAS.map((f) => (
-                    <MenuItem key={f} value={f}>{f}</MenuItem>
+                    <MenuItem key={f} value={f}>
+                      {f}
+                    </MenuItem>
                   ))}
                 </StyledField>
               </Grid>
             </Grid>
 
             {error && (
-              <Box sx={{ mt: 2, p: 1.5, borderRadius: "10px", bgcolor: "rgba(211,47,47,0.08)", border: "1px solid rgba(211,47,47,0.2)" }}>
-                <Typography sx={{ color: "#d32f2f", fontSize: 13 }}>{error}</Typography>
+              <Box
+                sx={{
+                  mt: 2,
+                  p: 1.5,
+                  borderRadius: "10px",
+                  bgcolor: "rgba(211,47,47,0.08)",
+                  border: "1px solid rgba(211,47,47,0.2)",
+                }}
+              >
+                <Typography sx={{ color: "#d32f2f", fontSize: 13 }}>
+                  {error}
+                </Typography>
               </Box>
             )}
 
-            <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5} sx={{ mt: 3 }}>
+            <Stack
+              direction={{ xs: "column", sm: "row" }}
+              spacing={1.5}
+              sx={{ mt: 3 }}
+            >
               <Button
                 fullWidth
                 variant="contained"
-                startIcon={loading ? <CircularProgress size={18} color="inherit" /> : <CalculateIcon />}
+                startIcon={
+                  loading ? (
+                    <CircularProgress size={18} color="inherit" />
+                  ) : (
+                    <CalculateIcon />
+                  )
+                }
                 disabled={loading}
                 onClick={() => ejecutarCalculo(form)}
-                sx={{ py: 1.6, bgcolor: "#0B1F3A", "&:hover": { bgcolor: "#1D4E89" } }}
+                sx={{
+                  py: 1.6,
+                  bgcolor: "#0B1F3A",
+                  "&:hover": { bgcolor: "#1D4E89" },
+                }}
               >
                 {loading ? "Calculando..." : "Calcular"}
               </Button>
@@ -440,12 +575,31 @@ export default function BonosPage() {
                 boxShadow: "0 30px 76px rgba(16,24,32,0.22)",
               }}
             >
-              <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ mb: 3 }}>
+              <Stack
+                direction="row"
+                justifyContent="space-between"
+                alignItems="flex-start"
+                sx={{ mb: 3 }}
+              >
                 <Box>
-                  <Typography sx={{ color: "rgba(255,255,255,0.62)", fontSize: 13, fontWeight: 900, textTransform: "uppercase" }}>
+                  <Typography
+                    sx={{
+                      color: "rgba(255,255,255,0.62)",
+                      fontSize: 13,
+                      fontWeight: 900,
+                      textTransform: "uppercase",
+                    }}
+                  >
                     Resumen de valuación
                   </Typography>
-                  <Typography sx={{ mt: 0.8, fontSize: 34, lineHeight: 1, fontWeight: 900 }}>
+                  <Typography
+                    sx={{
+                      mt: 0.8,
+                      fontSize: 34,
+                      lineHeight: 1,
+                      fontWeight: 900,
+                    }}
+                  >
                     {calculo
                       ? `$${Number(calculo.precioTeorico).toLocaleString("es-MX", { minimumFractionDigits: 4 })}`
                       : "$0.00"}
@@ -453,35 +607,77 @@ export default function BonosPage() {
                 </Box>
                 <Chip
                   label={`${rendimiento}% rendimiento`}
-                  sx={{ bgcolor: "rgba(127,179,213,0.16)", color: "#EEF3F8", fontWeight: 900 }}
+                  sx={{
+                    bgcolor: "rgba(127,179,213,0.16)",
+                    color: "#EEF3F8",
+                    fontWeight: 900,
+                  }}
                 />
               </Stack>
 
               <Grid container spacing={1.5} sx={{ mb: 3 }}>
                 <Grid item xs={6}>
-                  <StatPill icon={<PaidIcon fontSize="small" />} label="Cupón / periodo" value={calculo ? `$${Number(calculo.cuponPorPeriodo).toFixed(4)}` : "$0.00"} />
+                  <StatPill
+                    icon={<PaidIcon fontSize="small" />}
+                    label="Cupón / periodo"
+                    value={
+                      calculo
+                        ? `$${Number(calculo.cuponPorPeriodo).toFixed(4)}`
+                        : "$0.00"
+                    }
+                  />
                 </Grid>
                 <Grid item xs={6}>
-                  <StatPill icon={<PercentIcon fontSize="small" />} label="Tasa descuento" value={calculo ? `${Number(calculo.tasaDescuento).toFixed(2)}%` : "—"} />
+                  <StatPill
+                    icon={<PercentIcon fontSize="small" />}
+                    label="Tasa descuento"
+                    value={
+                      calculo
+                        ? `${Number(calculo.tasaDescuento).toFixed(2)}%`
+                        : "—"
+                    }
+                  />
                 </Grid>
                 <Grid item xs={6}>
-                  <StatPill icon={<TrendingUpIcon fontSize="small" />} label="Periodos" value={calculo ? calculo.numPeriodos : "—"} />
+                  <StatPill
+                    icon={<TrendingUpIcon fontSize="small" />}
+                    label="Periodos"
+                    value={calculo ? calculo.numPeriodos : "—"}
+                  />
                 </Grid>
                 <Grid item xs={6}>
-                  <StatPill icon={<AccountBalanceIcon fontSize="small" />} label="Precio compra" value={calculo ? `$${Number(calculo.precioCompra).toFixed(4)}` : "$0.00"} />
+                  <StatPill
+                    icon={<AccountBalanceIcon fontSize="small" />}
+                    label="Precio compra"
+                    value={
+                      calculo
+                        ? `$${Number(calculo.precioCompra).toFixed(4)}`
+                        : "$0.00"
+                    }
+                  />
                 </Grid>
               </Grid>
 
-              <Divider sx={{ borderColor: "rgba(255,255,255,0.12)", mb: 2.5 }} />
+              <Divider
+                sx={{ borderColor: "rgba(255,255,255,0.12)", mb: 2.5 }}
+              />
 
               {loading ? (
-                <Box sx={{ display: "grid", placeItems: "center", minHeight: 160 }}>
+                <Box
+                  sx={{ display: "grid", placeItems: "center", minHeight: 160 }}
+                >
                   <CircularProgress sx={{ color: "#EEF3F8" }} />
                 </Box>
               ) : calculo ? (
                 <Stack spacing={2}>
-                  <ResumenRow label="VP Cupones" value={`$${Number(calculo.vpCupones).toFixed(4)}`} />
-                  <ResumenRow label="VP Valor Nominal" value={`$${Number(calculo.vpValorNominal).toFixed(4)}`} />
+                  <ResumenRow
+                    label="VP Cupones"
+                    value={`$${Number(calculo.vpCupones).toFixed(4)}`}
+                  />
+                  <ResumenRow
+                    label="VP Valor Nominal"
+                    value={`$${Number(calculo.vpValorNominal).toFixed(4)}`}
+                  />
                   <Divider sx={{ borderColor: "rgba(255,255,255,0.12)" }} />
                   <ResumenRow
                     label="Precio Teórico"
@@ -492,14 +688,19 @@ export default function BonosPage() {
               ) : (
                 <Box sx={{ textAlign: "center", py: 4, opacity: 0.6 }}>
                   <Typography sx={{ fontSize: 15 }}>
-                    Ingresa los parámetros y presiona Calcular para ver la valuación.
+                    Ingresa los parámetros y presiona Calcular para ver la
+                    valuación.
                   </Typography>
                 </Box>
               )}
             </Paper>
           </Box>
         </Box>
-        <Snackbar open={!!successMessage} autoHideDuration={3000} onClose={() => setSuccessMessage("")}>
+        <Snackbar
+          open={!!successMessage}
+          autoHideDuration={3000}
+          onClose={() => setSuccessMessage("")}
+        >
           <Alert severity="success">{successMessage}</Alert>
         </Snackbar>
       </Container>

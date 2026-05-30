@@ -12,7 +12,8 @@ const AuthContext = createContext();
 
 // Definimos la URL base para las APIs de autenticación y transacciones
 const API_URL =
-  process.env.NEXT_PUBLIC_API_URL_V1 || "http://localhost:8080/api/v1";
+  process.env.NEXT_PUBLIC_API_URL_V1 ||
+  "https://bonos-app-production.up.railway.app/api/v1";
 
 // Función auxiliar para manejar respuestas de la API
 // Definida fuera del componente para que sea una referencia estática estable
